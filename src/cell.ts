@@ -1,6 +1,7 @@
 export class Cell {
 
-    private value = 0;
+    private value: number|null = null;
+    private revealed: boolean = false;
 
     constructor() {
 
@@ -24,6 +25,6 @@ export class Cell {
     }
 
     public toString(): string {
-        return this.value.toString();
+        return this.value ? this.value.toString() : "";
     }
 }
