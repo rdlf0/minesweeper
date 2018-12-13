@@ -1,5 +1,7 @@
 {
     "compilerOptions": {
+        "baseUrl": "./",
+        "outDir": "./dist",
         "sourceMap": true,
         "module": "amd",
         "declaration": false,
