@@ -1,5 +1,9 @@
 import { Board } from "./board";
 
-let board = new Board(5, 5);
+const ROWS = 5;
+const COLS = 5;
+const MINES = 3;
+
+let board = new Board(ROWS, COLS, MINES);
 
 document.body.innerHTML = board.printBoard();
