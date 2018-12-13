@@ -28,14 +28,15 @@ export class Board {
     }
 
     public printBoard(): string {
-        let msg = "Here is the generated board:<br /><br />";
+        let msg = `Here is the generated board:<br />Rows: ${this.rows} | Cols: ${this.cols} | Mines: ${this.mines}<br /><br /><pre>`;
         
         for (let i = 0; i < this.rows; i++) {
             for (let j = 0; j < this.cols; j++) {
-                msg += `${this.grid[i][j]}   `;
+                msg += String("  " + this.grid[i][j]).slice(-2) + "  ";
             }
             msg += "<br /><br />";
         }
+        msg += "</pre>";
 
         return msg;
     }
