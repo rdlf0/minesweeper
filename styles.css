@@ -1,0 +1,45 @@
+html, body {
+    margin: 0;
+    padding: 0;
+}
+
+ul, li {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+#container {
+
+}
+
+#board {
+
+}
+
+#rows-container {
+    display: flex;
+    flex-direction: column;
+}
+
+.row {
+
+}
+
+.cells-container {
+    display: flex;
+    flex-direction: row;
+}
+
+.cell {
+    cursor: default;
+    display: block;
+    width: 25px;
+    height: 25px;
+    background-color: #CCCCCC;
+    border-top: 5px solid #FFFFFF;
+    border-left: 5px solid #FFFFFF;
+    border-bottom: 5px solid #7b7b7b;
+    border-right: 5px solid #7b7b7b;
+    text-align: center;
+}
