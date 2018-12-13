@@ -1,8 +1,6 @@
 import { Board } from "./board";
 
-// const MODE_BEGINNER = "beginner";
-// const MODE_INTERMEDIATE = "intermediate";
-// const MODE_EXPERT = "expert";
+// enum MODE {Beginner, Intermediate, Expert};
 
 // Beginner
 // const ROWS = 9;
@@ -19,6 +17,7 @@ const ROWS = 16;
 const COLS = 30;
 const MINES = 99;
 
-let board = new Board(ROWS, COLS, MINES);
+let container = document.getElementById("container");
 
-document.body.innerHTML = board.printBoard();
+let board = new Board(ROWS, COLS, MINES);
+board.draw(container);

@@ -27,17 +27,33 @@ export class Board {
         return Math.floor(Math.random() * to) + from;
     }
 
-    public printBoard(): string {
-        let msg = `Here is the generated board:<br />Rows: ${this.rows} | Cols: ${this.cols} | Mines: ${this.mines}<br /><br /><pre>`;
-        
-        for (let i = 0; i < this.rows; i++) {
-            for (let j = 0; j < this.cols; j++) {
-                msg += String("  " + this.grid[i][j]).slice(-2) + "  ";
-            }
-            msg += "<br /><br />";
-        }
-        msg += "</pre>";
+    public draw(container: HTMLElement): void {
+        let board = document.createElement("div");
+        board.id = "board";
 
-        return msg;
+        let rowsContainer = document.createElement("ul");
+        rowsContainer.id = "rows-container";
+
+        for (let i = 0; i < this.rows; i++) {
+            let row = document.createElement("li");
+            row.classList.add("row");
+
+            let cellsContainer = document.createElement("ul");
+            cellsContainer.classList.add("cells-container");
+
+            for (let j = 0; j < this.cols; j++) {
+                let cell = document.createElement("li");
+                cell.classList.add("cell")
+                cell.innerHTML = this.grid[i][j].toString();
+
+                cellsContainer.append(cell);
+            }
+
+            row.append(cellsContainer);
+            rowsContainer.append(row);
+        }
+
+        board.append(rowsContainer);
+        container.append(board);
     }
 }
