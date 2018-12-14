@@ -43,3 +43,13 @@ ul, li {
     border-right: 5px solid #7b7b7b;
     text-align: center;
 }
+
+.cell.revealed {
+    background-color: #bdbdbd;
+    border-top: 2px solid #7b7b7b;
+    border-left: 2px solid #7b7b7b;
+    border-bottom: 0 none;
+    border-right: 0 none;
+    width: 33px;
+    height: 33px;
+}

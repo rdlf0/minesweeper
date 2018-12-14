@@ -42,9 +42,14 @@ export class Board {
             cellsContainer.classList.add("cells-container");
 
             for (let j = 0; j < this.cols; j++) {
+                let cellObj = this.grid[i][j];
                 let cell = document.createElement("li");
+                cellObj.setElement(cell);
                 cell.classList.add("cell")
-                cell.innerHTML = this.grid[i][j].toString();
+                // cell.innerHTML = cellObj.toString();
+                cell.addEventListener("click", () => {
+                    cellObj.reveal(this.grid, i, j);
+                })
 
                 cellsContainer.append(cell);
             }
