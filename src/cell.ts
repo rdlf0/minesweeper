@@ -1,7 +1,6 @@
 export class Cell {
 
     private value: number | null = null;
-    private revealed: boolean = false;
     private el: HTMLElement;
 
     public getValue(): number {
@@ -29,25 +28,28 @@ export class Cell {
         return this.value == -1;
     }
 
-    public reveal(grid: Cell[][], row: number, col: number): number {
-        if (grid[row][col].getValue() != null) {
-            return grid[row][col].getValue();
+    public reveal(grid: Cell[][], row: number, col: number): void {
+        // If already revealed
+        if (this.getValue() != null) {
+            return;
         }
 
-        let value = 0;
+        if (this.isMine()) {
+            this.explode();
+            return;
+        }
 
-        let adjacent = this.getAdjacent(grid, row, col);
+        this.value = 0;
+        let adjacent = this.getAdjacentCells(grid, row, col);
+
         for (let adj of adjacent) {
-            if (adj.getCell().isMine()) value++;
+            if (adj.getCell().isMine()) this.value++;
         }
-
-        this.value = value;
-        this.revealed = true;
 
         this.el.innerHTML = this.toString();
         this.el.classList.add("revealed");
 
-        if (value > 0) {
+        if (this.value > 0) {
             return;
         }
 
@@ -56,25 +58,24 @@ export class Cell {
         }
     }
 
-    public getAdjacent(grid: Cell[][], row: number, col: number): Adjacent[] {
+    // To-do
+    private explode() { }
+
+    public getAdjacentCells(grid: Cell[][], row: number, col: number): Adjacent[] {
         let adj: Adjacent[] = [];
         let rows = grid.length;
         let cols = grid[0].length;
 
-        if (row < rows - 1) {
-            if (col > 0) adj.push(new Adjacent(grid[row + 1][col - 1], row + 1, col - 1));
-            if (col < cols - 1) adj.push(new Adjacent(grid[row + 1][col + 1], row + 1, col + 1));
-            adj.push(new Adjacent(grid[row + 1][col], row + 1, col));
-        }
+        for (let i = row - 1; i <= row + 1; i++) {
+            for (let j = col - 1; j <= col + 1; j++) {
+                // Don't check current cell
+                if (i == row && j == col) continue;
 
-        if (row > 0) {
-            if (col > 0) adj.push(new Adjacent(grid[row - 1][col - 1], row - 1, col - 1));
-            if (col < cols - 1) adj.push(new Adjacent(grid[row - 1][col + 1], row - 1, col + 1));
-            adj.push(new Adjacent(grid[row - 1][col], row - 1, col));
+                if (i >= 0 && i < rows && j >= 0 && j < cols) {
+                    adj.push(new Adjacent(grid[i][j], i, j));
+                }
+            }
         }
-
-        if (col > 0) adj.push(new Adjacent(grid[row][col - 1], row, col - 1));
-        if (col < cols - 1) adj.push(new Adjacent(grid[row][col + 1], row, col + 1));
 
         return adj;
     }

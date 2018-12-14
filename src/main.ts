@@ -20,4 +20,5 @@ const MINES = 99;
 let container = document.getElementById("container");
 
 let board = new Board(ROWS, COLS, MINES);
+// board.enableDebug();
 board.draw(container);
