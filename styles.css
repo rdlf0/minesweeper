@@ -57,3 +57,12 @@ ul, li {
 .cell.flagged {
     background-color: #ff0000;
 }
+
+.cell .mine {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    background-color: #000000;
+    border-radius: 10px;
+    vertical-align: middle;
+}

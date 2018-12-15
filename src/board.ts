@@ -52,7 +52,11 @@ export class Board {
 
                 cellObj.setElement(cell);
 
-                if (this.debug) cell.innerHTML = cellObj.toString();
+                if (this.debug) {
+                    if (cellObj.isMine()) {
+                        cell.innerHTML = "<span class=\"mine\"></span>";
+                    }
+                }
             }
         }
     }
