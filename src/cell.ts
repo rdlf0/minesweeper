@@ -4,6 +4,7 @@ export class Cell {
 
     private value: number | null = null;
     private el: HTMLElement;
+    private flagged: boolean = false;
 
     constructor(private board: Board, private row: number, private col: number) {}
 
@@ -40,9 +41,12 @@ export class Cell {
         return this.value == -1;
     }
 
+    public isRevealed(): boolean {
+        return this.getValue() != null && this.getValue() > -1;
+    }
+
     public reveal(): void {
-        // Already revealed
-        if (this.getValue() != null) return;
+        if (this.isRevealed() || this.flagged) return;
 
         if (this.isMine()) {
             this.explode();
@@ -51,7 +55,6 @@ export class Cell {
 
         this.value = 0;
         let adjacent = this.board.getAdjacentCells(this);
-
         for (let adj of adjacent) {
             if (adj.isMine()) this.value++;
         }
@@ -68,8 +71,22 @@ export class Cell {
         }
     }
 
+    private toggleFlag(): void {
+        if (this.isRevealed()) return;
+
+        if (this.flagged) {
+            this.flagged = false;
+            this.el.classList.remove("flagged");
+        } else {
+            this.flagged = true;
+            this.el.classList.add("flagged");
+        }
+    }
+
     // To-do
-    private explode() { }
+    private explode() {
+        alert("BOOM!");
+    }
 
     public handleEvent(e: Event) {
         switch (e.type) {
@@ -78,7 +95,7 @@ export class Cell {
                 break;
             case "contextmenu":
                 e.preventDefault();
-                console.log("FLAG");
+                this.toggleFlag();
                 break;
         }
     }
