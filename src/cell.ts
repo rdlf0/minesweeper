@@ -66,7 +66,8 @@ export class Cell {
             if (adj.isMine()) this.value++;
         }
 
-        this.el.classList.add("revealed");
+        this.el.classList.remove("state-default");
+        this.el.classList.add("state-revealed");
         this.state = State.Revealed;
 
         if (this.value > 0) {

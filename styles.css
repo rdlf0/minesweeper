@@ -38,7 +38,7 @@ ul, li {
     user-select: none;
 }
 
-.cell.revealed {
+.cell.state-revealed {
     background-color: #bdbdbd;
     border-top: 2px solid #7b7b7b;
     border-left: 2px solid #7b7b7b;
