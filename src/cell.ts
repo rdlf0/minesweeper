@@ -1,12 +1,22 @@
 import { Board } from "./board";
 
+enum State {
+    Default = "default",
+    Flagged = "flagged",
+    Questioned = "questioned",
+    Revealed = "revealed"
+};
+
 export class Cell {
 
-    private value: number | null = null;
+    private value: number | null;
     private el: HTMLElement;
-    private flagged: boolean = false;
+    private state: State;
 
-    constructor(private board: Board, private row: number, private col: number) {}
+    constructor(private board: Board, private row: number, private col: number) {
+        this.value = null;
+        this.state = State.Default;
+    }
 
     public getValue(): number {
         return this.value;
@@ -18,6 +28,7 @@ export class Cell {
 
     public setElement(el: HTMLElement) {
         this.el = el;
+        this.el.classList.add(`state-${this.state}`);
     }
 
     public getRow(): number {
@@ -41,12 +52,8 @@ export class Cell {
         return this.value == -1;
     }
 
-    public isRevealed(): boolean {
-        return this.getValue() != null && this.getValue() > -1;
-    }
-
     public reveal(): void {
-        if (this.isRevealed() || this.flagged) return;
+        if (this.state != State.Default) return;
 
         if (this.isMine()) {
             this.explode();
@@ -60,6 +67,7 @@ export class Cell {
         }
 
         this.el.classList.add("revealed");
+        this.state = State.Revealed;
 
         if (this.value > 0) {
             this.el.innerHTML = this.getValue().toString();
@@ -71,16 +79,24 @@ export class Cell {
         }
     }
 
-    private toggleFlag(): void {
-        if (this.isRevealed()) return;
+    private mark(): void {
+        if (this.state == State.Revealed) return;
 
-        if (this.flagged) {
-            this.flagged = false;
-            this.el.classList.remove("flagged");
-        } else {
-            this.flagged = true;
-            this.el.classList.add("flagged");
+        this.el.classList.remove(`state-${this.state}`);
+
+        switch (this.state) {
+            case State.Default:
+                this.state = State.Flagged;
+                break;
+            case State.Flagged:
+                this.state = State.Questioned;
+                break;
+            case State.Questioned:
+                this.state = State.Default;
+                break;
         }
+
+        this.el.classList.add(`state-${this.state}`);
     }
 
     // To-do
@@ -95,7 +111,7 @@ export class Cell {
                 break;
             case "contextmenu":
                 e.preventDefault();
-                this.toggleFlag();
+                this.mark();
                 break;
         }
     }

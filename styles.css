@@ -9,16 +9,10 @@ ul, li {
     padding: 0;
 }
 
-#container {}
-
-#board {}
-
 #rows-container {
     display: flex;
     flex-direction: column;
 }
-
-.row {}
 
 .cols-container {
     display: flex;
@@ -54,8 +48,12 @@ ul, li {
     height: 33px;
 }
 
-.cell.flagged {
+.cell.state-flagged {
     background-color: #ff0000;
+}
+
+.cell.state-questioned {
+    background-color: #880088;
 }
 
 .cell .mine {
