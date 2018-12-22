@@ -9,12 +9,12 @@ enum State {
 
 export class Cell {
 
-    private value: number | null;
+    private value: number;
     private el: HTMLElement;
     private state: State;
 
     constructor(private board: Board, private row: number, private col: number) {
-        this.value = null;
+        this.value = -2;
         this.state = State.Default;
     }
 
@@ -114,9 +114,5 @@ export class Cell {
                 this.mark();
                 break;
         }
-    }
-
-    public toString(): string {
-        return this.value ? this.value.toString() : "";
     }
 }
