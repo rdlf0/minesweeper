@@ -15,7 +15,6 @@ export class Cell {
 
     constructor(private board: Board, private row: number, private col: number) {
         this.value = -2;
-        this.state = State.Default;
     }
 
     public getValue(): number {
@@ -28,7 +27,17 @@ export class Cell {
 
     public setElement(el: HTMLElement) {
         this.el = el;
-        this.el.classList.add(`state-${this.state}`);
+        this.setState(State.Default);
+    }
+
+    public getState(): State {
+        return this.state;
+    }
+
+    public setState(state: State): void {
+        this.el.classList.remove(`state-${this.getState()}`);
+        this.el.classList.add(`state-${state}`);
+        this.state = state;
     }
 
     public getRow(): number {
@@ -53,7 +62,7 @@ export class Cell {
     }
 
     public reveal(): void {
-        if (this.state != State.Default) return;
+        if (this.getState() != State.Default) return;
 
         if (this.isMine()) {
             this.explode();
@@ -66,9 +75,7 @@ export class Cell {
             if (adj.isMine()) this.value++;
         }
 
-        this.el.classList.remove("state-default");
-        this.el.classList.add("state-revealed");
-        this.state = State.Revealed;
+        this.setState(State.Revealed);
 
         if (this.value > 0) {
             this.el.innerHTML = this.getValue().toString();
@@ -81,23 +88,19 @@ export class Cell {
     }
 
     private mark(): void {
-        if (this.state == State.Revealed) return;
+        if (this.getState() == State.Revealed) return;
 
-        this.el.classList.remove(`state-${this.state}`);
-
-        switch (this.state) {
+        switch (this.getState()) {
             case State.Default:
-                this.state = State.Flagged;
+                this.setState(State.Flagged);
                 break;
             case State.Flagged:
-                this.state = State.Questioned;
+                this.setState(State.Questioned);
                 break;
             case State.Questioned:
-                this.state = State.Default;
+                this.setState(State.Default);
                 break;
         }
-
-        this.el.classList.add(`state-${this.state}`);
     }
 
     // To-do
