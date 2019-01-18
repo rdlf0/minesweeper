@@ -17,8 +17,8 @@ const ROWS = 16;
 const COLS = 30;
 const MINES = 99;
 
-let rowsContainer = document.getElementById("rows-container");
+let boardContainer = document.getElementById("board");
 
 let board = new Board(ROWS, COLS, MINES);
 // board.enableDebug();
-board.draw(rowsContainer);
+board.draw(boardContainer);

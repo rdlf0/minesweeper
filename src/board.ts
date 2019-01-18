@@ -32,7 +32,11 @@ export class Board {
         return Math.floor(Math.random() * to) + from;
     }
 
-    public draw(rowsContainer: HTMLElement): void {
+    public draw(board: HTMLElement): void {
+        let rowsContainer = document.createElement("ul");
+        rowsContainer.id = "rows-container";
+        board.append(rowsContainer);
+
         for (let i = 0; i < this.rows; i++) {
             let row = document.createElement("li");
             row.classList.add("row");
