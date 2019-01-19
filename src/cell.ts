@@ -93,9 +93,11 @@ export class Cell {
         switch (this.getState()) {
             case State.Default:
                 this.setState(State.Flagged);
+                this.board.updateFlags(1);
                 break;
             case State.Flagged:
                 this.setState(State.Questioned);
+                this.board.updateFlags(-1);
                 break;
             case State.Questioned:
                 this.setState(State.Default);

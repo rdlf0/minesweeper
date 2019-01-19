@@ -2,9 +2,15 @@ import { Cell } from "./cell";
 
 export class Board {
     private grid: Cell[][];
+    private flags: number;
     private debug: boolean = false;
 
-    constructor(private rows: number, private cols: number, private mines: number) {
+    constructor(
+        private rows: number,
+        private cols: number,
+        private mines: number,
+        private minesCounterEl: HTMLElement
+    ) {
         this.grid = [];
         for (let i = 0; i < this.rows; i++) {
             this.grid[i] = [];
@@ -14,10 +20,25 @@ export class Board {
         }
 
         this.plantMines();
+        this.setFlags(0);
+        this.updateMinesCounter();
     }
 
     public enableDebug() {
         this.debug = true;
+    }
+
+    public setFlags(value: number): void {
+        this.flags = value;
+    }
+
+    public updateFlags(value: number): void {
+        this.flags += value;
+        this.updateMinesCounter();
+    }
+
+    public updateMinesCounter(): void {
+        this.minesCounterEl.innerHTML = (this.mines - this.flags).toString();
     }
 
     private plantMines(): void {

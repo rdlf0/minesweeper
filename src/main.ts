@@ -18,7 +18,8 @@ const COLS = 30;
 const MINES = 99;
 
 let boardContainer = document.getElementById("board");
+let minesCounter = document.getElementById("mines-counter");
 
-let board = new Board(ROWS, COLS, MINES);
+let board = new Board(ROWS, COLS, MINES, minesCounter);
 // board.enableDebug();
 board.draw(boardContainer);
