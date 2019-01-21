@@ -3,14 +3,20 @@ import { Cell } from "./cell";
 export class Board {
     private grid: Cell[][];
     private flags: number = 0;
-    private debug: boolean = false;
 
     constructor(
         private rows: number,
         private cols: number,
         private mines: number,
-        private minesCounterEl: HTMLElement
+        private minesCounterEl: HTMLElement,
+        private debug: boolean = false
     ) {
+        this.initGrid();
+        this.plantMines();
+        this.updateMinesCounter();
+    }
+
+    public initGrid(): void {
         this.grid = [];
         for (let i = 0; i < this.rows; i++) {
             this.grid[i] = [];
@@ -18,13 +24,6 @@ export class Board {
                 this.grid[i][j] = new Cell(this, i, j);
             }
         }
-
-        this.plantMines();
-        this.updateMinesCounter();
-    }
-
-    public enableDebug() {
-        this.debug = true;
     }
 
     public incrementFlags(value: number): void {
@@ -49,6 +48,8 @@ export class Board {
     }
 
     public draw(board: HTMLElement): void {
+        board.innerHTML = "";
+
         let rowsContainer = document.createElement("ul");
         rowsContainer.id = "rows-container";
         board.append(rowsContainer);
