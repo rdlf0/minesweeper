@@ -9,6 +9,38 @@ ul, li {
     padding: 0;
 }
 
+#container {
+    display: table;
+    background-color: #bdbdbd;
+    border-top: 5px solid #ffffff;
+    border-left: 5px solid #ffffff;
+    border-bottom: 5px solid #7b7b7b;
+    border-right: 5px solid #7b7b7b;
+}
+
+#controls, #board {
+    border-left: 5px solid #7b7b7b;
+    border-top: 5px solid #7b7b7b;
+    border-right: 5px solid #ffffff;
+    border-bottom: 5px solid #ffffff;
+    margin: 15px;
+}
+
+#controls {
+    display: flex;
+    justify-content: space-between;
+}
+
+#controls>* {
+    margin: 10px;
+}
+
+#controls #mines-counter, #controls #timer {
+    background-color: #000000;
+    color: #ff0000;
+    font-size: 25px;
+}
+
 #rows-container {
     display: flex;
     flex-direction: column;
