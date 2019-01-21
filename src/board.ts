@@ -1,19 +1,20 @@
 import { Cell } from "./cell";
+import { Game } from "./game";
 
 export class Board {
     private grid: Cell[][];
     private flags: number = 0;
 
     constructor(
+        private game: Game,
         private rows: number,
         private cols: number,
         private mines: number,
-        private minesCounterEl: HTMLElement,
         private debug: boolean = false
     ) {
         this.initGrid();
         this.plantMines();
-        this.updateMinesCounter();
+        this.game.updateMinesCounter(this.flags);
     }
 
     public initGrid(): void {
@@ -28,11 +29,7 @@ export class Board {
 
     public incrementFlags(value: number): void {
         this.flags += value;
-        this.updateMinesCounter();
-    }
-
-    public updateMinesCounter(): void {
-        this.minesCounterEl.innerHTML = (this.mines - this.flags).toString();
+        this.game.updateMinesCounter(this.flags);
     }
 
     private plantMines(): void {

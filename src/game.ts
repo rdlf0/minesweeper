@@ -32,13 +32,17 @@ export class Game {
         this.generateScenario();
     }
 
-    public generateScenario() {
-        let board = new Board(ROWS, COLS, MINES, this.minesCounter, this.debug);
+    public generateScenario(): void {
+        let board = new Board(this, ROWS, COLS, MINES, this.debug);
         board.draw(this.boardContainer);
     }
 
-    public reset() {
+    public reset(): void {
         this.generateScenario();
+    }
+
+    public updateMinesCounter(flags: number): void {
+        this.minesCounter.innerHTML = (MINES - flags).toString();
     }
 
 }
