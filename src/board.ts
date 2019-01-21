@@ -2,7 +2,7 @@ import { Cell } from "./cell";
 
 export class Board {
     private grid: Cell[][];
-    private flags: number;
+    private flags: number = 0;
     private debug: boolean = false;
 
     constructor(
@@ -20,7 +20,6 @@ export class Board {
         }
 
         this.plantMines();
-        this.setFlags(0);
         this.updateMinesCounter();
     }
 
@@ -28,11 +27,7 @@ export class Board {
         this.debug = true;
     }
 
-    public setFlags(value: number): void {
-        this.flags = value;
-    }
-
-    public updateFlags(value: number): void {
+    public incrementFlags(value: number): void {
         this.flags += value;
         this.updateMinesCounter();
     }
