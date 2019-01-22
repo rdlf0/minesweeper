@@ -65,7 +65,7 @@ export class Cell {
         return this.value == -1;
     }
 
-    public reveal(): void {
+    private reveal(): void {
         if (this.getState() != State.Default) return;
 
         this.getBoard().getGame().start();

@@ -46,7 +46,7 @@ export class Game {
         this.started = value;
     }
 
-    public generateScenario(): void {
+    private generateScenario(): void {
         let board = new Board(this, ROWS, COLS, MINES, this.debug);
         board.draw(this.boardContainer);
     }
@@ -62,7 +62,7 @@ export class Game {
         }, 1000);
     }
 
-    public reset(): void {
+    private reset(): void {
         window.clearInterval(this.ticker);
         this.timer = 0;
         this.updateTimer();

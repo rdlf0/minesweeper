@@ -17,7 +17,7 @@ export class Board {
         this.game.updateMinesCounter(this.flags);
     }
 
-    public initGrid(): void {
+    private initGrid(): void {
         this.grid = [];
         for (let i = 0; i < this.rows; i++) {
             this.grid[i] = [];
