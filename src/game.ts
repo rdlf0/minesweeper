@@ -23,13 +23,27 @@ export class Game {
     private minesCounter: HTMLElement;
     private resetBtn: HTMLElement;
 
+    private ticker: any;
+    private timer: number = 0;
+    private timerEl: HTMLElement;
+    private started: boolean = false;
+
     constructor(private debug: boolean = false) {
         this.boardContainer = document.getElementById("board");
         this.minesCounter = document.getElementById("mines-counter");
+        this.timerEl = document.getElementById("timer");
         this.resetBtn = document.getElementById("reset");
         this.resetBtn.addEventListener("click", (e: Event) => this.reset());
 
         this.generateScenario();
+    }
+
+    public isStarted(): boolean {
+        return this.started;
+    }
+
+    private setStarted(value: boolean): void {
+        this.started = value;
     }
 
     public generateScenario(): void {
@@ -37,8 +51,27 @@ export class Game {
         board.draw(this.boardContainer);
     }
 
+    public start(): void {
+        if (this.isStarted()) return;
+
+        this.setStarted(true);
+
+        this.ticker = window.setInterval(() => {
+            this.timer++;
+            this.updateTimer();
+        }, 1000);
+    }
+
     public reset(): void {
+        window.clearInterval(this.ticker);
+        this.timer = 0;
+        this.updateTimer();
+        this.setStarted(false);
         this.generateScenario();
+    }
+
+    private updateTimer(): void {
+        this.timerEl.innerHTML = ("000" + this.timer).slice(-3);
     }
 
     public updateMinesCounter(flags: number): void {

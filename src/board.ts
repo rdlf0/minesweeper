@@ -27,6 +27,10 @@ export class Board {
         }
     }
 
+    public getGame(): Game {
+        return this.game;
+    }
+
     public incrementFlags(value: number): void {
         this.flags += value;
         this.game.updateMinesCounter(this.flags);

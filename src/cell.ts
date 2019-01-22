@@ -25,6 +25,10 @@ export class Cell {
         this.value = value;
     }
 
+    public getBoard(): Board {
+        return this.board;
+    }
+
     public setElement(el: HTMLElement) {
         this.el = el;
         this.setState(State.Default);
@@ -64,13 +68,15 @@ export class Cell {
     public reveal(): void {
         if (this.getState() != State.Default) return;
 
+        this.getBoard().getGame().start();
+
         if (this.isMine()) {
             this.explode();
             return;
         }
 
         this.value = 0;
-        let adjacent = this.board.getAdjacentCells(this);
+        let adjacent = this.getBoard().getAdjacentCells(this);
         for (let adj of adjacent) {
             if (adj.isMine()) this.value++;
         }
@@ -93,11 +99,11 @@ export class Cell {
         switch (this.getState()) {
             case State.Default:
                 this.setState(State.Flagged);
-                this.board.incrementFlags(1);
+                this.getBoard().incrementFlags(1);
                 break;
             case State.Flagged:
                 this.setState(State.Questioned);
-                this.board.incrementFlags(-1);
+                this.getBoard().incrementFlags(-1);
                 break;
             case State.Questioned:
                 this.setState(State.Default);
