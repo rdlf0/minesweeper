@@ -1,4 +1,5 @@
 import { Board } from "./board";
+import { Timer } from "./timer";
 
 // enum MODE {Beginner, Intermediate, Expert};
 
@@ -22,28 +23,17 @@ export class Game {
     private boardContainer: HTMLElement;
     private minesCounter: HTMLElement;
     private resetBtn: HTMLElement;
-
-    private ticker: any;
-    private timer: number = 0;
-    private timerEl: HTMLElement;
     private started: boolean = false;
+    private timer: Timer;
 
     constructor(private debug: boolean = false) {
         this.boardContainer = document.getElementById("board");
         this.minesCounter = document.getElementById("mines-counter");
-        this.timerEl = document.getElementById("timer");
+        this.timer = new Timer(document.getElementById("timer"));
         this.resetBtn = document.getElementById("reset");
         this.resetBtn.addEventListener("click", (e: Event) => this.reset());
 
         this.generateScenario();
-    }
-
-    public isStarted(): boolean {
-        return this.started;
-    }
-
-    private setStarted(value: boolean): void {
-        this.started = value;
     }
 
     private generateScenario(): void {
@@ -52,26 +42,16 @@ export class Game {
     }
 
     public start(): void {
-        if (this.isStarted()) return;
+        if (this.started) return;
 
-        this.setStarted(true);
-
-        this.ticker = window.setInterval(() => {
-            this.timer++;
-            this.updateTimer();
-        }, 1000);
+        this.timer.start();
+        this.started = true;
     }
 
     private reset(): void {
-        window.clearInterval(this.ticker);
-        this.timer = 0;
-        this.updateTimer();
-        this.setStarted(false);
+        this.timer.stop();
+        this.started = false;
         this.generateScenario();
-    }
-
-    private updateTimer(): void {
-        this.timerEl.innerHTML = ("000" + this.timer).slice(-3);
     }
 
     public updateMinesCounter(flags: number): void {
