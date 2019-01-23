@@ -1,5 +1,6 @@
 import { Board } from "./board";
 import { Timer } from "./timer";
+import { PubSub } from "./util/pub-sub";
 
 // enum MODE {Beginner, Intermediate, Expert};
 
@@ -34,10 +35,15 @@ export class Game {
         this.resetBtn.addEventListener("click", (e: Event) => this.reset());
 
         this.generateScenario();
+
+        PubSub.subscribe("flagsChanged", this.updateMinesCounter.bind(this));
+        PubSub.subscribe("cellClicked", this.start.bind(this))
     }
 
     private generateScenario(): void {
-        let board = new Board(this, ROWS, COLS, MINES, this.debug);
+        this.updateMinesCounter(0);
+
+        let board = new Board(ROWS, COLS, MINES, this.debug);
         board.draw(this.boardContainer);
     }
 
