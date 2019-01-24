@@ -3,21 +3,15 @@ import { Game } from "./game";
 
 export class Board {
     private grid: Cell[][];
-    private flags: number = 0;
 
     constructor(
         private game: Game,
         private rows: number,
         private cols: number,
-        private mines: number,
-        private debug: boolean = false
+        private mines: number
     ) {
         this.initGrid();
         this.plantMines();
-    }
-
-    public getGame(): Game {
-        return this.game;
     }
 
     private initGrid(): void {
@@ -30,11 +24,6 @@ export class Board {
         }
     }
 
-    public incrementFlags(value: number): void {
-        this.flags += value;
-        this.game.updateMinesCounter(this.flags);
-    }
-
     private plantMines(): void {
         let count = 0;
 
@@ -43,25 +32,23 @@ export class Board {
         }
     }
 
-    public replantMine(current: Cell): void {
+    public replantMine(row: number, col: number): void {
         for (let i = 0; i < this.rows; i++) {
             for (let j = 0; j < this.cols; j++) {
                 // Don't plant the mine on the same cell
-                if (i == current.getRow() && j == current.getCol()) continue;
+                if (i == row && j == col) continue;
 
-                if (this.grid[i][j].setMine() === 1) {
-                    if (this.debug) {
-                        this.grid[i][j].getElement().innerHTML = "<span class=\"mine\"></span>";
-                    }
-
-                    return;
-                }
+                if (this.grid[i][j].setMine() === 1) return;
             }
         }
     }
 
     private random(from: number, to: number): number {
         return Math.floor(Math.random() * to) + from;
+    }
+
+    public getGame(): Game {
+        return this.game;
     }
 
     public draw(board: HTMLElement): void {
@@ -81,31 +68,18 @@ export class Board {
             row.append(colsContainer);
 
             for (let j = 0; j < this.cols; j++) {
-                let cellObj = this.grid[i][j];
-                let cell = document.createElement("li");
-                cell.classList.add("cell")
-                cell.addEventListener("click", cellObj)
-                cell.addEventListener("contextmenu", cellObj)
-                colsContainer.append(cell);
-
-                cellObj.setElement(cell);
-
-                if (this.debug) {
-                    if (cellObj.isMine()) {
-                        cell.innerHTML = "<span class=\"mine\"></span>";
-                    }
-                }
+                colsContainer.append(this.grid[i][j].getElement());
             }
         }
     }
 
-    public getAdjacentCells(cell: Cell): Cell[] {
+    public getAdjacentCells(row: number, col: number): Cell[] {
         let adj: Cell[] = [];
 
-        for (let i = cell.getRow() - 1; i <= cell.getRow() + 1; i++) {
-            for (let j = cell.getCol() - 1; j <= cell.getCol() + 1; j++) {
+        for (let i = row - 1; i <= row + 1; i++) {
+            for (let j = col - 1; j <= col + 1; j++) {
                 // Don't check current cell
-                if (i == cell.getRow() && j == cell.getCol()) continue;
+                if (i == row && j == col) continue;
 
                 if (i >= 0 && i < this.rows && j >= 0 && j < this.cols) {
                     adj.push(this.grid[i][j]);

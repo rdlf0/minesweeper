@@ -4,6 +4,10 @@ export class Timer {
 
     constructor(private el: HTMLElement) { }
 
+    public isStarted(): boolean {
+        return this.intervaID !== undefined;
+    }
+
     public start(): void {
         this.intervaID = window.setInterval(() => {
             this.value++;

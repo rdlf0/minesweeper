@@ -15,46 +15,39 @@ export class Cell {
 
     constructor(private board: Board, private row: number, private col: number) {
         this.value = -2;
-    }
-
-    public getValue(): number {
-        return this.value;
-    }
-
-    public setValue(value: number): void {
-        this.value = value;
-    }
-
-    public setElement(el: HTMLElement) {
-        this.el = el;
+        this.createHTMLElement();
         this.setState(State.Default);
+    }
+
+    private createHTMLElement(): void {
+        this.el = document.createElement("li");
+        this.el.classList.add("cell");
+        this.el.addEventListener("click", this);
+        this.el.addEventListener("contextmenu", this);
     }
 
     public getElement(): HTMLElement {
         return this.el;
     }
 
-    public getState(): State {
+    private getState(): State {
         return this.state;
     }
 
-    public setState(state: State): void {
+    private setState(state: State): void {
         this.el.classList.remove(`state-${this.getState()}`);
         this.el.classList.add(`state-${state}`);
         this.state = state;
     }
 
-    public getRow(): number {
-        return this.row;
-    }
-
-    public getCol(): number {
-        return this.col;
-    }
-
     public setMine(): number {
         if (!this.isMine()) {
-            this.setValue(-1);
+            this.value = -1;
+
+            if (this.board.getGame().isDebugEnabled()) {
+                this.el.innerHTML = "<span class=\"mine\"></span>";
+            }
+
             return 1;
         }
 
@@ -63,7 +56,8 @@ export class Cell {
 
     private unsetMine(): void {
         if (this.isMine()) {
-            this.setValue(-2);
+            this.value = -2;
+            this.el.innerHTML = "";
         }
     }
 
@@ -82,7 +76,7 @@ export class Cell {
         this.board.getGame().start();
 
         this.value = 0;
-        let adjacent = this.board.getAdjacentCells(this);
+        let adjacent = this.board.getAdjacentCells(this.row, this.col);
         for (let adj of adjacent) {
             if (adj.isMine()) this.value++;
         }
@@ -90,7 +84,7 @@ export class Cell {
         this.setState(State.Revealed);
 
         if (this.value > 0) {
-            this.el.innerHTML = this.getValue().toString();
+            this.el.innerHTML = this.value.toString();
             return;
         }
 
@@ -105,11 +99,11 @@ export class Cell {
         switch (this.getState()) {
             case State.Default:
                 this.setState(State.Flagged);
-                this.board.incrementFlags(1);
+                this.board.getGame().incrementFlags(1);
                 break;
             case State.Flagged:
                 this.setState(State.Questioned);
-                this.board.incrementFlags(-1);
+                this.board.getGame().incrementFlags(-1);
                 break;
             case State.Questioned:
                 this.setState(State.Default);
@@ -119,9 +113,10 @@ export class Cell {
 
     // To-do
     private explode(): void {
+        // Mine-free first click
         if (!this.board.getGame().isStarted()) {
             this.unsetMine();
-            this.board.replantMine(this);
+            this.board.replantMine(this.row, this.col);
             this.reveal();
             return;
         }

@@ -23,8 +23,8 @@ export class Game {
     private boardContainer: HTMLElement;
     private minesCounter: HTMLElement;
     private resetBtn: HTMLElement;
-    private started: boolean = false;
     private timer: Timer;
+    private flags: number;
 
     constructor(private debug: boolean = false) {
         this.boardContainer = document.getElementById("board");
@@ -33,35 +33,45 @@ export class Game {
         this.resetBtn = document.getElementById("reset");
         this.resetBtn.addEventListener("click", (e: Event) => this.reset());
 
+        this.setFlags(0);
         this.generateScenario();
     }
 
-    private generateScenario(): void {
-        this.updateMinesCounter(0);
+    public isDebugEnabled(): boolean {
+        return this.debug;
+    }
 
-        let board = new Board(this, ROWS, COLS, MINES, this.debug);
+    private generateScenario(): void {
+        let board = new Board(this, ROWS, COLS, MINES);
         board.draw(this.boardContainer);
     }
 
-    public start(): void {
-        if (this.started) return;
+    private setFlags(value: number): void {
+        this.flags = value;
+        this.updateMinesCounter();
+    }
 
+    public start(): void {
+        if (this.isStarted()) return;
         this.timer.start();
-        this.started = true;
     }
 
     public isStarted(): boolean {
-        return this.started;
+        return this.timer.isStarted();
     }
 
     private reset(): void {
         this.timer.stop();
-        this.started = false;
+        this.setFlags(0);
         this.generateScenario();
     }
 
-    public updateMinesCounter(flags: number): void {
-        this.minesCounter.innerHTML = (MINES - flags).toString();
+    public incrementFlags(value: number): void {
+        this.setFlags(this.flags + value);
+    }
+
+    public updateMinesCounter(): void {
+        this.minesCounter.innerHTML = (MINES - this.flags).toString();
     }
 
 }
