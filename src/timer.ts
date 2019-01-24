@@ -18,6 +18,7 @@ export class Timer {
     public stop(): void {
         window.clearInterval(this.intervaID);
         this.value = 0;
+        this.intervaID = undefined;
         this.updateEl();
     }
 

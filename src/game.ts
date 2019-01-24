@@ -52,8 +52,9 @@ export class Game {
     }
 
     public start(): void {
-        if (this.isStarted()) return;
-        this.timer.start();
+        if (!this.timer.isStarted()) {
+            this.timer.start();
+        }
     }
 
     public isStarted(): boolean {
