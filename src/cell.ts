@@ -1,5 +1,4 @@
 import { Board } from "./board";
-import { PubSub } from "./util/pub-sub";
 
 enum State {
     Default = "default",
@@ -65,7 +64,7 @@ export class Cell {
     private reveal(): void {
         if (this.getState() != State.Default) return;
 
-        PubSub.publish("cellClicked");
+        this.board.getGame().start();
 
         if (this.isMine()) {
             this.explode();
@@ -73,7 +72,7 @@ export class Cell {
         }
 
         this.value = 0;
-        let adjacent = this.board.getAdjacentCells(this); // There might be a better way for this
+        let adjacent = this.board.getAdjacentCells(this);
         for (let adj of adjacent) {
             if (adj.isMine()) this.value++;
         }
@@ -96,11 +95,11 @@ export class Cell {
         switch (this.getState()) {
             case State.Default:
                 this.setState(State.Flagged);
-                PubSub.publish("cellFlagToggled", 1);
+                this.board.incrementFlags(1);
                 break;
             case State.Flagged:
                 this.setState(State.Questioned);
-                PubSub.publish("cellFlagToggled", -1);
+                this.board.incrementFlags(-1);
                 break;
             case State.Questioned:
                 this.setState(State.Default);

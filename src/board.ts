@@ -1,12 +1,12 @@
 import { Cell } from "./cell";
 import { Game } from "./game";
-import { PubSub } from "./util/pub-sub";
 
 export class Board {
     private grid: Cell[][];
     private flags: number = 0;
 
     constructor(
+        private game: Game,
         private rows: number,
         private cols: number,
         private mines: number,
@@ -14,8 +14,10 @@ export class Board {
     ) {
         this.initGrid();
         this.plantMines();
+    }
 
-        PubSub.subscribe("cellFlagToggled", this.incrementFlags.bind(this));
+    public getGame(): Game {
+        return this.game;
     }
 
     private initGrid(): void {
@@ -30,7 +32,7 @@ export class Board {
 
     public incrementFlags(value: number): void {
         this.flags += value;
-        PubSub.publish("flagsChanged", this.flags)
+        this.game.updateMinesCounter(this.flags);
     }
 
     private plantMines(): void {
