@@ -50,6 +50,10 @@ export class Game {
         this.started = true;
     }
 
+    public isStarted(): boolean {
+        return this.started;
+    }
+
     private reset(): void {
         this.timer.stop();
         this.started = false;

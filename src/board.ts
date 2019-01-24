@@ -43,6 +43,23 @@ export class Board {
         }
     }
 
+    public replantMine(current: Cell): void {
+        for (let i = 0; i < this.rows; i++) {
+            for (let j = 0; j < this.cols; j++) {
+                // Don't plant the mine on the same cell
+                if (i == current.getRow() && j == current.getCol()) continue;
+
+                if (this.grid[i][j].setMine() === 1) {
+                    if (this.debug) {
+                        this.grid[i][j].getElement().innerHTML = "<span class=\"mine\"></span>";
+                    }
+
+                    return;
+                }
+            }
+        }
+    }
+
     private random(from: number, to: number): number {
         return Math.floor(Math.random() * to) + from;
     }
