@@ -23,8 +23,10 @@ export class Game {
     private boardContainer: HTMLElement;
     private minesCounter: HTMLElement;
     private resetBtn: HTMLElement;
+    private board: Board;
     private timer: Timer;
     private flags: number;
+    private over: boolean = false;
 
     constructor(private debug: boolean = false) {
         this.boardContainer = document.getElementById("board");
@@ -42,8 +44,8 @@ export class Game {
     }
 
     private generateScenario(): void {
-        let board = new Board(this, ROWS, COLS, MINES);
-        board.draw(this.boardContainer);
+        this.board = new Board(this, ROWS, COLS, MINES);
+        this.board.draw(this.boardContainer);
     }
 
     private setFlags(value: number): void {
@@ -63,8 +65,20 @@ export class Game {
 
     private reset(): void {
         this.timer.stop();
+        this.timer.reset();
+        this.over = false;
         this.setFlags(0);
         this.generateScenario();
+    }
+
+    public gameOver(): void {
+        this.timer.stop();
+        this.board.revealMines();
+        this.over = true;
+    }
+
+    public isOver(): boolean {
+        return this.over;
     }
 
     public incrementFlags(value: number): void {

@@ -70,7 +70,7 @@ ul, li {
     user-select: none;
 }
 
-.cell.state-revealed {
+.cell.state-revealed, .cell.state-exploaded {
     background-color: #bdbdbd;
     border-top: 2px solid #7b7b7b;
     border-left: 2px solid #7b7b7b;
@@ -95,4 +95,8 @@ ul, li {
     background-color: #000000;
     border-radius: 10px;
     vertical-align: middle;
+}
+
+.cell.state-exploaded {
+    background-color: #FF0000;
 }

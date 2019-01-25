@@ -4,8 +4,11 @@ enum State {
     Default = "default",
     Flagged = "flagged",
     Questioned = "questioned",
-    Revealed = "revealed"
+    Revealed = "revealed",
+    Exploаded = "exploaded"
 };
+
+const MINE_CONTENT = "<span class=\"mine\"></span>";
 
 export class Cell {
 
@@ -45,7 +48,7 @@ export class Cell {
             this.value = -1;
 
             if (this.board.getGame().isDebugEnabled()) {
-                this.el.innerHTML = "<span class=\"mine\"></span>";
+                this.setContent(MINE_CONTENT);
             }
 
             return 1;
@@ -57,12 +60,16 @@ export class Cell {
     private unsetMine(): void {
         if (this.isMine()) {
             this.value = -2;
-            this.el.innerHTML = "";
+            this.setContent("");
         }
     }
 
     public isMine(): boolean {
         return this.value == -1;
+    }
+
+    private setContent(content: string): void {
+        this.el.innerHTML = content;
     }
 
     private reveal(): void {
@@ -73,7 +80,11 @@ export class Cell {
             return;
         }
 
-        this.board.getGame().start();
+        if (!this.board.getGame().isStarted()) {
+            this.board.getGame().start();
+        }
+
+        this.setState(State.Revealed);
 
         this.value = 0;
         let adjacent = this.board.getAdjacentCells(this.row, this.col);
@@ -81,16 +92,21 @@ export class Cell {
             if (adj.isMine()) this.value++;
         }
 
-        this.setState(State.Revealed);
-
         if (this.value > 0) {
-            this.el.innerHTML = this.value.toString();
+            this.setContent(this.value.toString());
             return;
         }
 
         for (let adj of adjacent) {
             adj.reveal();
         }
+    }
+
+    public revealMine(): void {
+        if (this.getState() !== State.Exploаded) {
+            this.setState(State.Revealed)
+        };
+        this.setContent(MINE_CONTENT);
     }
 
     private mark(): void {
@@ -111,7 +127,6 @@ export class Cell {
         }
     }
 
-    // To-do
     private explode(): void {
         // Mine-free first click
         if (!this.board.getGame().isStarted()) {
@@ -120,17 +135,23 @@ export class Cell {
             this.reveal();
             return;
         }
-        alert("BOOM!");
+
+        this.setState(State.Exploаded);
+        this.board.getGame().gameOver();
     }
 
     public handleEvent(e: Event) {
         switch (e.type) {
             case "click":
-                this.reveal();
+                if (!this.board.getGame().isOver()) {
+                    this.reveal();
+                }
                 break;
             case "contextmenu":
                 e.preventDefault();
-                this.mark();
+                if (!this.board.getGame().isOver()) {
+                    this.mark();
+                }
                 break;
         }
     }

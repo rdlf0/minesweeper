@@ -89,4 +89,16 @@ export class Board {
 
         return adj;
     }
+
+    public revealMines(): void {
+        for (let i = 0; i < this.rows; i++) {
+            for (let j = 0; j < this.cols; j++) {
+                let cell = this.grid[i][j];
+
+                if (cell.isMine()) {
+                    cell.revealMine();
+                }
+            }
+        }
+    }
 }
