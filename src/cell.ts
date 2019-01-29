@@ -127,6 +127,11 @@ export class Cell {
         if (this.getState() === State.Default) {
             this.mark();
         }
+
+        if (this.getState() === State.Questioned) {
+            this.mark();
+            this.mark();
+        }
     }
 
     private mark(): void {
