@@ -3,6 +3,7 @@ import { Game } from "./game";
 
 export class Board {
     private grid: Cell[][];
+    private revealed: number = 0;
 
     constructor(
         private game: Game,
@@ -90,15 +91,34 @@ export class Board {
         return adj;
     }
 
-    public revealMines(): void {
+    public revealMines(win: boolean): void {
         for (let i = 0; i < this.rows; i++) {
             for (let j = 0; j < this.cols; j++) {
                 let cell = this.grid[i][j];
 
                 if (cell.isMine()) {
-                    cell.revealMine();
+                    if (win) {
+                        cell.revealFlag();
+                    } else {
+                        cell.revealMine();
+                    }
+                } else {
+                    if (cell.isFlagged()) {
+                        cell.setWronglyFlagged();
+                    }
                 }
             }
+        }
+    }
+
+    public incremetnRevealed(): void {
+        this.revealed++;
+        this.checkForWin();
+    }
+
+    private checkForWin(): void {
+        if (this.revealed == this.rows * this.cols - this.mines) {
+            this.game.gameOver(true);
         }
     }
 }

@@ -67,14 +67,20 @@ export class Game {
         this.timer.stop();
         this.timer.reset();
         this.over = false;
+        this.resetBtn.innerHTML = "RESET";
         this.setFlags(0);
         this.generateScenario();
     }
 
-    public gameOver(): void {
+    public gameOver(win: boolean = false): void {
         this.timer.stop();
-        this.board.revealMines();
         this.over = true;
+
+        this.board.revealMines(win);
+
+        if (win) {
+            this.resetBtn.innerHTML = "WIN!";
+        }
     }
 
     public isOver(): boolean {
@@ -86,7 +92,7 @@ export class Game {
     }
 
     public updateMinesCounter(): void {
-        this.minesCounter.innerHTML = (MINES - this.flags).toString();
+        this.minesCounter.innerHTML = ("000" + (MINES - this.flags)).slice(-3);
     }
 
 }

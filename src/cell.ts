@@ -5,7 +5,8 @@ enum State {
     Flagged = "flagged",
     Questioned = "questioned",
     Revealed = "revealed",
-    Exploаded = "exploaded"
+    Exploаded = "exploaded",
+    WronglyFlagged = "wronglyFlagged",
 };
 
 const MINE_CONTENT = "<span class=\"mine\"></span>";
@@ -68,6 +69,14 @@ export class Cell {
         return this.value == -1;
     }
 
+    public isFlagged(): boolean {
+        return this.getState() === State.Flagged;
+    }
+
+    public setWronglyFlagged(): void {
+        this.setState(State.WronglyFlagged);
+    }
+
     private setContent(content: string): void {
         this.el.innerHTML = content;
     }
@@ -83,6 +92,8 @@ export class Cell {
         if (!this.board.getGame().isStarted()) {
             this.board.getGame().start();
         }
+
+        this.board.incremetnRevealed();
 
         this.setState(State.Revealed);
 
@@ -103,10 +114,19 @@ export class Cell {
     }
 
     public revealMine(): void {
+        if (this.getState() === State.Flagged) return;
+
         if (this.getState() !== State.Exploаded) {
             this.setState(State.Revealed)
         };
+
         this.setContent(MINE_CONTENT);
+    }
+
+    public revealFlag(): void {
+        if (this.getState() === State.Default) {
+            this.mark();
+        }
     }
 
     private mark(): void {
