@@ -1,5 +1,6 @@
 import { Board } from "./board";
 import { Timer } from "./timer";
+import { Counter } from "./counter";
 
 // enum MODE {Beginner, Intermediate, Expert};
 
@@ -20,23 +21,20 @@ const MINES = 99;
 
 export class Game {
 
-    private boardContainer: HTMLElement;
-    private minesCounter: HTMLElement;
+    private counter: Counter;
     private resetBtn: HTMLElement;
     private board: Board;
     private timer: Timer;
     private flags: number;
-    private over: boolean = false;
+    private over: boolean;
 
     constructor(private debug: boolean = false) {
-        this.boardContainer = document.getElementById("board");
-        this.minesCounter = document.getElementById("mines-counter");
+        this.counter = new Counter(document.getElementById("mines-counter"));
         this.timer = new Timer(document.getElementById("timer"));
         this.resetBtn = document.getElementById("reset");
         this.resetBtn.addEventListener("click", (e: Event) => this.reset());
 
-        this.setFlags(0);
-        this.generateScenario();
+        this.reset();
     }
 
     public isDebugEnabled(): boolean {
@@ -45,12 +43,7 @@ export class Game {
 
     private generateScenario(): void {
         this.board = new Board(this, ROWS, COLS, MINES);
-        this.board.draw(this.boardContainer);
-    }
-
-    private setFlags(value: number): void {
-        this.flags = value;
-        this.updateMinesCounter();
+        this.board.draw(document.getElementById("board"));
     }
 
     public start(): void {
@@ -63,19 +56,9 @@ export class Game {
         return this.timer.isStarted();
     }
 
-    private reset(): void {
-        this.timer.stop();
-        this.timer.reset();
-        this.over = false;
-        this.resetBtn.innerHTML = "RESET";
-        this.setFlags(0);
-        this.generateScenario();
-    }
-
     public gameOver(win: boolean = false): void {
         this.timer.stop();
         this.over = true;
-
         this.board.revealMines(win);
 
         if (win) {
@@ -87,12 +70,22 @@ export class Game {
         return this.over;
     }
 
-    public incrementFlags(value: number): void {
-        this.setFlags(this.flags + value);
+    private reset(): void {
+        this.timer.stop();
+        this.timer.reset();
+        this.resetBtn.innerHTML = "RESET";
+        this.over = false;
+        this.setFlags(0);
+        this.generateScenario();
     }
 
-    public updateMinesCounter(): void {
-        this.minesCounter.innerHTML = ("000" + (MINES - this.flags)).slice(-3);
+    private setFlags(value: number): void {
+        this.flags = value;
+        this.counter.updateEl(MINES - this.flags);
+    }
+
+    public incrementFlags(value: number): void {
+        this.setFlags(this.flags + value);
     }
 
 }

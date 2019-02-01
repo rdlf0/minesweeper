@@ -93,7 +93,7 @@ export class Cell {
             this.board.getGame().start();
         }
 
-        this.board.incremetnRevealed();
+        this.board.incrementRevealed();
 
         this.setState(State.Revealed);
 

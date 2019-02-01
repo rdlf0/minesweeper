@@ -16,7 +16,9 @@ export class Timer {
     }
 
     public stop(): void {
-        window.clearInterval(this.intervaID);
+        if (this.intervaID !== undefined) {
+            window.clearInterval(this.intervaID);
+        }
     }
 
     public reset(): void {

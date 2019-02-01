@@ -111,13 +111,13 @@ export class Board {
         }
     }
 
-    public incremetnRevealed(): void {
+    public incrementRevealed(): void {
         this.revealed++;
         this.checkForWin();
     }
 
     private checkForWin(): void {
-        if (this.revealed == this.rows * this.cols - this.mines) {
+        if (this.revealed === this.rows * this.cols - this.mines) {
             this.game.gameOver(true);
         }
     }
