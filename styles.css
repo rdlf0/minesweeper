@@ -39,6 +39,8 @@ ul, li {
     background-color: #000000;
     color: #ff0000;
     font-size: 25px;
+    font-family: Courier;
+    font-weight: bold;
 }
 
 #rows-container {
@@ -54,13 +56,18 @@ ul, li {
 .cell {
     cursor: default;
     display: block;
-    width: 25px;
-    height: 25px;
+    width: 33px;
+    height: 33px;
+    position: relative;
+    line-height: 30px;
+    font-size: 25px;
+    font-family: "Arial Black";
     background-color: #CCCCCC;
     border-top: 5px solid #FFFFFF;
     border-left: 5px solid #FFFFFF;
     border-bottom: 5px solid #7b7b7b;
     border-right: 5px solid #7b7b7b;
+    box-sizing: border-box;
     text-align: center;
     -webkit-touch-callout: none;
     -webkit-user-select: none;
@@ -76,16 +83,18 @@ ul, li {
     border-left: 2px solid #7b7b7b;
     border-bottom: 0 none;
     border-right: 0 none;
-    width: 33px;
-    height: 33px;
 }
 
-.cell.state-flagged {
-    background-color: #ff0000;
+.cell.state-flagged::after {
+    content: "◄";
+    color: #ff0000;
+    position: absolute;
+    top: -4px;
+    left: -1px;
 }
 
-.cell.state-questioned {
-    background-color: #880088;
+.cell.state-questioned::after {
+    content: "?";
 }
 
 .cell .mine {
@@ -94,13 +103,51 @@ ul, li {
     height: 20px;
     background-color: #000000;
     border-radius: 10px;
-    vertical-align: middle;
 }
 
 .cell.state-exploaded {
-    background-color: rgb(255, 136, 0);
+    background-color: #ff0000;
 }
 
-.cell.state-wronglyFlagged {
-    background-color: rgb(56, 56, 56);
+.cell.state-wronglyFlagged .mine::after {
+    content: "+";
+    color: #ff0000;
+    position: absolute;
+    top: -1px;
+    left: -2px;
+    transform: rotate(45deg);
+    font-size: 60px;
+    font-family: "Arial";
+}
+
+.cell.cell-value-1 {
+    color: #0000ff;
+}
+
+.cell.cell-value-2 {
+    color: #008000;
+}
+
+.cell.cell-value-3 {
+    color: #ff0000;
+}
+
+.cell.cell-value-4 {
+    color: #000080;
+}
+
+.cell.cell-value-5 {
+    color: #800000;
+}
+
+.cell.cell-value-6 {
+    color: #008080;
+}
+
+.cell.cell-value-7 {
+    color: #000000;
+}
+
+.cell.cell-value-8 {
+    color: #808080;
 }
