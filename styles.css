@@ -89,20 +89,23 @@ ul, li {
     content: "◄";
     color: #ff0000;
     position: absolute;
-    top: -7px;
-    left: 0px;
-    font-size: 17px;
+    top: -6px;
+    left: 1px;
+    font-size: 16px;
 }
 
 .cell.state-flagged::before {
     content: "";
     display: block;
-    border-left: 7px solid transparent;
-    border-right: 7px solid transparent;
-    border-bottom: 7px solid #000;
-    top: 13px;
+    border-left: 6px solid #CCC;
+    border-right: 6px solid #CCC;
+    border-bottom: 3px solid #000;
+    top: 14px;
     left: 7px;
     position: absolute;
+    width: 2px;
+    background-color: #000;
+    height: 3px;
 }
 
 .cell.state-questioned::after {
