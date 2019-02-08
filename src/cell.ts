@@ -97,13 +97,13 @@ export class Cell {
         this.board.incrementRevealed();
 
         this.setState(State.Revealed);
-        
+
         this.value = 0;
         let adjacent = this.board.getAdjacentCells(this.row, this.col);
         for (let adj of adjacent) {
             if (adj.isMine()) this.value++;
         }
-        
+
         if (this.value > 0) {
             this.setContent(this.value.toString());
             this.el.classList.add(`cell-value-${this.value.toString()}`);
