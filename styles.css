@@ -126,6 +126,12 @@ ul, li {
     left: 7px;
 }
 
+.cell .mine.debug {
+    top: 4px;
+    left: 4px;
+    background-color: #999999;
+}
+
 .cell .mine::after, .cell .mine::before {
     content: "+";
     color: black;
@@ -138,6 +144,10 @@ ul, li {
 
 .cell .mine::after {
     transform: rotate(45deg);
+}
+
+.cell .mine.debug::before, .cell .mine.debug::after {
+    color: #999999;
 }
 
 .cell.state-exploaded {

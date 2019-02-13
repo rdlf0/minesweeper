@@ -10,6 +10,7 @@ enum State {
 };
 
 const MINE_CONTENT = "<span class=\"mine\"></span>";
+const MINE_CONTENT_DEBUG = "<span class=\"mine debug\"></span>";
 
 export class Cell {
 
@@ -49,7 +50,7 @@ export class Cell {
             this.value = -1;
 
             if (this.board.getGame().isDebugEnabled()) {
-                this.setContent(MINE_CONTENT);
+                this.setContent(MINE_CONTENT_DEBUG);
             }
 
             return 1;
