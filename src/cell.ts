@@ -87,15 +87,20 @@ export class Cell {
     private reveal(): void {
         if (this.getState() != State.Default) return;
 
+        let gameStarted: boolean = this.board.getGame().isStarted();
+
         if (this.isMine()) {
-            this.explode();
-            return;
+            if (gameStarted) {
+                this.explode();
+                return;
+            } else {
+                this.unsetMine();
+            }
         }
 
         this.setState(State.Revealed);
         this.board.incrementRevealed();
 
-        let gameStarted: boolean = this.board.getGame().isStarted();
         this.value = 0;
         let adjacent = this.board.getAdjacentCells(this.row, this.col);
         for (let adj of adjacent) {
@@ -159,13 +164,6 @@ export class Cell {
     }
 
     private explode(): void {
-        // Mine-free first click
-        if (!this.board.getGame().isStarted()) {
-            this.unsetMine();
-            this.reveal();
-            return;
-        }
-
         this.setState(State.Exploаded);
         this.board.getGame().gameOver();
     }
