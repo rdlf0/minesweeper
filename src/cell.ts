@@ -59,10 +59,11 @@ export class Cell {
         return 0;
     }
 
-    private unsetMine(): void {
+    public unsetMine(): void {
         if (this.isMine()) {
             this.value = -2;
             this.setContent("");
+            this.board.replantMine(this.row, this.col);
         }
     }
 
@@ -91,24 +92,26 @@ export class Cell {
             return;
         }
 
-        if (!this.board.getGame().isStarted()) {
-            this.board.getGame().start();
-        }
-
+        this.setState(State.Revealed);
         this.board.incrementRevealed();
 
-        this.setState(State.Revealed);
-
+        let gameStarted: boolean = this.board.getGame().isStarted();
         this.value = 0;
         let adjacent = this.board.getAdjacentCells(this.row, this.col);
         for (let adj of adjacent) {
-            if (adj.isMine()) this.value++;
+            if (adj.isMine()) {
+                gameStarted ? this.value++ : adj.unsetMine();
+            }
         }
 
         if (this.value > 0) {
             this.setContent(this.value.toString());
             this.el.classList.add(`cell-value-${this.value.toString()}`);
             return;
+        }
+
+        if (!gameStarted) {
+            this.board.getGame().start();
         }
 
         for (let adj of adjacent) {
@@ -159,7 +162,6 @@ export class Cell {
         // Mine-free first click
         if (!this.board.getGame().isStarted()) {
             this.unsetMine();
-            this.board.replantMine(this.row, this.col);
             this.reveal();
             return;
         }

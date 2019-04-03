@@ -13,6 +13,6 @@ Then just open `index.html`
 - replay the same board
 - performance improvement - precalculation of the cell value on init
 - settings UI
-- option for first click: "mine-free" or "guaranteed cascade"
+- ~~option for first click: "mine-free" or "guaranteed cascade"~~
 - game sharing - generate URL with encoded game state
 - option for UI hint - highlighting the adjacent cells on hover
