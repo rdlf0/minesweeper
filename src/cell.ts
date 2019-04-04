@@ -1,4 +1,5 @@
 import { Board } from "./board";
+import { FIRST_CLICK } from "./config";
 
 enum State {
     Default = "default",
@@ -49,7 +50,7 @@ export class Cell {
         if (!this.isMine()) {
             this.value = -1;
 
-            if (this.board.getGame().isDebugEnabled()) {
+            if (this.board.getGame().config.debug === true) {
                 this.setContent(MINE_CONTENT_DEBUG);
             }
 
@@ -105,7 +106,11 @@ export class Cell {
         let adjacent = this.board.getAdjacentCells(this.row, this.col);
         for (let adj of adjacent) {
             if (adj.isMine()) {
-                gameStarted ? this.value++ : adj.unsetMine();
+                if (this.board.getGame().config.firstClick === FIRST_CLICK.GuaranteedCascade) {
+                    gameStarted ? this.value++ : adj.unsetMine();
+                } else {
+                    this.value++;
+                }
             }
         }
 

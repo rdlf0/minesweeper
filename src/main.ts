@@ -1,5 +1,10 @@
 import { Game } from "./game";
+import { FIRST_CLICK, MODE, Config } from "./config";
 
-const DEBUG = false;
+const config: Config = {
+    mode: MODE.Expert,
+    firstClick: FIRST_CLICK.GuaranteedCascade,
+    debug: false,
+}
 
-let main = new Game(DEBUG);
+new Game(config);

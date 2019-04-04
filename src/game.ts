@@ -1,25 +1,13 @@
 import { Board } from "./board";
 import { Timer } from "./timer";
 import { Counter } from "./counter";
-
-// enum MODE {Beginner, Intermediate, Expert};
-
-// Beginner
-// const ROWS = 9;
-// const COLS = 9;
-// const MINES = 10;
-
-// Intermediate
-// const ROWS = 16;
-// const COLS = 16;
-// const MINES = 40;
-
-// Expert
-const ROWS = 16;
-const COLS = 30;
-const MINES = 99;
+import { Config, BOARD_CONFIG } from "./config";
 
 export class Game {
+
+    private rows: number;
+    private cols: number;
+    private mines: number;
 
     private counter: Counter;
     private resetBtn: HTMLElement;
@@ -28,7 +16,13 @@ export class Game {
     private flags: number;
     private over: boolean;
 
-    constructor(private debug: boolean = false) {
+    constructor(
+        public config: Config
+    ) {
+        this.rows = BOARD_CONFIG[config.mode].rows;
+        this.cols = BOARD_CONFIG[config.mode].cols;
+        this.mines = BOARD_CONFIG[config.mode].mines;
+        
         this.counter = new Counter(document.getElementById("mines-counter"));
         this.timer = new Timer(document.getElementById("timer"));
         this.resetBtn = document.getElementById("reset");
@@ -37,12 +31,8 @@ export class Game {
         this.reset();
     }
 
-    public isDebugEnabled(): boolean {
-        return this.debug;
-    }
-
     private generateScenario(): void {
-        this.board = new Board(this, ROWS, COLS, MINES);
+        this.board = new Board(this, this.rows, this.cols, this.mines);
         this.board.draw(document.getElementById("board"));
     }
 
@@ -81,7 +71,7 @@ export class Game {
 
     private setFlags(value: number): void {
         this.flags = value;
-        this.counter.updateEl(MINES - this.flags);
+        this.counter.updateEl(this.mines - this.flags);
     }
 
     public incrementFlags(value: number): void {
