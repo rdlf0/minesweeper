@@ -18,11 +18,17 @@ export class Cell {
     private value: number;
     private el: HTMLElement;
     private state: State;
+    private adjacentCells: Cell[] = [];
 
     constructor(private board: Board, private row: number, private col: number) {
         this.value = -2;
         this.createHTMLElement();
         this.setState(State.Default);
+    }
+
+    private setValue(value: number): void {
+        this.value = value;
+        this.el.classList.add(`cell-value-${this.value.toString()}`);
     }
 
     private createHTMLElement(): void {
@@ -60,11 +66,11 @@ export class Cell {
         return 0;
     }
 
-    public unsetMine(): void {
+    public unsetMine(centerRow: number, centerCol: number): void {
         if (this.isMine()) {
             this.value = -2;
             this.setContent("");
-            this.board.replantMine(this.row, this.col);
+            this.board.replantMine(centerRow, centerCol);
         }
     }
 
@@ -85,48 +91,69 @@ export class Cell {
         this.el.innerHTML = content;
     }
 
+    private getAdjacentCells(): Cell[] {
+        if (this.adjacentCells.length === 0) {
+            this.adjacentCells = this.board.getAdjacentCells(this.row, this.col);
+        }
+
+        return this.adjacentCells;
+    }
+
     private reveal(): void {
         if (this.getState() != State.Default) return;
 
-        let gameStarted: boolean = this.board.getGame().isStarted();
+        const isFirstClick = this.board.getGame().isStarted() === false;
+        if (isFirstClick) {
+            this.board.getGame().start();
+            this.makeSafeArea();
+        }
 
         if (this.isMine()) {
-            if (gameStarted) {
-                this.explode();
-                return;
-            } else {
-                this.unsetMine();
-            }
+            this.explode();
+            return;
         }
 
         this.setState(State.Revealed);
         this.board.incrementRevealed();
 
-        this.value = 0;
-        let adjacent = this.board.getAdjacentCells(this.row, this.col);
-        for (let adj of adjacent) {
-            if (adj.isMine()) {
-                if (this.board.getGame().config.firstClick === FIRST_CLICK.GuaranteedCascade) {
-                    gameStarted ? this.value++ : adj.unsetMine();
-                } else {
-                    this.value++;
+        this.calculateValue();
+
+        if (this.value === 0) {
+            this.revealAdjacentCells();
+        } else {
+            this.setContent(this.value.toString());
+        }
+    }
+
+    private revealAdjacentCells(): void {
+        for (let adj of this.getAdjacentCells()) {
+            adj.reveal();
+        }
+    }
+
+    private makeSafeArea(): void {
+        if (this.isMine()) {
+            this.unsetMine(this.row, this.col);
+        }
+
+        if (this.board.getGame().config.firstClick === FIRST_CLICK.GuaranteedCascade) {
+            for (let adj of this.getAdjacentCells()) {
+                if (adj.isMine()) {
+                    adj.unsetMine(this.row, this.col);
                 }
+            }
+        };
+    }
+
+    private calculateValue(): void {
+        let value = 0;
+        for (let adj of this.getAdjacentCells()) {
+            if (adj.isMine()) {
+                value++;
             }
         }
 
-        if (this.value > 0) {
-            this.setContent(this.value.toString());
-            this.el.classList.add(`cell-value-${this.value.toString()}`);
-            return;
-        }
-
-        if (!gameStarted) {
-            this.board.getGame().start();
-        }
-
-        for (let adj of adjacent) {
-            adj.reveal();
-        }
+        this.setValue(value);
     }
 
     public revealMine(): void {

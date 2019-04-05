@@ -33,14 +33,17 @@ export class Board {
         }
     }
 
-    public replantMine(row: number, col: number): void {
-        for (let i = 0; i < this.rows; i++) {
-            for (let j = 0; j < this.cols; j++) {
-                // Don't plant the mine on the same cell
-                if (i == row && j == col) continue;
+    public replantMine(centerRow: number, centerCol: number): void {
+        const randomRow = this.random(0, this.rows);
+        const randomCol = this.random(0, this.cols);
 
-                if (this.grid[i][j].setMine() === 1) return;
-            }
+        const distance = this.getGame().config.firstClick;
+
+        const outOfSafeArea = (randomRow > centerRow + distance || randomRow < centerRow - distance)
+            && (randomCol > centerCol + distance || randomCol < centerCol - distance);
+
+        if (!outOfSafeArea || this.grid[randomRow][randomCol].setMine() === 0) {
+            this.replantMine(centerRow, centerCol);
         }
     }
 

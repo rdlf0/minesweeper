@@ -5,8 +5,8 @@ export interface Config {
 }
 
 export enum FIRST_CLICK {
-    GuaranteedCell,
-    GuaranteedCascade
+    GuaranteedCell = 0,
+    GuaranteedCascade = 1
 }
 
 export enum MODE {
