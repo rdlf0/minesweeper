@@ -1,38 +1,42 @@
 import { Board } from "./board";
 import { Timer } from "./timer";
 import { Counter } from "./counter";
-import { Config, BOARD_CONFIG } from "./config";
+import { Config } from "./config";
 
 export class Game {
 
-    private rows: number;
-    private cols: number;
-    private mines: number;
-
     private counter: Counter;
     private resetBtn: HTMLElement;
+    private replayBtn: HTMLElement;
     private board: Board;
     private timer: Timer;
     private flags: number;
     private over: boolean;
 
     constructor(
-        public config: Config
-    ) {
-        this.rows = BOARD_CONFIG[config.mode].rows;
-        this.cols = BOARD_CONFIG[config.mode].cols;
-        this.mines = BOARD_CONFIG[config.mode].mines;
-        
+        private config: Config
+    ) { 
         this.counter = new Counter(document.getElementById("mines-counter"));
         this.timer = new Timer(document.getElementById("timer"));
         this.resetBtn = document.getElementById("reset");
+        this.replayBtn = document.getElementById("replay");
         this.resetBtn.addEventListener("click", (e: Event) => this.reset());
+        this.replayBtn.addEventListener("click", (e: Event) => this.reset(true));
 
         this.reset();
     }
 
-    private generateScenario(): void {
-        this.board = new Board(this, this.rows, this.cols, this.mines);
+    public getConfig(): Config {
+        return this.config;
+    }
+
+    private generateScenario(replay: boolean = false): void {
+        let minesList: boolean[] = [];
+        if (replay && this.board !== undefined) {
+            minesList = this.board.getMinesList();
+        }
+
+        this.board = new Board(this, minesList);
         this.board.draw(document.getElementById("board"));
     }
 
@@ -60,18 +64,18 @@ export class Game {
         return this.over;
     }
 
-    private reset(): void {
+    private reset(replay: boolean = false): void {
         this.timer.stop();
         this.timer.reset();
         this.resetBtn.innerHTML = "RESET";
         this.over = false;
+        this.generateScenario(replay);
         this.setFlags(0);
-        this.generateScenario();
     }
 
     private setFlags(value: number): void {
         this.flags = value;
-        this.counter.updateEl(this.mines - this.flags);
+        this.counter.updateEl(this.board.getMines() - this.flags);
     }
 
     public incrementFlags(value: number): void {

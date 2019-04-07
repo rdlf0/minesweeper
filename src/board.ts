@@ -1,16 +1,24 @@
 import { Cell } from "./cell";
 import { Game } from "./game";
+import { BOARD_CONFIG } from "./config";
 
 export class Board {
+    private rows: number;
+    private cols: number;
+    private mines: number;
     private grid: Cell[][];
     private revealed: number = 0;
+    public isReplay: boolean = false;
 
     constructor(
         private game: Game,
-        private rows: number,
-        private cols: number,
-        private mines: number
+        private minesList: boolean[] = []
     ) {
+        const mode = this.getGame().getConfig().mode;
+        this.rows = BOARD_CONFIG[mode].rows;
+        this.cols = BOARD_CONFIG[mode].cols;
+        this.mines = BOARD_CONFIG[mode].mines;
+
         this.initGrid();
         this.plantMines();
     }
@@ -26,24 +34,48 @@ export class Board {
     }
 
     private plantMines(): void {
-        let count = 0;
+        if (this.minesList.length > 0) {
+            for (let i = 1; i < this.minesList.length; i++) {
+                if (this.minesList[i]) {
+                    const row = Math.ceil(i / this.cols) - 1;
+                    const col = (i - 1) % this.cols;
+                    this.grid[row][col].setMine();
+                }
+            }
 
-        while (count < this.mines) {
-            count += this.grid[this.random(0, this.rows)][this.random(0, this.cols)].setMine();
+            this.isReplay = true;
+        } else {
+            let count = 0;
+
+            while (count < this.mines) {
+                const row = this.random(0, this.rows);
+                const col = this.random(0, this.cols);
+                const planted = this.grid[row][col].setMine();
+                if (planted === 1) {
+                    count++;
+                    this.minesList[(row * this.cols + col + 1)] = true;
+                }
+            }
         }
     }
 
-    public replantMine(centerRow: number, centerCol: number): void {
+    public replantMine(centerRow: number, centerCol: number, unsetMineRow?: number, unsetMineCol?: number): void {
+        if (unsetMineRow !== undefined && unsetMineCol !== undefined) {
+            this.minesList[(unsetMineRow * this.cols + unsetMineCol + 1)] = null;
+        }
+
         const randomRow = this.random(0, this.rows);
         const randomCol = this.random(0, this.cols);
 
-        const distance = this.getGame().config.firstClick;
+        const distance = this.getGame().getConfig().firstClick;
 
         const outOfSafeArea = (randomRow > centerRow + distance || randomRow < centerRow - distance)
             && (randomCol > centerCol + distance || randomCol < centerCol - distance);
 
         if (!outOfSafeArea || this.grid[randomRow][randomCol].setMine() === 0) {
             this.replantMine(centerRow, centerCol);
+        } else {
+            this.minesList[(randomRow * this.cols + randomCol + 1)] = true;
         }
     }
 
@@ -51,8 +83,16 @@ export class Board {
         return Math.floor(Math.random() * to) + from;
     }
 
+    public getMinesList(): boolean[] {
+        return this.minesList;
+    }
+
     public getGame(): Game {
         return this.game;
+    }
+
+    public getMines(): number {
+        return this.mines;
     }
 
     public draw(board: HTMLElement): void {

@@ -31,8 +31,12 @@ ul, li {
     justify-content: space-between;
 }
 
-#controls>* {
+#controls .control {
     margin: 10px;
+}
+
+#controls .buttons-wrapper {
+    display: flex;
 }
 
 #controls #mines-counter, #controls #timer {

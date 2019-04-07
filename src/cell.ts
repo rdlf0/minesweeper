@@ -56,7 +56,7 @@ export class Cell {
         if (!this.isMine()) {
             this.value = -1;
 
-            if (this.board.getGame().config.debug === true) {
+            if (this.board.getGame().getConfig().debug === true) {
                 this.setContent(MINE_CONTENT_DEBUG);
             }
 
@@ -70,7 +70,7 @@ export class Cell {
         if (this.isMine()) {
             this.value = -2;
             this.setContent("");
-            this.board.replantMine(centerRow, centerCol);
+            this.board.replantMine(centerRow, centerCol, this.row, this.col);
         }
     }
 
@@ -105,7 +105,9 @@ export class Cell {
         const isFirstClick = this.board.getGame().isStarted() === false;
         if (isFirstClick) {
             this.board.getGame().start();
-            this.makeSafeArea();
+            if (!this.board.isReplay) {
+                this.makeSafeArea();
+            }
         }
 
         if (this.isMine()) {
@@ -136,7 +138,7 @@ export class Cell {
             this.unsetMine(this.row, this.col);
         }
 
-        if (this.board.getGame().config.firstClick === FIRST_CLICK.GuaranteedCascade) {
+        if (this.board.getGame().getConfig().firstClick === FIRST_CLICK.GuaranteedCascade) {
             for (let adj of this.getAdjacentCells()) {
                 if (adj.isMine()) {
                     adj.unsetMine(this.row, this.col);
