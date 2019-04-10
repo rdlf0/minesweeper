@@ -100,12 +100,12 @@ export class Cell {
     }
 
     private reveal(): void {
-        if (this.getState() != State.Default) return;
+        if (this.getState() !== State.Default) return;
 
         const isFirstClick = this.board.getGame().isStarted() === false;
         if (isFirstClick) {
             this.board.getGame().start();
-            if (!this.board.isReplay) {
+            if (!this.board.getGame().checkIsReplay()) {
                 this.makeSafeArea();
             }
         }
@@ -127,24 +127,19 @@ export class Cell {
         }
     }
 
-    private revealAdjacentCells(): void {
-        for (let adj of this.getAdjacentCells()) {
-            adj.reveal();
-        }
-    }
-
     private makeSafeArea(): void {
-        if (this.isMine()) {
-            this.unsetMine(this.row, this.col);
-        }
+        this.unsetMine(this.row, this.col);
 
         if (this.board.getGame().getConfig().firstClick === FIRST_CLICK.GuaranteedCascade) {
-            for (let adj of this.getAdjacentCells()) {
-                if (adj.isMine()) {
-                    adj.unsetMine(this.row, this.col);
-                }
+            for (const adj of this.getAdjacentCells()) {
+                adj.unsetMine(this.row, this.col);
             }
         };
+    }
+
+    private explode(): void {
+        this.setState(State.Exploаded);
+        this.board.getGame().gameOver();
     }
 
     private calculateValue(): void {
@@ -158,9 +153,17 @@ export class Cell {
         this.setValue(value);
     }
 
+    private revealAdjacentCells(): void {
+        for (const adj of this.getAdjacentCells()) {
+            adj.reveal();
+        }
+    }
+
     public revealMine(): void {
+        // Leave flags
         if (this.getState() === State.Flagged) return;
 
+        // Reveal not exploaded mines
         if (this.getState() !== State.Exploаded) {
             this.setState(State.Revealed)
         };
@@ -174,6 +177,7 @@ export class Cell {
         }
 
         if (this.getState() === State.Questioned) {
+            // :)
             this.mark();
             this.mark();
         }
@@ -197,21 +201,16 @@ export class Cell {
         }
     }
 
-    private explode(): void {
-        this.setState(State.Exploаded);
-        this.board.getGame().gameOver();
-    }
-
     public handleEvent(e: Event) {
         switch (e.type) {
             case "click":
-                if (!this.board.getGame().isOver()) {
+                if (!this.board.getGame().checkIsOver()) {
                     this.reveal();
                 }
                 break;
             case "contextmenu":
                 e.preventDefault();
-                if (!this.board.getGame().isOver()) {
+                if (!this.board.getGame().checkIsOver()) {
                     this.mark();
                 }
                 break;

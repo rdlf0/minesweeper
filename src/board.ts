@@ -3,16 +3,18 @@ import { Game } from "./game";
 import { BOARD_CONFIG } from "./config";
 
 export class Board {
+    
     private rows: number;
     private cols: number;
     private mines: number;
+
     private grid: Cell[][];
-    private revealed: number = 0;
-    public isReplay: boolean = false;
+
+    private revealedCounter: number = 0;
 
     constructor(
         private game: Game,
-        private minesList: boolean[] = []
+        private minesScheme: boolean[] = []
     ) {
         const mode = this.getGame().getConfig().mode;
         this.rows = BOARD_CONFIG[mode].rows;
@@ -34,34 +36,41 @@ export class Board {
     }
 
     private plantMines(): void {
-        if (this.minesList.length > 0) {
-            for (let i = 1; i < this.minesList.length; i++) {
-                if (this.minesList[i]) {
-                    const row = Math.ceil(i / this.cols) - 1;
-                    const col = (i - 1) % this.cols;
-                    this.grid[row][col].setMine();
-                }
-            }
-
-            this.isReplay = true;
+        if (this.minesScheme.length > 0) {
+            this.plantMinesFromScheme();
         } else {
-            let count = 0;
+            this.plantMinesRandomly();
+        }
+    }
 
-            while (count < this.mines) {
-                const row = this.random(0, this.rows);
-                const col = this.random(0, this.cols);
-                const planted = this.grid[row][col].setMine();
-                if (planted === 1) {
-                    count++;
-                    this.minesList[(row * this.cols + col + 1)] = true;
-                }
+    private plantMinesFromScheme() {
+        for (let i = 1; i < this.minesScheme.length; i++) {
+            if (this.minesScheme[i]) {
+                const row = Math.ceil(i / this.cols) - 1;
+                const col = (i - 1) % this.cols;
+                this.grid[row][col].setMine();
+            }
+        }
+    }
+
+    private plantMinesRandomly() {
+        let count = 0;
+
+        while (count < this.mines) {
+            const row = this.random(0, this.rows);
+            const col = this.random(0, this.cols);
+            const planted = this.grid[row][col].setMine();
+            if (planted === 1) {
+                count++;
+                this.minesScheme[(row * this.cols + col + 1)] = true;
             }
         }
     }
 
     public replantMine(centerRow: number, centerCol: number, unsetMineRow?: number, unsetMineCol?: number): void {
+        // Remove mine from scheme on first attempt
         if (unsetMineRow !== undefined && unsetMineCol !== undefined) {
-            this.minesList[(unsetMineRow * this.cols + unsetMineCol + 1)] = null;
+            this.minesScheme[(unsetMineRow * this.cols + unsetMineCol + 1)] = null;
         }
 
         const randomRow = this.random(0, this.rows);
@@ -69,13 +78,14 @@ export class Board {
 
         const distance = this.getGame().getConfig().firstClick;
 
+        // Check if generated row/col pair is not in the same cell/area
         const outOfSafeArea = (randomRow > centerRow + distance || randomRow < centerRow - distance)
             && (randomCol > centerCol + distance || randomCol < centerCol - distance);
 
         if (!outOfSafeArea || this.grid[randomRow][randomCol].setMine() === 0) {
             this.replantMine(centerRow, centerCol);
         } else {
-            this.minesList[(randomRow * this.cols + randomCol + 1)] = true;
+            this.minesScheme[(randomRow * this.cols + randomCol + 1)] = true;
         }
     }
 
@@ -83,8 +93,8 @@ export class Board {
         return Math.floor(Math.random() * to) + from;
     }
 
-    public getMinesList(): boolean[] {
-        return this.minesList;
+    public getMinesScheme(): boolean[] {
+        return this.minesScheme;
     }
 
     public getGame(): Game {
@@ -98,16 +108,16 @@ export class Board {
     public draw(board: HTMLElement): void {
         board.innerHTML = "";
 
-        let rowsContainer = document.createElement("ul");
+        const rowsContainer = document.createElement("ul");
         rowsContainer.id = "rows-container";
         board.append(rowsContainer);
 
         for (let i = 0; i < this.rows; i++) {
-            let row = document.createElement("li");
+            const row = document.createElement("li");
             row.classList.add("row");
             rowsContainer.append(row);
 
-            let colsContainer = document.createElement("ul");
+            const colsContainer = document.createElement("ul");
             colsContainer.classList.add("cols-container");
             row.append(colsContainer);
 
@@ -118,11 +128,11 @@ export class Board {
     }
 
     public getAdjacentCells(row: number, col: number): Cell[] {
-        let adj: Cell[] = [];
+        const adj: Cell[] = [];
 
         for (let i = row - 1; i <= row + 1; i++) {
             for (let j = col - 1; j <= col + 1; j++) {
-                // Don't check current cell
+                // Skip current cell
                 if (i == row && j == col) continue;
 
                 if (i >= 0 && i < this.rows && j >= 0 && j < this.cols) {
@@ -137,7 +147,7 @@ export class Board {
     public revealMines(win: boolean): void {
         for (let i = 0; i < this.rows; i++) {
             for (let j = 0; j < this.cols; j++) {
-                let cell = this.grid[i][j];
+                const cell = this.grid[i][j];
 
                 if (cell.isMine()) {
                     if (win) {
@@ -155,12 +165,12 @@ export class Board {
     }
 
     public incrementRevealed(): void {
-        this.revealed++;
+        this.revealedCounter++;
         this.checkForWin();
     }
 
     private checkForWin(): void {
-        if (this.revealed === this.rows * this.cols - this.mines) {
+        if (this.revealedCounter === this.rows * this.cols - this.mines) {
             this.game.gameOver(true);
         }
     }

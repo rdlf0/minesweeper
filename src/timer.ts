@@ -28,6 +28,6 @@ export class Timer {
     }
 
     private updateEl(): void {
-        this.el.innerHTML = ("000" + this.value).slice(-3);
+        this.el.innerHTML = ("00" + this.value).slice(-3);
     }
 }
