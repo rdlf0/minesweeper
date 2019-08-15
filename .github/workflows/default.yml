@@ -10,5 +10,5 @@ jobs:
     steps:
     #- uses: actions/checkout@v1
     - name: My first step
-        uses: actions/hello-world@master
+    - uses: sandrokeil/typescript@latest
     - run: echo All Done!
