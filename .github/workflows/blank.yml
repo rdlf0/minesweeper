@@ -12,5 +12,5 @@ jobs:
     - name: Run a multi-line script
       run: |
         echo Ahoy!
-        echo Here's the current version of typescript:
+        echo "Here's the current version of typescript: "
         tsc -v
