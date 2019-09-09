@@ -1,19 +1,28 @@
 name: CI/CD
 
-on:
-  push:
-    branches:
-      - master
+# on:
+#   push:
+#     branches:
+#       - master
 
 jobs:
   build:
-
+    name: Build
     runs-on: ubuntu-latest
-    
     steps:
-      - uses: actions/checkout@v1
-      - uses: docker://sandrokeil/typescript:latest
-      - name: Run a multi-line script
+      - name: Check out the code
+        uses: actions/checkout@v1
+        
+      - name: Pull a typescript-ready docker container
+        uses: docker://sandrokeil/typescript:latest
+      
+      - name: Compile the source
         run: |
           tsc
           ls -l
+          
+  deploy:
+    name: Deploy
+    needs: build
+    runs-on: ubuntu-latest
+    # TO BE CONTINUED SOME DAY...
