@@ -17,9 +17,7 @@ jobs:
         uses: docker://sandrokeil/typescript:latest
       
       - name: Compile the source
-        run: |
-          tsc
-          ls -l
+        run: tsc
           
       - name: Upload artifact
         uses: actions/upload-artifact@master
@@ -38,4 +36,6 @@ jobs:
           name: minesweeper-compiled
       
       - name: Test - list contents
-        run: ls -l
+        run: |
+          cd minesweeper-compiled
+          ls -l
