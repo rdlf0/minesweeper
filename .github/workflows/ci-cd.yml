@@ -40,11 +40,6 @@ jobs:
         uses: actions/download-artifact@master
         with:
           name: minesweeper-compiled
-      
-      - name: Test - list contents
-        run: |
-          cd minesweeper-compiled
-          ls -l
           
       - name: Upload to S3
         uses: jakejarvis/s3-sync-action@master
