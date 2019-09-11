@@ -1,9 +1,9 @@
 name: CI/CD
 
-# on:
-#   push:
-#     branches:
-#       - master
+on:
+  push:
+    branches:
+      - master
 
 jobs:
   build:
@@ -21,8 +21,21 @@ jobs:
           tsc
           ls -l
           
+      - name: Upload artifact
+        uses: actions/upload-artifact@master
+        with:
+          name: minesweeper-compiled
+          path: dist
+          
   deploy:
     name: Deploy
     needs: build
     runs-on: ubuntu-latest
-    # TO BE CONTINUED SOME DAY...
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@master
+        with:
+          name: minesweeper-compiled
+      
+      - name: Test - list contents
+        run: ls -l
