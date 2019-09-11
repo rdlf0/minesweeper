@@ -18,12 +18,18 @@ jobs:
       
       - name: Compile the source
         run: tsc
+        
+      - name: Prepare artifact
+        run: |
+          mkdir -p artifact/dist
+          mv index.html require.js styles.css artifact
+          mv dist/*.js artifact/dist
           
       - name: Upload artifact
         uses: actions/upload-artifact@master
         with:
           name: minesweeper-compiled
-          path: dist
+          path: artifact
           
   deploy:
     name: Deploy
@@ -39,3 +45,14 @@ jobs:
         run: |
           cd minesweeper-compiled
           ls -l
+          
+      - name: Upload to S3
+        uses: jakejarvis/s3-sync-action@master
+        with:
+          args: --acl public-read
+        env:
+          SOURCE_DIR: './minesweeper-compiled'
+          AWS_REGION: 'us-east-2'
+          AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
