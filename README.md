@@ -1,3 +1,5 @@
+![](https://github.com/rdlf0/minesweeper/workflows/CI/CD/badge.svg)
+
 # Minesweeper
 
 Compile with:
