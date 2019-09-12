@@ -17,9 +17,7 @@ jobs:
         uses: docker://sandrokeil/typescript:latest
       
       - name: Compile the source
-        run: tsc \
-              --sourceMap false \
-              --outDir artifact/dist
+        run: tsc --sourceMap false --outDir artifact/dist
         
       - name: Prepare artifact
         run: mv index.html require.js styles.css artifact
