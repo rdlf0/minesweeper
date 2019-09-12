@@ -14,7 +14,8 @@ jobs:
         uses: actions/checkout@v1
         
       - name: Pull a typescript-ready docker container
-        uses: docker://sandrokeil/typescript:latest
+        #uses: docker://sandrokeil/typescript:latest
+        uses: actions/typescript-action@master
       
       - name: Compile the source
         run: tsc
