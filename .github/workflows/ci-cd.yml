@@ -41,22 +41,13 @@ jobs:
         with:
           name: minesweeper-compiled
           
-#       - name: Upload to S3
-#         uses: jakejarvis/s3-sync-action@master
-#         with:
-#           args: --acl public-read
-#         env:
-#           SOURCE_DIR: './minesweeper-compiled'
-#           AWS_REGION: 'us-east-2'
-#           AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
-#           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-#           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       - name: Upload to S3
-        uses: actions/aws/cli@master
+        uses: jakejarvis/s3-sync-action@master
         with:
-          args: s3 sync './minesweeper-compiled' s3://${{ secrets.AWS_S3_BUCKET }} \
-            --follow-symlinks \
-            --delete \
-            --region 'us-east-2' \
-            --acl public-read
-        secrets: [${{ secrets.AWS_ACCESS_KEY_ID }}, ${{ secrets.AWS_SECRET_ACCESS_KEY }}]
+          args: --acl public-read
+        env:
+          SOURCE_DIR: './minesweeper-compiled'
+          AWS_REGION: 'us-east-2'
+          AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
