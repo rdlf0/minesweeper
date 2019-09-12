@@ -17,13 +17,12 @@ jobs:
         uses: docker://sandrokeil/typescript:latest
       
       - name: Compile the source
-        run: tsc
+        run: tsc \
+              --sourceMap false \
+              --outDir artifact/dist
         
       - name: Prepare artifact
-        run: |
-          mkdir -p artifact/dist
-          mv index.html require.js styles.css artifact
-          mv dist/*.js artifact/dist
+        run: mv index.html require.js styles.css artifact
           
       - name: Upload artifact
         uses: actions/upload-artifact@master
