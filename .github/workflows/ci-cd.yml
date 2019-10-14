@@ -13,11 +13,13 @@ jobs:
       - name: Check out the code
         uses: actions/checkout@v1
         
-      - name: Pull a typescript-ready docker container
-        uses: docker://sandrokeil/typescript:latest
+      # - name: Pull a typescript-ready docker container
+      #   uses: docker://sandrokeil/typescript:latest
       
       - name: Compile the source
-        run: tsc --sourceMap false --outDir artifact/dist
+        run: |
+          tsc -v
+          tsc --sourceMap false --outDir artifact/dist
         
       - name: Prepare artifact
         run: mv index.html require.js styles.css artifact
