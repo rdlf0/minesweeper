@@ -19,7 +19,20 @@
         </div>
         <div id="board"></div>
     </div>
-    <br>
-    <a href="https://github.com/rdlf0/minesweeper" target="blank" title="Find the source code at GitHub">[GitHub]</a>
+    <div id="links">
+        <div><a href="#" id="dark-mode-toggle">[Turn dark mode ON]</a></div>
+        <div><a href="https://github.com/rdlf0/minesweeper" target="blank" title="Find the source code at GitHub">[GitHub]</a></div>
+    </div>
+    <script type="text/javascript">
+        document.getElementById("dark-mode-toggle").addEventListener("click", toggleNightMode);
+
+        function toggleNightMode(e) {
+            e.preventDefault();
+            document.body.classList.toggle('night');
+            let contains = document.body.classList.contains('night');
+            let state = contains ? "OFF" : "ON";
+            e.target.text = "[Turn dark mode " + state + "]";
+        }
+    </script>
 </body>
 </html>
