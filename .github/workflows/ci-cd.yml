@@ -23,7 +23,9 @@ jobs:
               --outDir artifact/dist
         
       - name: Prepare artifact
-        run: mv index.html require.js styles.css $ARTIFACT_PATH
+        run: |
+            mv index.html require.js styles.css $ARTIFACT_PATH
+            echo $ARTIFACT_PATH
           
       - name: Upload artifact
         uses: actions/upload-artifact@master
