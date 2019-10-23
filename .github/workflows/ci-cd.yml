@@ -1,8 +1,8 @@
 name: CI/CD
 
 env:
-  ARTIFACT_NAME: "minesweeper-compiled"
-  ARTIFACT_PAHT: "artifact"
+  ARTIFACT_NAME: minesweeper-compiled
+  ARTIFACT_PAHT: artifact
 
 on:
   push:
@@ -23,7 +23,7 @@ jobs:
               --outDir artifact/dist
         
       - name: Prepare artifact
-        run: mv index.html require.js styles.css ${{ ARTIFACT_PATH }}
+        run: mv index.html require.js styles.css $ARTIFACT_PATH
           
       - name: Upload artifact
         uses: actions/upload-artifact@master
