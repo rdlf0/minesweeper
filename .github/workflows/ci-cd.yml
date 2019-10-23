@@ -25,7 +25,7 @@ jobs:
       - name: Prepare artifact
         run: |
             mv index.html require.js styles.css $ARTIFACT_PATH
-            tree
+            ls -l $ARTIFACT_PATH
           
       - name: Upload artifact
         uses: actions/upload-artifact@master
