@@ -31,7 +31,7 @@ jobs:
         uses: actions/upload-artifact@master
         with:
           name: $ARTIFACT_NAME
-          path: $ARTIFACT_PATH
+          path: artifact
           
   deploy:
     name: Deploy
