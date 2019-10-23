@@ -1,5 +1,9 @@
 name: CI/CD
 
+env:
+  ARTIFACT_NAME: "minesweeper-compiled"
+  ARTIFACT_PAHT: "artifact"
+
 on:
   push:
     branches:
@@ -19,13 +23,13 @@ jobs:
               --outDir artifact/dist
         
       - name: Prepare artifact
-        run: mv index.html require.js styles.css artifact
+        run: mv index.html require.js styles.css ${{ ARTIFACT_PATH }}
           
       - name: Upload artifact
         uses: actions/upload-artifact@master
         with:
-          name: minesweeper-compiled
-          path: artifact
+          name: ${{ ARTIFACT_NAME }}
+          path: ${{ ARTIFACT_PATH }}
           
   deploy:
     name: Deploy
@@ -35,7 +39,7 @@ jobs:
       - name: Download artifact
         uses: actions/download-artifact@master
         with:
-          name: minesweeper-compiled
+          name: ${{ ARTIFACT_NAME }}
           
       - name: Upload to S3
         env:
@@ -45,6 +49,6 @@ jobs:
           AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
         run: |
           aws s3 sync \
-              minesweeper-compiled s3://$AWS_S3_BUCKET \
+              $ARTIFACT_NAME s3://$AWS_S3_BUCKET \
               --no-progress \
               --acl public-read
