@@ -2,7 +2,7 @@ name: CI/CD
 
 env:
   ARTIFACT_NAME: minesweeper-compiled
-  ARTIFACT_PAHT: artifact
+  ARTIFACT_PATH: artifact
 
 on:
   push:
