@@ -28,8 +28,8 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@master
         with:
-          name: ${{ ARTIFACT_NAME }}
-          path: ${{ ARTIFACT_PATH }}
+          name: $ARTIFACT_NAME
+          path: $ARTIFACT_PATH
           
   deploy:
     name: Deploy
@@ -39,7 +39,7 @@ jobs:
       - name: Download artifact
         uses: actions/download-artifact@master
         with:
-          name: ${{ ARTIFACT_NAME }}
+          name: $ARTIFACT_NAME
           
       - name: Upload to S3
         env:
