@@ -1,8 +1,8 @@
 name: CI/CD
 
 env:
-  ARTIFACT_NAME: minesweeper-compiled
-  ARTIFACT_PATH: artifact
+  ARTIFACT_NAME: 'minesweeper-compiled'
+  ARTIFACT_PATH: 'artifact'
 
 on:
   push:
@@ -25,7 +25,6 @@ jobs:
       - name: Prepare artifact
         run: |
             mv index.html require.js styles.css $ARTIFACT_PATH
-            ls -l $ARTIFACT_PATH
           
       - name: Upload artifact
         uses: actions/upload-artifact@master
@@ -41,7 +40,7 @@ jobs:
       - name: Download artifact
         uses: actions/download-artifact@master
         with:
-          name: $ARTIFACT_NAME
+          name: ${{ ARTIFACT_NAME }}
           
       - name: Upload to S3
         env:
