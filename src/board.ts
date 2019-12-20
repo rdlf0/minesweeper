@@ -1,6 +1,7 @@
 import { Cell } from "./cell";
 import { Game } from "./game";
 import { BOARD_CONFIG } from "./config";
+import { Encoder, Pair } from "./encoder";
 
 export class Board {
     
@@ -23,6 +24,7 @@ export class Board {
 
         this.initGrid();
         this.plantMines();
+        this.encodeState();
     }
 
     private initGrid(): void {
@@ -173,5 +175,18 @@ export class Board {
         if (this.revealedCounter === this.rows * this.cols - this.mines) {
             this.game.gameOver(true);
         }
+    }
+
+    private encodeState(): void {
+        const p: Pair = {
+            a: 15,
+            b: 3
+        };
+
+        const encoded = Encoder.encode(p);
+        const decoded = Encoder.decode(encoded);
+
+        console.log(encoded);
+        console.log(decoded);
     }
 }
