@@ -1,7 +1,11 @@
 import { Cell } from "./cell";
 import { Game } from "./game";
 import { BOARD_CONFIG } from "./config";
-import { Encoder, Pair } from "./encoder";
+import { CantorEncoder, Pair } from "./encoder/cantorEncoder";
+import { BinaryEncoder } from "./encoder/binaryEncoder";
+import { SzudzikEncoder } from "./encoder/szudzikEncoder";
+import { PeterEncoder } from "./encoder/peterEncoder";
+import { MortonEncoder } from "./encoder/mortonEncoder";
 
 export class Board {
     
@@ -178,15 +182,36 @@ export class Board {
     }
 
     private encodeState(): void {
-        const p: Pair = {
-            a: 15,
-            b: 3
-        };
+        // const p: Pair = {
+        //     a: 92215,
+        //     b: 9223
+        // };
 
-        const encoded = Encoder.encode(p);
-        const decoded = Encoder.decode(encoded);
+        // console.log("Cantor");
+        // const cantorEncoded = CantorEncoder.encode(p);
+        // const cantorDecoded = CantorEncoder.decode(cantorEncoded);
+        // console.log(cantorEncoded);
+        // console.log(cantorDecoded);
+        
+        // console.log("Szudzik");
+        // const szudzikEncoded = SzudzikEncoder.encode(p);
+        // const szudzikDecoded = SzudzikEncoder.decode(szudzikEncoded);        
+        // console.log(szudzikEncoded);
+        // console.log(szudzikDecoded);
 
-        console.log(encoded);
-        console.log(decoded);
+        // console.log("Peter");
+        // const peterEncoded = PeterEncoder.encode(p);
+        // const peterDecoded = PeterEncoder.decode(peterEncoded);
+        // console.log(peterEncoded);
+        // console.log(peterDecoded);
+
+        // console.log("Morton");
+        // const mortonEncoded = MortonEncoder.encode(p);
+        // const mortonDecoded = MortonEncoder.decode(mortonEncoded);
+        // console.log(mortonEncoded);
+        // console.log(mortonDecoded);
+
+        const encoded = BinaryEncoder.encode(this.minesScheme);
+        const decoded = BinaryEncoder.decode(encoded);
     }
 }

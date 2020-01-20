@@ -3,12 +3,12 @@
  * https://en.wikipedia.org/wiki/Pairing_function#Cantor_pairing_function
  * https://en.wikipedia.org/wiki/Pairing_function#Inverting_the_Cantor_pairing_function
  */
-export class Encoder {
+export class CantorEncoder {
 
     private constructor() {};
 
     public static encode(pair: Pair): number {
-        return (((pair.a + pair.b) * (pair.a + pair.b + 1)) / 2) + pair.b;
+        return (pair.a + pair.b) * (pair.a + pair.b + 1) / 2 + pair.b;
     }
 
     public static decode(x: number): Pair {
