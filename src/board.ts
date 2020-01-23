@@ -1,14 +1,10 @@
 import { Cell } from "./cell";
 import { Game } from "./game";
 import { BOARD_CONFIG } from "./config";
-import { CantorEncoder, Pair } from "./encoder/cantorEncoder";
-import { BinaryEncoder } from "./encoder/binaryEncoder";
-import { SzudzikEncoder } from "./encoder/szudzikEncoder";
-import { PeterEncoder } from "./encoder/peterEncoder";
-import { MortonEncoder } from "./encoder/mortonEncoder";
+import { State } from "./state";
 
 export class Board {
-    
+
     private rows: number;
     private cols: number;
     private mines: number;
@@ -19,7 +15,7 @@ export class Board {
 
     constructor(
         private game: Game,
-        private minesScheme: boolean[] = []
+        private state: State
     ) {
         const mode = this.getGame().getConfig().mode;
         this.rows = BOARD_CONFIG[mode].rows;
@@ -28,7 +24,19 @@ export class Board {
 
         this.initGrid();
         this.plantMines();
-        this.encodeState();
+        // this.encodeState();
+    }
+
+    public getGame(): Game {
+        return this.game;
+    }
+
+    public getState(): State {
+        return this.state;
+    }
+
+    public getMines(): number {
+        return this.mines;
     }
 
     private initGrid(): void {
@@ -42,41 +50,42 @@ export class Board {
     }
 
     private plantMines(): void {
-        if (this.minesScheme.length > 0) {
-            this.plantMinesFromScheme();
-        } else {
+        if (this.state == undefined) {
             this.plantMinesRandomly();
+        } else {
+            this.plantMinesFromState();
         }
     }
-
-    private plantMinesFromScheme() {
-        for (let i = 1; i < this.minesScheme.length; i++) {
-            if (this.minesScheme[i]) {
-                const row = Math.ceil(i / this.cols) - 1;
-                const col = (i - 1) % this.cols;
+    
+    private plantMinesFromState(): void {
+        for (let i = 0; i < this.rows * this.cols; i++) {
+            if (this.state.isHighBit(i)) {
+                const row = Math.floor(i / this.cols);
+                const col = i % this.cols;
                 this.grid[row][col].setMine();
             }
         }
     }
-
-    private plantMinesRandomly() {
+    
+    private plantMinesRandomly(): void {
+        this.state = new State(this.rows * this.cols);
+        
         let count = 0;
-
         while (count < this.mines) {
             const row = this.random(0, this.rows);
             const col = this.random(0, this.cols);
             const planted = this.grid[row][col].setMine();
             if (planted === 1) {
                 count++;
-                this.minesScheme[(row * this.cols + col + 1)] = true;
+                this.state.setBit(row * this.cols + col);
             }
         }
     }
 
     public replantMine(centerRow: number, centerCol: number, unsetMineRow?: number, unsetMineCol?: number): void {
-        // Remove mine from scheme on first attempt
+        // Remove mine from state on first attempt
         if (unsetMineRow !== undefined && unsetMineCol !== undefined) {
-            this.minesScheme[(unsetMineRow * this.cols + unsetMineCol + 1)] = null;
+            this.state.unsetBit(unsetMineRow * this.cols + unsetMineCol);
         }
 
         const randomRow = this.random(0, this.rows);
@@ -91,24 +100,12 @@ export class Board {
         if (!outOfSafeArea || this.grid[randomRow][randomCol].setMine() === 0) {
             this.replantMine(centerRow, centerCol);
         } else {
-            this.minesScheme[(randomRow * this.cols + randomCol + 1)] = true;
+            this.state.setBit(randomRow * this.cols + randomCol);
         }
     }
 
     private random(from: number, to: number): number {
         return Math.floor(Math.random() * to) + from;
-    }
-
-    public getMinesScheme(): boolean[] {
-        return this.minesScheme;
-    }
-
-    public getGame(): Game {
-        return this.game;
-    }
-
-    public getMines(): number {
-        return this.mines;
     }
 
     public draw(board: HTMLElement): void {
@@ -181,37 +178,37 @@ export class Board {
         }
     }
 
-    private encodeState(): void {
-        // const p: Pair = {
-        //     a: 92215,
-        //     b: 9223
-        // };
+    // private encodeState(): void {
+    //     const p: Pair = {
+    //         a: 92215,
+    //         b: 9223
+    //     };
 
-        // console.log("Cantor");
-        // const cantorEncoded = CantorEncoder.encode(p);
-        // const cantorDecoded = CantorEncoder.decode(cantorEncoded);
-        // console.log(cantorEncoded);
-        // console.log(cantorDecoded);
-        
-        // console.log("Szudzik");
-        // const szudzikEncoded = SzudzikEncoder.encode(p);
-        // const szudzikDecoded = SzudzikEncoder.decode(szudzikEncoded);        
-        // console.log(szudzikEncoded);
-        // console.log(szudzikDecoded);
+    //     console.log("Cantor");
+    //     const cantorEncoded = CantorEncoder.encode(p);
+    //     const cantorDecoded = CantorEncoder.decode(cantorEncoded);
+    //     console.log(cantorEncoded);
+    //     console.log(cantorDecoded);
 
-        // console.log("Peter");
-        // const peterEncoded = PeterEncoder.encode(p);
-        // const peterDecoded = PeterEncoder.decode(peterEncoded);
-        // console.log(peterEncoded);
-        // console.log(peterDecoded);
+    //     console.log("Szudzik");
+    //     const szudzikEncoded = SzudzikEncoder.encode(p);
+    //     const szudzikDecoded = SzudzikEncoder.decode(szudzikEncoded);        
+    //     console.log(szudzikEncoded);
+    //     console.log(szudzikDecoded);
 
-        // console.log("Morton");
-        // const mortonEncoded = MortonEncoder.encode(p);
-        // const mortonDecoded = MortonEncoder.decode(mortonEncoded);
-        // console.log(mortonEncoded);
-        // console.log(mortonDecoded);
+    //     console.log("Peter");
+    //     const peterEncoded = PeterEncoder.encode(p);
+    //     const peterDecoded = PeterEncoder.decode(peterEncoded);
+    //     console.log(peterEncoded);
+    //     console.log(peterDecoded);
 
-        const encoded = BinaryEncoder.encode(this.minesScheme);
-        const decoded = BinaryEncoder.decode(encoded);
-    }
+    //     console.log("Morton");
+    //     const mortonEncoded = MortonEncoder.encode(p);
+    //     const mortonDecoded = MortonEncoder.decode(mortonEncoded);
+    //     console.log(mortonEncoded);
+    //     console.log(mortonDecoded);
+
+    //     const encoded = BinaryEncoder.encode(this.state);
+    //     const decoded = BinaryEncoder.decode(encoded);
+    // }
 }

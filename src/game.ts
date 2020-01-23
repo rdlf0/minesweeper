@@ -2,6 +2,7 @@ import { Board } from "./board";
 import { Timer } from "./timer";
 import { Counter } from "./counter";
 import { Config } from "./config";
+import { State } from "./state";
 
 export class Game {
 
@@ -35,12 +36,12 @@ export class Game {
     }
 
     private generateScenario(): void {
-        let minesScheme: boolean[] = [];
+        let state: State;
         if (this.isReplay) {
-            minesScheme = this.board.getMinesScheme();
+            state = this.board.getState();
         }
 
-        this.board = new Board(this, minesScheme);
+        this.board = new Board(this, state);
         this.board.draw(document.getElementById("board"));
     }
 
