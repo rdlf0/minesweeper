@@ -24,7 +24,7 @@ export class Game {
 
         this.resetBtn = document.getElementById("reset");
         this.resetBtn.addEventListener("click", (e: Event) => this.reset());
-        
+
         this.replayBtn = document.getElementById("replay");
         this.replayBtn.addEventListener("click", (e: Event) => this.reset(true));
 

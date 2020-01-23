@@ -56,7 +56,7 @@ export class Board {
             this.plantMinesFromState();
         }
     }
-    
+
     private plantMinesFromState(): void {
         for (let i = 0; i < this.rows * this.cols; i++) {
             if (this.state.isHighBit(i)) {
@@ -66,10 +66,10 @@ export class Board {
             }
         }
     }
-    
+
     private plantMinesRandomly(): void {
         this.state = new State(this.rows * this.cols);
-        
+
         let count = 0;
         while (count < this.mines) {
             const row = this.random(0, this.rows);
@@ -192,7 +192,7 @@ export class Board {
 
     //     console.log("Szudzik");
     //     const szudzikEncoded = SzudzikEncoder.encode(p);
-    //     const szudzikDecoded = SzudzikEncoder.decode(szudzikEncoded);        
+    //     const szudzikDecoded = SzudzikEncoder.decode(szudzikEncoded);
     //     console.log(szudzikEncoded);
     //     console.log(szudzikDecoded);
 
