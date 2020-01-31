@@ -14,3 +14,4 @@ Then just open `index.html`
 # To do:
 - settings UI
 - game sharing - generate URL with encoded game/board state
+- refactoring and code improvements
