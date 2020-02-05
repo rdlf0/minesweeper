@@ -34,4 +34,23 @@ export class State {
         this.data[index] = 0;
     }
 
+    public encode() {
+        let str = this.data.join("");
+        console.log(str);
+        let padLen = (8 - str.length % 8) % 8;
+        let strPadded = str.padEnd(padLen + str.length, "0");
+
+        console.log(strPadded);
+
+        let bytes = strPadded.match(/.{8}/g);
+
+        let result = bytes
+            .map(b => String.fromCharCode(parseInt(b, 2)))
+            .join("");
+
+        const resultB64 = btoa(result);
+
+        console.log(resultB64);
+    }
+
 }
