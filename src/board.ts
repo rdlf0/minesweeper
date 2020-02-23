@@ -1,13 +1,9 @@
 import { Cell } from "./cell";
 import { Game } from "./game";
-import { BOARD_CONFIG } from "./config";
+import { Mode } from "./config";
 import { State } from "./state";
 
 export class Board {
-
-    private rows: number;
-    private cols: number;
-    private mines: number;
 
     private grid: Cell[][];
 
@@ -15,16 +11,11 @@ export class Board {
 
     constructor(
         private game: Game,
+        private mode: Mode,
         private state: State
     ) {
-        const mode = this.getGame().getConfig().mode;
-        this.rows = BOARD_CONFIG[mode].rows;
-        this.cols = BOARD_CONFIG[mode].cols;
-        this.mines = BOARD_CONFIG[mode].mines;
-
         this.initGrid();
         this.plantMines();
-        // this.encodeState();
     }
 
     public getGame(): Game {
@@ -36,14 +27,14 @@ export class Board {
     }
 
     public getMines(): number {
-        return this.mines;
+        return this.mode.mines;
     }
 
     private initGrid(): void {
         this.grid = [];
-        for (let i = 0; i < this.rows; i++) {
+        for (let i = 0; i < this.mode.rows; i++) {
             this.grid[i] = [];
-            for (let j = 0; j < this.cols; j++) {
+            for (let j = 0; j < this.mode.cols; j++) {
                 this.grid[i][j] = new Cell(this, i, j);
             }
         }
@@ -58,26 +49,26 @@ export class Board {
     }
 
     private plantMinesFromState(): void {
-        for (let i = 0; i < this.rows * this.cols; i++) {
+        for (let i = 0; i < this.mode.rows * this.mode.cols; i++) {
             if (this.state.isHighBit(i)) {
-                const row = Math.floor(i / this.cols);
-                const col = i % this.cols;
+                const row = Math.floor(i / this.mode.cols);
+                const col = i % this.mode.cols;
                 this.grid[row][col].setMine();
             }
         }
     }
 
     private plantMinesRandomly(): void {
-        this.state = new State(this.rows * this.cols);
+        this.state = new State(this.mode.rows * this.mode.cols);
 
         let count = 0;
-        while (count < this.mines) {
-            const row = this.random(0, this.rows);
-            const col = this.random(0, this.cols);
+        while (count < this.mode.mines) {
+            const row = this.random(0, this.mode.rows);
+            const col = this.random(0, this.mode.cols);
             const planted = this.grid[row][col].setMine();
             if (planted === 1) {
                 count++;
-                this.state.setBit(row * this.cols + col);
+                this.state.setBit(row * this.mode.cols + col);
             }
         }
     }
@@ -85,11 +76,11 @@ export class Board {
     public replantMine(centerRow: number, centerCol: number, unsetMineRow?: number, unsetMineCol?: number): void {
         // Remove mine from state on first attempt
         if (unsetMineRow !== undefined && unsetMineCol !== undefined) {
-            this.state.unsetBit(unsetMineRow * this.cols + unsetMineCol);
+            this.state.unsetBit(unsetMineRow * this.mode.cols + unsetMineCol);
         }
 
-        const randomRow = this.random(0, this.rows);
-        const randomCol = this.random(0, this.cols);
+        const randomRow = this.random(0, this.mode.rows);
+        const randomCol = this.random(0, this.mode.cols);
 
         const distance = this.getGame().getConfig().firstClick;
 
@@ -100,7 +91,7 @@ export class Board {
         if (!outOfSafeArea || this.grid[randomRow][randomCol].setMine() === 0) {
             this.replantMine(centerRow, centerCol);
         } else {
-            this.state.setBit(randomRow * this.cols + randomCol);
+            this.state.setBit(randomRow * this.mode.cols + randomCol);
         }
     }
 
@@ -115,7 +106,7 @@ export class Board {
         rowsContainer.id = "rows-container";
         board.append(rowsContainer);
 
-        for (let i = 0; i < this.rows; i++) {
+        for (let i = 0; i < this.mode.rows; i++) {
             const row = document.createElement("li");
             row.classList.add("row");
             rowsContainer.append(row);
@@ -124,7 +115,7 @@ export class Board {
             colsContainer.classList.add("cols-container");
             row.append(colsContainer);
 
-            for (let j = 0; j < this.cols; j++) {
+            for (let j = 0; j < this.mode.cols; j++) {
                 colsContainer.append(this.grid[i][j].getElement());
             }
         }
@@ -138,7 +129,7 @@ export class Board {
                 // Skip current cell
                 if (i == row && j == col) continue;
 
-                if (i >= 0 && i < this.rows && j >= 0 && j < this.cols) {
+                if (i >= 0 && i < this.mode.rows && j >= 0 && j < this.mode.cols) {
                     adj.push(this.grid[i][j]);
                 }
             }
@@ -148,8 +139,8 @@ export class Board {
     }
 
     public revealMines(win: boolean): void {
-        for (let i = 0; i < this.rows; i++) {
-            for (let j = 0; j < this.cols; j++) {
+        for (let i = 0; i < this.mode.rows; i++) {
+            for (let j = 0; j < this.mode.cols; j++) {
                 const cell = this.grid[i][j];
 
                 if (cell.isMine()) {
@@ -173,42 +164,8 @@ export class Board {
     }
 
     private checkForWin(): void {
-        if (this.revealedCounter === this.rows * this.cols - this.mines) {
+        if (this.revealedCounter === this.mode.rows * this.mode.cols - this.mode.mines) {
             this.game.gameOver(true);
         }
     }
-
-    // private encodeState(): void {
-    //     const p: Pair = {
-    //         a: 92215,
-    //         b: 9223
-    //     };
-
-    //     console.log("Cantor");
-    //     const cantorEncoded = CantorEncoder.encode(p);
-    //     const cantorDecoded = CantorEncoder.decode(cantorEncoded);
-    //     console.log(cantorEncoded);
-    //     console.log(cantorDecoded);
-
-    //     console.log("Szudzik");
-    //     const szudzikEncoded = SzudzikEncoder.encode(p);
-    //     const szudzikDecoded = SzudzikEncoder.decode(szudzikEncoded);
-    //     console.log(szudzikEncoded);
-    //     console.log(szudzikDecoded);
-
-    //     console.log("Peter");
-    //     const peterEncoded = PeterEncoder.encode(p);
-    //     const peterDecoded = PeterEncoder.decode(peterEncoded);
-    //     console.log(peterEncoded);
-    //     console.log(peterDecoded);
-
-    //     console.log("Morton");
-    //     const mortonEncoded = MortonEncoder.encode(p);
-    //     const mortonDecoded = MortonEncoder.decode(mortonEncoded);
-    //     console.log(mortonEncoded);
-    //     console.log(mortonDecoded);
-
-    //     const encoded = BinaryEncoder.encode(this.state);
-    //     const decoded = BinaryEncoder.decode(encoded);
-    // }
 }

@@ -1,5 +1,11 @@
+import { Encoder } from "./encoder/encoder"
+import { Pairer } from "./pairer/pairer"
+
+
 export interface Config {
-    mode: MODE;
+    mode: MODE_NAME;
+    encoder: Encoder;
+    statePairer: Pairer;
     firstClick: FIRST_CLICK;
     debug: boolean;
 }
@@ -9,20 +15,20 @@ export enum FIRST_CLICK {
     GuaranteedCascade = 1
 }
 
-export enum MODE {
+export enum MODE_NAME {
     Beginner = "beginner",
     Intermediate = "intermediate",
     Expert = "expert"
 };
 
-interface BoardPreset {
+export interface Mode {
     rows: number;
     cols: number;
     mines: number;
 }
 
 type BoardConfig = {
-    readonly [mode in MODE]: BoardPreset;
+    readonly [name in MODE_NAME]: Mode;
 }
 
 export const BOARD_CONFIG: BoardConfig = {
