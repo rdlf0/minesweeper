@@ -135,6 +135,9 @@ export class Cell {
                 adj.unsetMine(this.row, this.col);
             }
         };
+
+        // Temporary solution until some kind of publish/subscribe get implemented
+        this.board.getGame().updateHash();
     }
 
     private explode(): void {
