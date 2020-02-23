@@ -6,9 +6,9 @@ import { BinaryToBase64UrlEncoderV2 } from "./encoder/binaryToBase64UrlEncoderV2
 const config: Config = {
     mode: MODE_NAME.Expert,
     encoder: BinaryToBase64UrlEncoderV2.prototype,
-    statePairer: CantorPairer.prototype,
+    modePairer: CantorPairer.prototype,
     firstClick: FIRST_CLICK.GuaranteedCascade,
-    debug: false,
+    debug: true,
 }
 
 new Game(config);

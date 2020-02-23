@@ -32,7 +32,7 @@ export class Game {
 
         this.urlTool = new UrlTool(
             this.config.encoder,
-            this.config.statePairer);
+            this.config.modePairer);
 
         this.reset();
     }

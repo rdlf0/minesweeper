@@ -5,7 +5,7 @@ import { Pairer } from "./pairer/pairer"
 export interface Config {
     mode: MODE_NAME;
     encoder: Encoder;
-    statePairer: Pairer;
+    modePairer: Pairer;
     firstClick: FIRST_CLICK;
     debug: boolean;
 }

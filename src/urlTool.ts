@@ -9,7 +9,7 @@ export class UrlTool {
 
     constructor(
         private encoder: Encoder,
-        private statePairer: Pairer) {
+        private modePairer: Pairer) {
     }
 
     public isHashSet(): boolean {
@@ -31,11 +31,11 @@ export class UrlTool {
     public extractMode(hash: string): Mode {
         const binaryMode = hash.slice(0, MODE_SIZE);
         const decimal = parseInt(binaryMode, 2);
-        let decoded: Tuple = this.statePairer.unpair(decimal);
+        let decoded: Tuple = this.modePairer.unpair(decimal);
 
         const mines = decoded.b;
 
-        decoded = this.statePairer.unpair(decoded.a);
+        decoded = this.modePairer.unpair(decoded.a);
 
         const rows = decoded.a;
         const cols = decoded.b;
@@ -71,18 +71,18 @@ export class UrlTool {
             b: mode.cols
         };
 
-        let encoded = this.statePairer.pair(t);
+        let paired = this.modePairer.pair(t);
 
         t = {
-            a: encoded,
+            a: paired,
             b: mode.mines
         };
 
-        encoded = this.statePairer.pair(t);
+        paired = this.modePairer.pair(t);
 
-        const encodedBinary = encoded.toString(2);
+        const binary = paired.toString(2);
 
-        return encodedBinary.padStart(MODE_SIZE, "0");
+        return binary.padStart(MODE_SIZE, "0");
     }
 
 }
