@@ -1,8 +1,13 @@
 ![](https://github.com/rdlf0/minesweeper/workflows/CI/CD/badge.svg)
 
 # Minesweeper
+## Requirements
+- typescript v3 or later
+- a non-ancient browser
 
-Compile with:
+## Compilation and running
+
+Get to the root directory and run:
 
 ```
 $ tsc
@@ -10,9 +15,20 @@ $ tsc
 
 Then just open `index.html`
 
+## Settings _(not yet available to the user - [issue #2](https://github.com/rdlf0/minesweeper/issues/2))_
+| Setting | Options |
+| ------- | ------- |
+| mode | beginner \| intermediate \| expert
+| first click * | guaranteed non-mine \| guaraneed cascade |
+| debug ** | true \| false |
 
-# To do:
-- ~~performance improvement - precalculation of the cell value on init~~
-- settings UI
-- game sharing - generate URL with encoded game state
-- option for UI hint - highlighting the adjacent cells on hover
+_* considered only when game is started from URL or reset_
+_** will probably not become available to the user_
+
+## Game start options
+| Option | Mode | State |
+| ------ | ---- | ----- |
+| from URL | from config | random |
+| from URL with hash | from hash | from hash |
+| reset | from config | random |
+| replay | from config | from current board |
