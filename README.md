@@ -22,7 +22,7 @@ Then just open `index.html`
 | first click * | guaranteed non-mine \| guaraneed cascade |
 | debug ** | true \| false |
 
-_* considered only when game is started from URL or reset_
+_* considered only when game is started from URL or reset_  
 _** will probably not become available to the user_
 
 ## Game start options
