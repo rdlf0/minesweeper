@@ -174,4 +174,4 @@ export class Board {
             this.game.gameOver(true);
         }
     }
-}
+}}
