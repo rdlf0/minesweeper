@@ -1,0 +1,17 @@
+name: Compilability check
+
+on:
+  push:
+    branches:
+      - '*'
+      - '!master'
+
+jobs:
+  compile:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Check out the code
+      uses: actions/checkout@v2
+      
+    - name: Compile
+      run: tsc --noEmit
