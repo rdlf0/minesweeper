@@ -8,6 +8,7 @@ on:
 
 jobs:
   compile:
+    name: Compile
     runs-on: ubuntu-latest
     steps:
     - name: Check out the code
