@@ -8,7 +8,7 @@ const config: Config = {
     encoder: BinaryToBase64UrlEncoderV2.prototype,
     modePairer: CantorPairer.prototype,
     firstClick: FIRST_CLICK.GuaranteedCascade,
-    debug: true,
+    debug: false,
 }
 
 new Game(config);

@@ -5,6 +5,12 @@ import { Config, Mode, BOARD_CONFIG } from "./config";
 import { State } from "./state";
 import { UrlTool } from "./urlTool";
 
+enum Starter {
+    Default = "Default/Reset", // same as Reset
+    Hash = "Hash",
+    Replay = "Replay",
+}
+
 export class Game {
 
     // Visual elements
@@ -18,46 +24,86 @@ export class Game {
     private flagsCounter: number;
     private isOver: boolean;
     private isReplay: boolean;
-    private urlTool: UrlTool
+    private urlTool: UrlTool;
+    private starter: Starter;
 
     constructor(private config: Config) {
         this.counter = new Counter(document.getElementById("mines-counter"));
         this.timer = new Timer(document.getElementById("timer"));
 
         this.resetBtn = document.getElementById("reset");
-        this.resetBtn.addEventListener("click", (e: Event) => this.reset(true, false));
+        this.resetBtn.addEventListener("click", (e: Event) => this.reset());
 
         this.replayBtn = document.getElementById("replay");
-        this.replayBtn.addEventListener("click", (e: Event) => this.reset(false, true));
+        this.replayBtn.addEventListener("click", (e: Event) => this.replay());
 
         this.urlTool = new UrlTool(
             this.config.encoder,
             this.config.modePairer);
 
-        this.reset();
+        this.initialize();
     }
 
     public getConfig(): Config {
         return this.config;
     }
 
-    private generateScenario(): void {
-        let mode: Mode = BOARD_CONFIG[this.config.mode];
-        let state: State = null;
+    private reset(): void {
+        history.replaceState(undefined, undefined, "#");
+        this.timer.stop();
+        this.isReplay = false;
+        this.resetBtn.innerHTML = "RESET";
+        this.initialize();
+    }
 
+    private replay(): void {
+        this.timer.stop();
+        this.isReplay = true;
+        this.initialize();
+    }
+
+    private initialize(): void {
+        this.starter = this.determineStarter();
+        console.log(this.starter);
+        this.isOver = false;
+        this.timer.reset();
+        this.generateScenario();
+        this.board.draw(document.getElementById("board"));
+        this.setFlags(0);
+    }
+
+    private determineStarter(): Starter {
         if (this.isReplay) {
-            state = this.board.getState();
-        } else {
-            if (this.urlTool.isHashSet()) {
-                const decodedHash = this.urlTool.getDecodedHash();
-                mode = this.urlTool.extractMode(decodedHash);
-                state = this.urlTool.extractState(decodedHash, mode);
-                this.isReplay = true; // update hash after state got updated
-            }
+            return Starter.Replay;
+        }
+
+        if (this.urlTool.isHashSet()) {
+            return Starter.Hash;
+        }
+
+        // Default == Reset
+        return Starter.Default;
+    }
+
+    private generateScenario(): void {
+        let mode: Mode;
+        let state: State;
+
+        switch (this.starter) {
+            case Starter.Replay:
+                mode = BOARD_CONFIG[this.config.mode];
+                state = this.board.getState();
+                break;
+            case Starter.Hash:
+                mode = this.urlTool.extractMode();
+                state = this.urlTool.extractState(mode);
+                break;
+            default:
+                mode = BOARD_CONFIG[this.config.mode];
+                state = null;
         }
 
         this.board = new Board(this, mode, state);
-        this.board.draw(document.getElementById("board"));
 
         this.urlTool.updateHash(mode, this.board.getState());
     }
@@ -86,23 +132,9 @@ export class Game {
         return this.isOver;
     }
 
-    public checkIsReplay(): boolean {
-        return this.isReplay;
-    }
-
-    private reset(reset: boolean = false, replay: boolean = false): void {
-        this.timer.stop();
-        this.timer.reset();
-        this.resetBtn.innerHTML = "RESET";
-        this.isOver = false;
-        this.isReplay = replay;
-
-        if (reset) {
-            history.replaceState(undefined, undefined, "#");
-        }
-
-        this.generateScenario();
-        this.setFlags(0);
+    public skipFirstClickCheck(): boolean {
+        return this.starter == Starter.Replay
+            || this.starter == Starter.Hash;
     }
 
     private setFlags(value: number): void {
@@ -116,8 +148,7 @@ export class Game {
 
     // Temporary solution until some kind of publish/subscribe get implemented
     public updateHash(): void {
-        const decodedHash = this.urlTool.getDecodedHash();
-        const mode = this.urlTool.extractMode(decodedHash);
+        const mode = this.urlTool.extractMode();
         this.urlTool.updateHash(mode, this.board.getState());
     }
 
