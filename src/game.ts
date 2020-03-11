@@ -64,7 +64,6 @@ export class Game {
 
     private initialize(): void {
         this.starter = this.determineStarter();
-        console.log(this.starter);
         this.isOver = false;
         this.timer.reset();
         this.generateScenario();
