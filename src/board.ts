@@ -1,12 +1,9 @@
 import { Cell } from "./cell";
 import { Game } from "./game";
-import { BOARD_CONFIG } from "./config";
+import { Mode } from "./config";
+import { State } from "./state";
 
 export class Board {
-    
-    private rows: number;
-    private cols: number;
-    private mines: number;
 
     private grid: Cell[][];
 
@@ -14,67 +11,76 @@ export class Board {
 
     constructor(
         private game: Game,
-        private minesScheme: boolean[] = []
+        private mode: Mode,
+        private state: State
     ) {
-        const mode = this.getGame().getConfig().mode;
-        this.rows = BOARD_CONFIG[mode].rows;
-        this.cols = BOARD_CONFIG[mode].cols;
-        this.mines = BOARD_CONFIG[mode].mines;
-
         this.initGrid();
         this.plantMines();
     }
 
+    public getGame(): Game {
+        return this.game;
+    }
+
+    public getState(): State {
+        return this.state;
+    }
+
+    public getMines(): number {
+        return this.mode.mines;
+    }
+
     private initGrid(): void {
         this.grid = [];
-        for (let i = 0; i < this.rows; i++) {
+        for (let i = 0; i < this.mode.rows; i++) {
             this.grid[i] = [];
-            for (let j = 0; j < this.cols; j++) {
+            for (let j = 0; j < this.mode.cols; j++) {
                 this.grid[i][j] = new Cell(this, i, j);
             }
         }
     }
 
     private plantMines(): void {
-        if (this.minesScheme.length > 0) {
-            this.plantMinesFromScheme();
-        } else {
+        if (this.state == undefined) {
             this.plantMinesRandomly();
+        } else {
+            this.plantMinesFromState();
         }
     }
 
-    private plantMinesFromScheme() {
-        for (let i = 1; i < this.minesScheme.length; i++) {
-            if (this.minesScheme[i]) {
-                const row = Math.ceil(i / this.cols) - 1;
-                const col = (i - 1) % this.cols;
+    private plantMinesFromState(): void {
+        for (let i = 0; i < this.mode.rows * this.mode.cols; i++) {
+            if (this.state.isHighBit(i)) {
+                const row = Math.floor(i / this.mode.cols);
+                const col = i % this.mode.cols;
                 this.grid[row][col].setMine();
             }
         }
     }
 
-    private plantMinesRandomly() {
-        let count = 0;
+    private plantMinesRandomly(): void {
+        this.state = new State(this.mode.rows * this.mode.cols);
 
-        while (count < this.mines) {
-            const row = this.random(0, this.rows);
-            const col = this.random(0, this.cols);
+        let count = 0;
+        while (count < this.mode.mines) {
+            const row = this.random(0, this.mode.rows);
+            const col = this.random(0, this.mode.cols);
             const planted = this.grid[row][col].setMine();
             if (planted === 1) {
                 count++;
-                this.minesScheme[(row * this.cols + col + 1)] = true;
+                this.state.setBit(row * this.mode.cols + col);
             }
         }
     }
 
     public replantMine(centerRow: number, centerCol: number, unsetMineRow?: number, unsetMineCol?: number): void {
-        // Remove mine from scheme on first attempt
+        // Remove mine from state on first attempt
         if (unsetMineRow !== undefined && unsetMineCol !== undefined) {
-            this.minesScheme[(unsetMineRow * this.cols + unsetMineCol + 1)] = null;
+            this.state.unsetBit(unsetMineRow * this.mode.cols + unsetMineCol);
         }
 
-        const randomRow = this.random(0, this.rows);
-        const randomCol = this.random(0, this.cols);
+        const randomRow = this.random(0, this.mode.rows);
+        const randomCol = this.random(0, this.mode.cols);
 
         const distance = this.getGame().getConfig().firstClick;
 
@@ -85,24 +91,12 @@ export class Board {
         if (!outOfSafeArea || this.grid[randomRow][randomCol].setMine() === 0) {
             this.replantMine(centerRow, centerCol);
         } else {
-            this.minesScheme[(randomRow * this.cols + randomCol + 1)] = true;
+            this.state.setBit(randomRow * this.mode.cols + randomCol);
         }
     }
 
     private random(from: number, to: number): number {
         return Math.floor(Math.random() * to) + from;
-    }
-
-    public getMinesScheme(): boolean[] {
-        return this.minesScheme;
-    }
-
-    public getGame(): Game {
-        return this.game;
-    }
-
-    public getMines(): number {
-        return this.mines;
     }
 
     public draw(board: HTMLElement): void {
@@ -112,7 +106,7 @@ export class Board {
         rowsContainer.id = "rows-container";
         board.append(rowsContainer);
 
-        for (let i = 0; i < this.rows; i++) {
+        for (let i = 0; i < this.mode.rows; i++) {
             const row = document.createElement("li");
             row.classList.add("row");
             rowsContainer.append(row);
@@ -121,7 +115,7 @@ export class Board {
             colsContainer.classList.add("cols-container");
             row.append(colsContainer);
 
-            for (let j = 0; j < this.cols; j++) {
+            for (let j = 0; j < this.mode.cols; j++) {
                 colsContainer.append(this.grid[i][j].getElement());
             }
         }
@@ -135,7 +129,7 @@ export class Board {
                 // Skip current cell
                 if (i == row && j == col) continue;
 
-                if (i >= 0 && i < this.rows && j >= 0 && j < this.cols) {
+                if (i >= 0 && i < this.mode.rows && j >= 0 && j < this.mode.cols) {
                     adj.push(this.grid[i][j]);
                 }
             }
@@ -145,8 +139,8 @@ export class Board {
     }
 
     public revealMines(win: boolean): void {
-        for (let i = 0; i < this.rows; i++) {
-            for (let j = 0; j < this.cols; j++) {
+        for (let i = 0; i < this.mode.rows; i++) {
+            for (let j = 0; j < this.mode.cols; j++) {
                 const cell = this.grid[i][j];
 
                 if (cell.isMine()) {
@@ -170,7 +164,7 @@ export class Board {
     }
 
     private checkForWin(): void {
-        if (this.revealedCounter === this.rows * this.cols - this.mines) {
+        if (this.revealedCounter === this.mode.rows * this.mode.cols - this.mode.mines) {
             this.game.gameOver(true);
         }
     }

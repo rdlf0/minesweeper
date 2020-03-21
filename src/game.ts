@@ -1,7 +1,15 @@
 import { Board } from "./board";
 import { Timer } from "./timer";
 import { Counter } from "./counter";
-import { Config } from "./config";
+import { Config, Mode, BOARD_CONFIG } from "./config";
+import { State } from "./state";
+import { UrlTool } from "./urlTool";
+
+enum Starter {
+    Default = "Default/Reset", // same as Reset
+    Hash = "Hash",
+    Replay = "Replay",
+}
 
 export class Game {
 
@@ -16,6 +24,8 @@ export class Game {
     private flagsCounter: number;
     private isOver: boolean;
     private isReplay: boolean;
+    private urlTool: UrlTool;
+    private starter: Starter;
 
     constructor(private config: Config) {
         this.counter = new Counter(document.getElementById("mines-counter"));
@@ -23,25 +33,78 @@ export class Game {
 
         this.resetBtn = document.getElementById("reset");
         this.resetBtn.addEventListener("click", (e: Event) => this.reset());
-        
-        this.replayBtn = document.getElementById("replay");
-        this.replayBtn.addEventListener("click", (e: Event) => this.reset(true));
 
-        this.reset();
+        this.replayBtn = document.getElementById("replay");
+        this.replayBtn.addEventListener("click", (e: Event) => this.replay());
+
+        this.urlTool = new UrlTool(
+            this.config.encoder,
+            this.config.modePairer);
+
+        this.initialize();
     }
 
     public getConfig(): Config {
         return this.config;
     }
 
-    private generateScenario(): void {
-        let minesScheme: boolean[] = [];
+    private reset(): void {
+        history.replaceState(undefined, undefined, "#");
+        this.timer.stop();
+        this.isReplay = false;
+        this.resetBtn.innerHTML = "RESET";
+        this.initialize();
+    }
+
+    private replay(): void {
+        this.timer.stop();
+        this.isReplay = true;
+        this.initialize();
+    }
+
+    private initialize(): void {
+        this.starter = this.determineStarter();
+        this.isOver = false;
+        this.timer.reset();
+        this.generateScenario();
+        this.board.draw(document.getElementById("board"));
+        this.setFlags(0);
+    }
+
+    private determineStarter(): Starter {
         if (this.isReplay) {
-            minesScheme = this.board.getMinesScheme();
+            return Starter.Replay;
         }
 
-        this.board = new Board(this, minesScheme);
-        this.board.draw(document.getElementById("board"));
+        if (this.urlTool.isHashSet()) {
+            return Starter.Hash;
+        }
+
+        // Default == Reset
+        return Starter.Default;
+    }
+
+    private generateScenario(): void {
+        let mode: Mode;
+        let state: State;
+
+        switch (this.starter) {
+            case Starter.Replay:
+                mode = BOARD_CONFIG[this.config.mode];
+                state = this.board.getState();
+                break;
+            case Starter.Hash:
+                mode = this.urlTool.extractMode();
+                state = this.urlTool.extractState(mode);
+                break;
+            default:
+                mode = BOARD_CONFIG[this.config.mode];
+                state = null;
+        }
+
+        this.board = new Board(this, mode, state);
+
+        this.urlTool.updateHash(mode, this.board.getState());
     }
 
     public start(): void {
@@ -68,18 +131,9 @@ export class Game {
         return this.isOver;
     }
 
-    public checkIsReplay(): boolean {
-        return this.isReplay;
-    }
-
-    private reset(replay: boolean = false): void {
-        this.timer.stop();
-        this.timer.reset();
-        this.resetBtn.innerHTML = "RESET";
-        this.isOver = false;
-        this.isReplay = replay;
-        this.generateScenario();
-        this.setFlags(0);
+    public skipFirstClickCheck(): boolean {
+        return this.starter == Starter.Replay
+            || this.starter == Starter.Hash;
     }
 
     private setFlags(value: number): void {
@@ -89,6 +143,12 @@ export class Game {
 
     public incrementFlags(value: number): void {
         this.setFlags(this.flagsCounter + value);
+    }
+
+    // Temporary solution until some kind of publish/subscribe get implemented
+    public updateHash(): void {
+        const mode = this.urlTool.extractMode();
+        this.urlTool.updateHash(mode, this.board.getState());
     }
 
 }

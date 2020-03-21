@@ -1,7 +1,7 @@
 import { Board } from "./board";
 import { FIRST_CLICK } from "./config";
 
-enum State {
+enum CellState {
     Default = "default",
     Flagged = "flagged",
     Questioned = "questioned",
@@ -17,13 +17,13 @@ export class Cell {
 
     private value: number;
     private el: HTMLElement;
-    private state: State;
+    private state: CellState;
     private adjacentCells: Cell[] = [];
 
     constructor(private board: Board, private row: number, private col: number) {
         this.value = -2;
         this.createHTMLElement();
-        this.setState(State.Default);
+        this.setState(CellState.Default);
     }
 
     private setValue(value: number): void {
@@ -42,11 +42,11 @@ export class Cell {
         return this.el;
     }
 
-    private getState(): State {
+    private getState(): CellState {
         return this.state;
     }
 
-    private setState(state: State): void {
+    private setState(state: CellState): void {
         this.el.classList.remove(`state-${this.getState()}`);
         this.el.classList.add(`state-${state}`);
         this.state = state;
@@ -79,11 +79,11 @@ export class Cell {
     }
 
     public isFlagged(): boolean {
-        return this.getState() === State.Flagged;
+        return this.getState() === CellState.Flagged;
     }
 
     public setWronglyFlagged(): void {
-        this.setState(State.WronglyFlagged);
+        this.setState(CellState.WronglyFlagged);
         this.setContent(MINE_CONTENT);
     }
 
@@ -100,12 +100,12 @@ export class Cell {
     }
 
     private reveal(): void {
-        if (this.getState() !== State.Default) return;
+        if (this.getState() !== CellState.Default) return;
 
         const isFirstClick = this.board.getGame().isStarted() === false;
         if (isFirstClick) {
             this.board.getGame().start();
-            if (!this.board.getGame().checkIsReplay()) {
+            if (!this.board.getGame().skipFirstClickCheck()) {
                 this.makeSafeArea();
             }
         }
@@ -115,7 +115,7 @@ export class Cell {
             return;
         }
 
-        this.setState(State.Revealed);
+        this.setState(CellState.Revealed);
         this.board.incrementRevealed();
 
         this.calculateValue();
@@ -135,10 +135,13 @@ export class Cell {
                 adj.unsetMine(this.row, this.col);
             }
         };
+
+        // Temporary solution until some kind of publish/subscribe get implemented
+        this.board.getGame().updateHash();
     }
 
     private explode(): void {
-        this.setState(State.Exploаded);
+        this.setState(CellState.Exploаded);
         this.board.getGame().gameOver();
     }
 
@@ -161,22 +164,22 @@ export class Cell {
 
     public revealMine(): void {
         // Leave flags
-        if (this.getState() === State.Flagged) return;
+        if (this.getState() === CellState.Flagged) return;
 
         // Reveal not exploaded mines
-        if (this.getState() !== State.Exploаded) {
-            this.setState(State.Revealed)
+        if (this.getState() !== CellState.Exploаded) {
+            this.setState(CellState.Revealed)
         };
 
         this.setContent(MINE_CONTENT);
     }
 
     public revealFlag(): void {
-        if (this.getState() === State.Default) {
+        if (this.getState() === CellState.Default) {
             this.mark();
         }
 
-        if (this.getState() === State.Questioned) {
+        if (this.getState() === CellState.Questioned) {
             // :)
             this.mark();
             this.mark();
@@ -184,19 +187,19 @@ export class Cell {
     }
 
     private mark(): void {
-        if (this.getState() == State.Revealed) return;
+        if (this.getState() == CellState.Revealed) return;
 
         switch (this.getState()) {
-            case State.Default:
-                this.setState(State.Flagged);
+            case CellState.Default:
+                this.setState(CellState.Flagged);
                 this.board.getGame().incrementFlags(1);
                 break;
-            case State.Flagged:
-                this.setState(State.Questioned);
+            case CellState.Flagged:
+                this.setState(CellState.Questioned);
                 this.board.getGame().incrementFlags(-1);
                 break;
-            case State.Questioned:
-                this.setState(State.Default);
+            case CellState.Questioned:
+                this.setState(CellState.Default);
                 break;
         }
     }
