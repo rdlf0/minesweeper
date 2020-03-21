@@ -23,7 +23,7 @@ jobs:
         run: mv index.html require.js styles.css artifact
 
       - name: Upload artifact
-        uses: actions/upload-artifact@master
+        uses: actions/upload-artifact@v1
         with:
           name: minesweeper-compiled
           path: artifact
@@ -34,7 +34,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Download artifact
-        uses: actions/download-artifact@master
+        uses: actions/download-artifact@v1
         with:
           name: minesweeper-compiled
 
