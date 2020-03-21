@@ -1,9 +1,8 @@
 name: CI/CD
 
 on:
-  push:
-    branches:
-      - master
+  release:
+    types: [published]
 
 jobs:
   build:
@@ -11,22 +10,24 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out the code
-        uses: actions/checkout@v1
-      
+        uses: actions/checkout@v2
+        with:
+          ref: ${{ github.ref }}
+
       - name: Compile the source
         run: |
           tsc --sourceMap false \
               --outDir artifact/dist
-        
+
       - name: Prepare artifact
         run: mv index.html require.js styles.css artifact
-          
+
       - name: Upload artifact
         uses: actions/upload-artifact@master
         with:
           name: minesweeper-compiled
           path: artifact
-          
+
   deploy:
     name: Deploy
     needs: build
@@ -36,7 +37,7 @@ jobs:
         uses: actions/download-artifact@master
         with:
           name: minesweeper-compiled
-          
+
       - name: Upload to S3
         env:
           AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
