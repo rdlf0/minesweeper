@@ -9,43 +9,47 @@ jobs:
     name: Build
     runs-on: ubuntu-latest
     steps:
-      - name: Check out the code
-        uses: actions/checkout@v2
-        with:
-          ref: ${{ github.sha }}
-
-      - name: Compile the source
-        run: |
-          tsc --sourceMap false \
-              --outDir artifact/dist
-
-      - name: Prepare artifact
-        run: mv index.html require.js styles.css artifact
-
-      - name: Upload artifact
-        uses: actions/upload-artifact@v1
-        with:
-          name: minesweeper-compiled
-          path: artifact
-
-  deploy:
-    name: Deploy
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - name: Download artifact
-        uses: actions/download-artifact@v1
-        with:
-          name: minesweeper-compiled
-
-      - name: Upload to S3
+      - name: Dump GitHub context
         env:
-          AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
-        run: |
-          aws s3 sync \
-              'minesweeper-compiled' s3://$AWS_S3_BUCKET \
-              --no-progress \
-              --acl public-read
+          GITHUB_CONTEXT: ${{ toJson(github) }}
+        run: echo "$GITHUB_CONTEXT"
+  #     - name: Check out the code
+  #       uses: actions/checkout@v2
+  #       with:
+  #         ref: ${{ github.sha }}
+
+  #     - name: Compile the source
+  #       run: |
+  #         tsc --sourceMap false \
+  #             --outDir artifact/dist
+
+  #     - name: Prepare artifact
+  #       run: mv index.html require.js styles.css artifact
+
+  #     - name: Upload artifact
+  #       uses: actions/upload-artifact@v1
+  #       with:
+  #         name: minesweeper-compiled
+  #         path: artifact
+
+  # deploy:
+  #   name: Deploy
+  #   needs: build
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Download artifact
+  #       uses: actions/download-artifact@v1
+  #       with:
+  #         name: minesweeper-compiled
+
+  #     - name: Upload to S3
+  #       env:
+  #         AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
+  #         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  #         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  #         AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
+  #       run: |
+  #         aws s3 sync \
+  #             'minesweeper-compiled' s3://$AWS_S3_BUCKET \
+  #             --no-progress \
+  #             --acl public-read
