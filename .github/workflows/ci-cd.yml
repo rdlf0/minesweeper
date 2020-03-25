@@ -14,63 +14,56 @@ jobs:
     name: Build
     runs-on: ubuntu-latest
     steps:
-      - name: Debug
-        env:
-          GITHUB_CONTEXT: ${{ toJson(github) }}
+      - name: Check out the code
+        uses: actions/checkout@v2
+        with:
+          ref: ${{ github.sha }}
+
+      - name: Compile the source
         run: |
-          echo "$GITHUB_CONTEXT"
-          echo ${{ env.ARTIFACT_NAME }}
+          tsc --sourceMap false \
+              --outDir artifact/dist
 
-  #     - name: Check out the code
-  #       uses: actions/checkout@v2
-  #       with:
-  #         ref: ${{ github.sha }}
+      - name: Prepare artifact
+        run: mv index.html require.js styles.css LICENSE artifact
 
-  #     - name: Compile the source
-  #       run: |
-  #         tsc --sourceMap false \
-  #             --outDir artifact/dist
+      - name: Prepare release asset
+        run: zip -r minesweeper.zip artifact
 
-  #     - name: Prepare artifact
-  #       run: mv index.html require.js styles.css LICENSE artifact
+      - name: Upload artifact
+        uses: actions/upload-artifact@v1
+        with:
+          name: ${{ env.ARTIFACT_NAME }}
+          path: ./artifact
 
-  #     - name: Prepare release asset
-  #       run: zip -r minesweeper.zip artifact
+      - name: Upload release asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: ./minesweeper.zip
+          asset_name: minesweeper.zip
+          asset_content_type: application/zip
 
-  #     - name: Upload artifact
-  #       uses: actions/upload-artifact@v1
-  #       with:
-  #         name: minesweeper-compiled
-  #         path: ./artifact
+  deploy:
+    name: Deploy
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v1
+        with:
+          name: ${{ env.ARTIFACT_NAME }}
 
-  #     - name: Upload release asset
-  #       uses: actions/upload-release-asset@v1
-  #       env:
-  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  #       with:
-  #         upload_url: ${{ github.event.release.upload_url }}
-  #         asset_path: ./minesweeper.zip
-  #         asset_name: minesweeper.zip
-  #         asset_content_type: application/zip
-
-  # deploy:
-  #   name: Deploy
-  #   needs: build
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Download artifact
-  #       uses: actions/download-artifact@v1
-  #       with:
-  #         name: minesweeper-compiled
-
-  #     - name: Upload to S3
-  #       env:
-  #         AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
-  #         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-  #         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-  #         AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
-  #       run: |
-  #         aws s3 sync \
-  #             'minesweeper-compiled' s3://$AWS_S3_BUCKET \
-  #             --no-progress \
-  #             --acl public-read
+      - name: Upload to S3
+        env:
+          AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
+        run: |
+          aws s3 sync \
+              '${{ env.ARTIFACT_NAME }}' s3://$AWS_S3_BUCKET \
+              --no-progress \
+              --acl public-read
