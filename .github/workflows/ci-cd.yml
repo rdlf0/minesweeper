@@ -27,8 +27,8 @@ jobs:
       - name: Prepare artifact
         run: mv index.html require.js styles.css LICENSE artifact
 
-      - name: Prepare release asset
-        run: zip -r minesweeper.zip artifact
+      # - name: Prepare release asset
+      #   run: zip -r minesweeper.zip artifact
 
       - name: Upload artifact
         uses: actions/upload-artifact@v1
@@ -36,15 +36,15 @@ jobs:
           name: ${{ env.ARTIFACT_NAME }}
           path: ./artifact
 
-      - name: Upload release asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ github.event.release.upload_url }}
-          asset_path: ./minesweeper.zip
-          asset_name: minesweeper.zip
-          asset_content_type: application/zip
+      # - name: Upload release asset
+      #   uses: actions/upload-release-asset@v1
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #   with:
+      #     upload_url: ${{ github.event.release.upload_url }}
+      #     asset_path: ./minesweeper.zip
+      #     asset_name: minesweeper.zip
+      #     asset_content_type: application/zip
 
   deploy:
     name: Deploy
