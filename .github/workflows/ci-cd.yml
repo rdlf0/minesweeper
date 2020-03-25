@@ -1,13 +1,15 @@
 name: CI/CD
 
-# on:
-#   release:
-#     types: [published]
-
-on: push
+on:
+  release:
+    types:
+      - published
 
 env:
   ARTIFACT_NAME: ${{ 'minesweeper-compiled' }}
+  ARTIFACT_PATH: ${{ 'artifact' }}
+  ASSET_NAME: ${{ 'minesweeper.zip' }}
+  ASSET_TYPE: ${{ 'application/zip' }}
 
 jobs:
   build:
@@ -22,48 +24,48 @@ jobs:
       - name: Compile the source
         run: |
           tsc --sourceMap false \
-              --outDir artifact/dist
+              --outDir ${{ env.ARTIFACT_PATH }}/dist
 
       - name: Prepare artifact
-        run: mv index.html require.js styles.css LICENSE artifact
+        run: mv index.html require.js styles.css LICENSE ${{ env.ARTIFACT_PATH }}
 
-      # - name: Prepare release asset
-      #   run: zip -r minesweeper.zip artifact
+      - name: Prepare release asset
+        run: zip -r ${{ env.ASSET_NAME }} ${{ env.ARTIFACT_PATH }}
 
       - name: Upload artifact
         uses: actions/upload-artifact@v1
         with:
-          name: $ARTIFACT_NAME
-          path: ./artifact
+          name: ${{ env.ARTIFACT_NAME }}
+          path: ./${{ env.ARTIFACT_PATH }}
 
-      # - name: Upload release asset
-      #   uses: actions/upload-release-asset@v1
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      #   with:
-      #     upload_url: ${{ github.event.release.upload_url }}
-      #     asset_path: ./minesweeper.zip
-      #     asset_name: minesweeper.zip
-      #     asset_content_type: application/zip
+      - name: Upload release asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: ./${{ env.ASSET_NAME }}
+          asset_name: ${{ env.ASSET_NAME }}
+          asset_content_type: ${{ env.ASSET_TYPE }}
 
-  # deploy:
-  #   name: Deploy
-  #   needs: build
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Download artifact
-  #       uses: actions/download-artifact@v1
-  #       with:
-  #         name: ${{ env.ARTIFACT_NAME }}
+  deploy:
+    name: Deploy
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v1
+        with:
+          name: ${{ env.ARTIFACT_NAME }}
 
-  #     - name: Upload to S3
-  #       env:
-  #         AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
-  #         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-  #         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-  #         AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
-  #       run: |
-  #         aws s3 sync \
-  #             '${{ env.ARTIFACT_NAME }}' s3://$AWS_S3_BUCKET \
-  #             --no-progress \
-  #             --acl public-read
+      - name: Upload to S3
+        env:
+          AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
+        run: |
+          aws s3 sync \
+              '${{ env.ARTIFACT_NAME }}' s3://$AWS_S3_BUCKET \
+              --no-progress \
+              --acl public-read
