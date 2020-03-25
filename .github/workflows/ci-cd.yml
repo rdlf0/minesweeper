@@ -19,10 +19,17 @@ jobs:
           tsc --sourceMap false \
               --outDir artifact/dist
 
-      - name: Prepare artifact and release asset
-        run: |
-          mv index.html require.js styles.css artifact
-          zip -r minesweeper artifact
+      - name: Prepare artifact
+        run: mv index.html require.js styles.css LICENSE artifact
+
+      - name: Prepare release asset
+        run: zip -r minesweeper.zip artifact
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v1
+        with:
+          name: minesweeper-compiled
+          path: ./artifact
 
       - name: Upload release asset
         uses: actions/upload-release-asset@v1
@@ -33,12 +40,6 @@ jobs:
           asset_path: ./minesweeper.zip
           asset_name: minesweeper.zip
           asset_content_type: application/zip
-
-      - name: Upload artifact
-        uses: actions/upload-artifact@v1
-        with:
-          name: minesweeper-compiled
-          path: artifact
 
   deploy:
     name: Deploy
