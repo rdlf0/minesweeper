@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,6 +9,7 @@
     <script data-main="dist/main" src="require.js"></script>
     <link rel="stylesheet" href="styles.css">
 </head>
+
 <body>
     <div id="container">
         <div id="controls">
@@ -21,7 +23,10 @@
     </div>
     <div id="links">
         <div><a href="#" id="dark-mode-toggle">[Turn dark mode ON]</a></div>
-        <div><a href="https://github.com/rdlf0/minesweeper" target="blank" title="Find the source code at GitHub">[GitHub]</a></div>
+        <ul id="version">
+            <li>Version <span id="version_string"></span></li>
+            <li><a href="https://github.com/rdlf0/minesweeper" target="blank" title="Find the source code at GitHub">GitHub</a></li>
+        </ul>
     </div>
     <script type="text/javascript">
         document.getElementById("dark-mode-toggle").addEventListener("click", toggleNightMode);
@@ -33,6 +38,17 @@
             let state = contains ? "OFF" : "ON";
             e.target.text = "[Turn dark mode " + state + "]";
         }
+
+        function getVersion() {
+            const versionEl = document.getElementById("version_string");
+
+            fetch("http://api.github.com/repos/rdlf0/minesweeper/releases/latest", { method: "GET", headers: {} })
+                .then(resp => resp.json())
+                .then(body => versionEl.textContent = body.tag_name)
+        }
+
+        getVersion();
     </script>
 </body>
+
 </html>
