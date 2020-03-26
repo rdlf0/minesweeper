@@ -7,13 +7,13 @@
 
 ## Compilation and running
 
-Get to the root directory and run:
+Clone, get to the root directory and run:
 
 ```
 $ tsc
 ```
-
-Then just open `index.html`
+Or simply download the asset from the [latest release](https://github.com/rdlf0/minesweeper/releases/latest) and just unzip.  
+After that just open `index.html`.
 
 ## Settings _(not yet available to the user - [issue #2](https://github.com/rdlf0/minesweeper/issues/2))_
 | Setting | Options |
