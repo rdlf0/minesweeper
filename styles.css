@@ -2,7 +2,7 @@ html, body {
     margin: 0;
     padding: 0;
     text-align: center;
-    transition: background-color 50ms linear;
+    transition: background-color 100ms linear;
 }
 
 body.night {
@@ -209,31 +209,41 @@ ul, li {
     color: #808080;
 }
 
-#links {
+footer {
     margin-top: 20px;
+    font-family: monospace;
 }
 
-#links div {
+footer a {
+    color: #111111;
+    text-decoration: none;
+    transition: color 100ms linear;
+}
+
+.night footer a {
+    color: #cccccc;
+}
+
+footer a:hover {
+    color: #FF0000;
+}
+
+footer ul#version {
     margin-top: 10px;
 }
 
-#links ul#version {
-    margin-top: 10px;
-}
-
-#links ul#version li {
+footer ul#version li {
     display: inline-block;
     border-left: 2px solid #111111;
     margin-left: 5px;
     padding-left: 10px;
 }
 
-#links a {
-    color: #111111;
-    text-decoration: none;
-    transition: color 50ms linear;
+.night footer ul#version li {
+    border-left: 2px solid #cccccc;
 }
 
-.night #links a {
-    color: #cccccc;
+footer ul#version li:first-child {
+    border-left: 0 none;
+    padding-left: 0;
 }

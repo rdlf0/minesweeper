@@ -15,40 +15,29 @@
         <div id="controls">
             <div id="mines-counter" class="control"></div>
             <div class="buttons-wrapper">
-                <button type="button" id="reset" class="control">RESET</button><button type="button" id="replay" class="control">REPLAY</button>
+                <button type="button" id="reset" class="control">RESET</button><button type="button" id="replay"
+                    class="control">REPLAY</button>
             </div>
             <div id="timer" class="control">000</div>
         </div>
         <div id="board"></div>
     </div>
-    <div id="links">
-        <div><a href="#" id="dark-mode-toggle">[Turn dark mode ON]</a></div>
+    <footer>
+        <a href="#" id="dark-mode-toggle">Turn dark mode ON</a>
         <ul id="version">
-            <li>Version <span id="version_string"></span></li>
-            <li><a href="https://github.com/rdlf0/minesweeper" target="blank" title="Find the source code at GitHub">GitHub</a></li>
+            <li>
+                <a href="http://github.com/rdlf0/minesweeper/releases/latest" target="blank"
+                    title="Check out the changelog">
+                    Version <span id="version_string"></span>
+                </a>
+            </li>
+            <li>
+                <a href="https://github.com/rdlf0/minesweeper" target="blank"
+                    title="Find the source code at GitHub">GitHub</a>
+            </li>
         </ul>
-    </div>
-    <script type="text/javascript">
-        document.getElementById("dark-mode-toggle").addEventListener("click", toggleNightMode);
-
-        function toggleNightMode(e) {
-            e.preventDefault();
-            document.body.classList.toggle('night');
-            let contains = document.body.classList.contains('night');
-            let state = contains ? "OFF" : "ON";
-            e.target.text = "[Turn dark mode " + state + "]";
-        }
-
-        function getVersion() {
-            const versionEl = document.getElementById("version_string");
-
-            fetch("http://api.github.com/repos/rdlf0/minesweeper/releases/latest", { method: "GET", headers: {} })
-                .then(resp => resp.json())
-                .then(body => versionEl.textContent = body.tag_name)
-        }
-
-        getVersion();
-    </script>
+    </footer>
+    <script type="text/javascript" src="main.js"></script>
 </body>
 
 </html>
