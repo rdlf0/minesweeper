@@ -19,7 +19,7 @@ function getVersion() {
 
     fetch("http://api.github.com/repos/rdlf0/minesweeper/releases/latest", { method: "GET", headers: {} })
         .then(resp => resp.json())
-        .then(body => versionEl.textContent = body.tag_name)
+        .then(body => versionEl.textContent = body.tag_name.substring(1))
 }
 
 getVersion();

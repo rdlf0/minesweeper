@@ -237,6 +237,7 @@ footer ul#version li {
     border-left: 2px solid #111111;
     margin-left: 5px;
     padding-left: 10px;
+    transition: all 100ms linear;
 }
 
 .night footer ul#version li {
