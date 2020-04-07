@@ -5,10 +5,8 @@ document.getElementById("dark-mode-toggle").addEventListener("click", toggleNigh
 
 function toggleNightMode(e) {
     e.preventDefault();
-    document.body.classList.toggle('night');
-    let contains = document.body.classList.contains('night');
-    let state = contains ? "OFF" : "ON";
-    e.target.text = "Turn dark mode " + state + "";
+    const state = document.body.classList.toggle('night') ? "OFF" : "ON";
+    e.target.childNodes[1].textContent = state;
 }
 
 /**

@@ -228,6 +228,12 @@ footer a:hover {
     color: #FF0000;
 }
 
+footer #dark-mode-toggle {
+    display: inline-block;
+    width: 130px;
+    text-align: left;
+}
+
 footer ul#version {
     margin-top: 10px;
 }
