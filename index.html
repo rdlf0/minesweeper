@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,31 +9,35 @@
     <script data-main="dist/main" src="require.js"></script>
     <link rel="stylesheet" href="styles.css">
 </head>
+
 <body>
     <div id="container">
         <div id="controls">
             <div id="mines-counter" class="control"></div>
             <div class="buttons-wrapper">
-                <button type="button" id="reset" class="control">RESET</button><button type="button" id="replay" class="control">REPLAY</button>
+                <button type="button" id="reset" class="control">RESET</button><button type="button" id="replay"
+                    class="control">REPLAY</button>
             </div>
             <div id="timer" class="control">000</div>
         </div>
         <div id="board"></div>
     </div>
-    <div id="links">
-        <div><a href="#" id="dark-mode-toggle">[Turn dark mode ON]</a></div>
-        <div><a href="https://github.com/rdlf0/minesweeper" target="blank" title="Find the source code at GitHub">[GitHub]</a></div>
-    </div>
-    <script type="text/javascript">
-        document.getElementById("dark-mode-toggle").addEventListener("click", toggleNightMode);
-
-        function toggleNightMode(e) {
-            e.preventDefault();
-            document.body.classList.toggle('night');
-            let contains = document.body.classList.contains('night');
-            let state = contains ? "OFF" : "ON";
-            e.target.text = "[Turn dark mode " + state + "]";
-        }
-    </script>
+    <footer>
+        <a href="#" id="dark-mode-toggle">Turn dark mode <span>ON</span></a>
+        <ul id="version">
+            <li>
+                <a href="http://github.com/rdlf0/minesweeper/releases/latest" target="blank"
+                    title="Check out the changelog">
+                    Version <span id="version_string"></span>
+                </a>
+            </li>
+            <li>
+                <a href="https://github.com/rdlf0/minesweeper" target="blank"
+                    title="Find the source code at GitHub">GitHub</a>
+            </li>
+        </ul>
+    </footer>
+    <script type="text/javascript" src="main.js"></script>
 </body>
+
 </html>
