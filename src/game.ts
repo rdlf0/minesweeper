@@ -1,8 +1,8 @@
 import { Board } from "./board";
-import { Timer } from "./timer";
+import { BOARD_CONFIG, Config, Mode } from "./config";
 import { Counter } from "./counter";
-import { Config, Mode, BOARD_CONFIG } from "./config";
 import { State } from "./state";
+import { Timer } from "./timer";
 import { UrlTool } from "./urlTool";
 
 enum Starter {

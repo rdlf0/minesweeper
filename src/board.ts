@@ -1,6 +1,6 @@
 import { Cell } from "./cell";
-import { Game } from "./game";
 import { Mode } from "./config";
+import { Game } from "./game";
 import { State } from "./state";
 
 export class Board {
@@ -100,25 +100,12 @@ export class Board {
     }
 
     public draw(board: HTMLElement): void {
-        board.innerHTML = "";
+        // Remove existing cells (on reset/replay)
+        board.textContent = "";
 
-        const rowsContainer = document.createElement("ul");
-        rowsContainer.id = "rows-container";
-        board.append(rowsContainer);
-
-        for (let i = 0; i < this.mode.rows; i++) {
-            const row = document.createElement("li");
-            row.classList.add("row");
-            rowsContainer.append(row);
-
-            const colsContainer = document.createElement("ul");
-            colsContainer.classList.add("cols-container");
-            row.append(colsContainer);
-
-            for (let j = 0; j < this.mode.cols; j++) {
-                colsContainer.append(this.grid[i][j].getElement());
-            }
-        }
+        this.grid.forEach(row => {
+            row.forEach(cell => board.append(cell.getElement()))
+        });
     }
 
     public getAdjacentCells(row: number, col: number): Cell[] {

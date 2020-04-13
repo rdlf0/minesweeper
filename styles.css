@@ -15,7 +15,7 @@ ul, li {
     padding: 0;
 }
 
-#container {
+main {
     display: table;
     background-color: #bdbdbd;
     border-top: 5px solid #ffffff;
@@ -54,14 +54,13 @@ ul, li {
     font-weight: bold;
 }
 
-#rows-container {
-    display: flex;
-    flex-direction: column;
-}
-
-.cols-container {
-    display: flex;
-    flex-direction: row;
+#board {
+    display: grid;
+    grid-template-columns: repeat(30, 1fr);
+    line-height: 30px;
+    font-size: 25px;
+    font-family: "Arial Black", "Arial";
+    font-weight: 900;
 }
 
 .cell {
@@ -70,10 +69,6 @@ ul, li {
     width: 33px;
     height: 33px;
     position: relative;
-    line-height: 30px;
-    font-size: 25px;
-    font-family: "Arial Black", "Arial";
-    font-weight: 900;
     background-color: #CCCCCC;
     border-top: 5px solid #FFFFFF;
     border-left: 5px solid #FFFFFF;
@@ -81,11 +76,6 @@ ul, li {
     border-right: 5px solid #7b7b7b;
     box-sizing: border-box;
     text-align: center;
-    -webkit-touch-callout: none;
-    -webkit-user-select: none;
-    -khtml-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
     user-select: none;
 }
 
