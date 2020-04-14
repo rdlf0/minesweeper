@@ -1,13 +1,25 @@
 import { Cell } from "./cell";
-import { Game } from "./game";
 import { Mode } from "./config";
+import { Game } from "./game";
 import { State } from "./state";
+import { EVENT_CELL_REVEALED, EVENT_GAME_OVER, PubSub } from "./util/pub-sub";
+
+interface subscriptionPair {
+    event: string;
+    function: {
+        (data?: any): any
+    }
+}
 
 export class Board {
 
     private grid: Cell[][];
 
     private revealedCounter: number = 0;
+
+    private eventSubscribers: subscriptionPair[] = [
+        { event: EVENT_CELL_REVEALED, function: this.incrementRevealed.bind(this) }
+    ];
 
     constructor(
         private game: Game,
@@ -16,6 +28,15 @@ export class Board {
     ) {
         this.initGrid();
         this.plantMines();
+        this.subscribe();
+    }
+
+    private subscribe(): void {
+        this.eventSubscribers.slice(0).forEach((p: subscriptionPair) => PubSub.subscribe(p.event, p.function))
+    }
+
+    public unsubscribe(): void {
+        this.eventSubscribers.slice(0).forEach((p: subscriptionPair) => PubSub.unsubscribe(p.event, p.function))
     }
 
     public getGame(): Game {
@@ -158,14 +179,14 @@ export class Board {
         }
     }
 
-    public incrementRevealed(): void {
+    private incrementRevealed(): void {
         this.revealedCounter++;
         this.checkForWin();
     }
 
     private checkForWin(): void {
         if (this.revealedCounter === this.mode.rows * this.mode.cols - this.mode.mines) {
-            this.game.gameOver(true);
+            PubSub.publish(EVENT_GAME_OVER, true);
         }
     }
 }

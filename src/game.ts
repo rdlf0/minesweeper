@@ -1,9 +1,10 @@
 import { Board } from "./board";
-import { Timer } from "./timer";
+import { BOARD_CONFIG, Config, Mode } from "./config";
 import { Counter } from "./counter";
-import { Config, Mode, BOARD_CONFIG } from "./config";
 import { State } from "./state";
+import { Timer } from "./timer";
 import { UrlTool } from "./urlTool";
+import { EVENT_CELL_FLAG_TOGGLED, EVENT_CELL_REVEALED, EVENT_GAME_OVER, EVENT_SAFE_AREA_CREATED, PubSub } from "./util/pub-sub";
 
 enum Starter {
     Default = "Default/Reset", // same as Reset
@@ -41,6 +42,11 @@ export class Game {
             this.config.encoder,
             this.config.modePairer);
 
+        PubSub.subscribe(EVENT_CELL_REVEALED, this.start.bind(this));
+        PubSub.subscribe(EVENT_CELL_FLAG_TOGGLED, this.incrementFlags.bind(this));
+        PubSub.subscribe(EVENT_GAME_OVER, this.gameOver.bind(this));
+        PubSub.subscribe(EVENT_SAFE_AREA_CREATED, this.updateHash.bind(this));
+
         this.initialize();
     }
 
@@ -66,6 +72,7 @@ export class Game {
         this.starter = this.determineStarter();
         this.isOver = false;
         this.timer.reset();
+        this.board?.unsubscribe();
         this.generateScenario();
         this.board.draw(document.getElementById("board"));
         this.setFlags(0);
@@ -107,7 +114,7 @@ export class Game {
         this.urlTool.updateHash(mode, this.board.getState());
     }
 
-    public start(): void {
+    private start(): void {
         if (!this.timer.isStarted()) {
             this.timer.start();
         }
@@ -117,7 +124,7 @@ export class Game {
         return this.timer.isStarted();
     }
 
-    public gameOver(win: boolean = false): void {
+    private gameOver(win: boolean = false): void {
         this.timer.stop();
         this.isOver = true;
         this.board.revealMines(win);
@@ -141,12 +148,11 @@ export class Game {
         this.counter.updateEl(this.board.getMines() - this.flagsCounter);
     }
 
-    public incrementFlags(value: number): void {
+    private incrementFlags(value: number): void {
         this.setFlags(this.flagsCounter + value);
     }
 
-    // Temporary solution until some kind of publish/subscribe get implemented
-    public updateHash(): void {
+    private updateHash(): void {
         const mode = this.urlTool.extractMode();
         this.urlTool.updateHash(mode, this.board.getState());
     }

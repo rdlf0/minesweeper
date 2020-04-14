@@ -1,5 +1,6 @@
 import { Board } from "./board";
 import { FIRST_CLICK } from "./config";
+import { EVENT_CELL_FLAG_TOGGLED, EVENT_CELL_REVEALED, EVENT_GAME_OVER, EVENT_SAFE_AREA_CREATED, PubSub } from "./util/pub-sub";
 
 enum CellState {
     Default = "default",
@@ -8,7 +9,7 @@ enum CellState {
     Revealed = "revealed",
     Exploаded = "exploaded",
     WronglyFlagged = "wronglyFlagged",
-};
+}
 
 const MINE_CONTENT = "<span class=\"mine\"></span>";
 const MINE_CONTENT_DEBUG = "<span class=\"mine debug\"></span>";
@@ -102,12 +103,8 @@ export class Cell {
     private reveal(): void {
         if (this.getState() !== CellState.Default) return;
 
-        const isFirstClick = this.board.getGame().isStarted() === false;
-        if (isFirstClick) {
-            this.board.getGame().start();
-            if (!this.board.getGame().skipFirstClickCheck()) {
-                this.makeSafeArea();
-            }
+        if (!this.board.getGame().isStarted() && !this.board.getGame().skipFirstClickCheck()) {
+            this.makeSafeArea();
         }
 
         if (this.isMine()) {
@@ -116,7 +113,7 @@ export class Cell {
         }
 
         this.setState(CellState.Revealed);
-        this.board.incrementRevealed();
+        PubSub.publish(EVENT_CELL_REVEALED, this);
 
         this.calculateValue();
 
@@ -134,15 +131,14 @@ export class Cell {
             for (const adj of this.getAdjacentCells()) {
                 adj.unsetMine(this.row, this.col);
             }
-        };
+        }
 
-        // Temporary solution until some kind of publish/subscribe get implemented
-        this.board.getGame().updateHash();
+        PubSub.publish(EVENT_SAFE_AREA_CREATED);
     }
 
     private explode(): void {
         this.setState(CellState.Exploаded);
-        this.board.getGame().gameOver();
+        PubSub.publish(EVENT_GAME_OVER);
     }
 
     private calculateValue(): void {
@@ -169,7 +165,7 @@ export class Cell {
         // Reveal not exploaded mines
         if (this.getState() !== CellState.Exploаded) {
             this.setState(CellState.Revealed)
-        };
+        }
 
         this.setContent(MINE_CONTENT);
     }
@@ -192,11 +188,11 @@ export class Cell {
         switch (this.getState()) {
             case CellState.Default:
                 this.setState(CellState.Flagged);
-                this.board.getGame().incrementFlags(1);
+                PubSub.publish(EVENT_CELL_FLAG_TOGGLED, 1)
                 break;
             case CellState.Flagged:
                 this.setState(CellState.Questioned);
-                this.board.getGame().incrementFlags(-1);
+                PubSub.publish(EVENT_CELL_FLAG_TOGGLED, -1);
                 break;
             case CellState.Questioned:
                 this.setState(CellState.Default);
