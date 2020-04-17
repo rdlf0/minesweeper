@@ -105,7 +105,7 @@ export class Board {
     /**
      * Replants a mine to a new randomly-generated row and column.
      * The new position should not be lying in the safe area
-     * defuned by a center cell and a radius (distance).
+     * defined by a center cell and a radius (distance).
      * The distance is defined by the configuration for first click.
      * 
      * @param centerRow Center row of the safe area
