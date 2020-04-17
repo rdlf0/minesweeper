@@ -4,11 +4,11 @@ import { Game } from "./game";
 import { CantorPairer } from "./pairer/cantorPairer";
 
 const config: Config = {
-    mode: MODE_NAME.Beginner,
+    mode: MODE_NAME.Expert,
     encoder: BinaryToBase64UrlEncoderV2.prototype,
     modePairer: CantorPairer.prototype,
     firstClick: FIRST_CLICK.GuaranteedCascade,
-    debug: true,
+    debug: false,
 }
 
 new Game(config);

@@ -4,7 +4,14 @@ import { Counter } from "./counter";
 import { State } from "./state";
 import { Timer } from "./timer";
 import { UrlTool } from "./urlTool";
-import { EVENT_CELL_FLAG_TOGGLED, EVENT_CELL_REVEALED, EVENT_GAME_OVER, EVENT_SAFE_AREA_CREATED, PubSub } from "./util/pub-sub";
+import {
+    EVENT_CELL_REVEALED,
+    EVENT_CELL_FLAGGED,
+    EVENT_CELL_UNFLAGGED,
+    EVENT_GAME_OVER,
+    EVENT_SAFE_AREA_CREATED,
+    PubSub
+} from "./util/pub-sub";
 
 enum Starter {
     Default = "Default/Reset", // same as Reset
@@ -43,7 +50,8 @@ export class Game {
             this.config.modePairer);
 
         PubSub.subscribe(EVENT_CELL_REVEALED, this.start.bind(this));
-        PubSub.subscribe(EVENT_CELL_FLAG_TOGGLED, this.incrementFlags.bind(this));
+        PubSub.subscribe(EVENT_CELL_FLAGGED, this.incrementFlags.bind(this));
+        PubSub.subscribe(EVENT_CELL_UNFLAGGED, this.decrementFlags.bind(this));
         PubSub.subscribe(EVENT_GAME_OVER, this.gameOver.bind(this));
         PubSub.subscribe(EVENT_SAFE_AREA_CREATED, this.updateHash.bind(this));
 
@@ -139,8 +147,8 @@ export class Game {
     }
 
     public skipFirstClickCheck(): boolean {
-        return this.starter == Starter.Replay
-            || this.starter == Starter.Hash;
+        return this.starter == Starter.Replay ||
+            this.starter == Starter.Hash;
     }
 
     private setFlags(value: number): void {
@@ -149,7 +157,11 @@ export class Game {
     }
 
     private incrementFlags(value: number): void {
-        this.setFlags(this.flagsCounter + value);
+        this.setFlags(++this.flagsCounter);
+    }
+
+    private decrementFlags(): void {
+        this.setFlags(--this.flagsCounter);
     }
 
     private updateHash(): void {

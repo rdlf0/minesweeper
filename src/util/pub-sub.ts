@@ -3,7 +3,8 @@ interface callbackFunc {
 }
 
 export const EVENT_CELL_REVEALED = "cellRevealed";
-export const EVENT_CELL_FLAG_TOGGLED = "cellFlagToggled";
+export const EVENT_CELL_FLAGGED = "cellFlagged";
+export const EVENT_CELL_UNFLAGGED = "cellUnflagged";
 export const EVENT_GAME_OVER = "gameOver";
 export const EVENT_SAFE_AREA_CREATED = "safeAreaCreated";
 
@@ -23,7 +24,7 @@ export class PubSub {
 
     public static publish(eventName: string, data?: any): void {
         if (PubSub.events[eventName]) {
-            PubSub.events[eventName].slice(0).forEach((f: callbackFunc) => f(data));
+            PubSub.events[eventName].slice(0).forEach((f: callbackFunc) => f(data))
         }
     }
 }

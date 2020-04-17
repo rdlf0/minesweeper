@@ -2,7 +2,11 @@ import { Cell } from "./cell";
 import { Mode } from "./config";
 import { Game } from "./game";
 import { State } from "./state";
-import { EVENT_CELL_REVEALED, EVENT_GAME_OVER, PubSub } from "./util/pub-sub";
+import {
+    EVENT_CELL_REVEALED,
+    EVENT_GAME_OVER,
+    PubSub
+} from "./util/pub-sub";
 
 interface subscriptionPair {
     event: string;
@@ -94,18 +98,24 @@ export class Board {
         }
     }
 
-    public replantMine(centerRow: number, centerCol: number, unsetMineRow?: number, unsetMineCol?: number): void {
-        // Remove mine from state on first attempt
-        if (unsetMineRow !== undefined && unsetMineCol !== undefined) {
-            this.state.unsetBit(unsetMineRow * this.mode.cols + unsetMineCol);
-        }
+    public removeFromState(row: number, col: number): void {
+        this.state.unsetBit(row * this.mode.cols + col);
+    }
 
+    /**
+     * Replants a mine to a new randomly-generated row and column.
+     * The new position should not be lying in the safe area
+     * defuned by a center cell and a radius (distance).
+     * The distance is defined by the configuration for first click.
+     * 
+     * @param centerRow Center row of the safe area
+     * @param centerCol Center column of the safe area
+     */
+    public replantMine(centerRow: number, centerCol: number): void {
         const randomRow = this.random(0, this.mode.rows);
         const randomCol = this.random(0, this.mode.cols);
-
         const distance = this.getGame().getConfig().firstClick;
 
-        // Check if generated row/col pair is not in the same cell/area
         const outOfSafeArea = (randomRow > centerRow + distance || randomRow < centerRow - distance)
             && (randomCol > centerCol + distance || randomCol < centerCol - distance);
 

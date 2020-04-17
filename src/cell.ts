@@ -1,6 +1,13 @@
 import { Board } from "./board";
 import { FIRST_CLICK } from "./config";
-import { EVENT_CELL_FLAG_TOGGLED, EVENT_CELL_REVEALED, EVENT_GAME_OVER, EVENT_SAFE_AREA_CREATED, PubSub } from "./util/pub-sub";
+import {
+    EVENT_CELL_REVEALED,
+    EVENT_CELL_FLAGGED,
+    EVENT_CELL_UNFLAGGED,
+    EVENT_GAME_OVER,
+    EVENT_SAFE_AREA_CREATED,
+    PubSub
+} from "./util/pub-sub";
 
 enum CellState {
     Default = "default",
@@ -71,7 +78,8 @@ export class Cell {
         if (this.isMine()) {
             this.value = -2;
             this.setContent("");
-            this.board.replantMine(centerRow, centerCol, this.row, this.col);
+            this.board.removeFromState(this.row, this.col);
+            this.board.replantMine(centerRow, centerCol);
         }
     }
 
@@ -188,11 +196,11 @@ export class Cell {
         switch (this.getState()) {
             case CellState.Default:
                 this.setState(CellState.Flagged);
-                PubSub.publish(EVENT_CELL_FLAG_TOGGLED, 1)
+                PubSub.publish(EVENT_CELL_FLAGGED)
                 break;
             case CellState.Flagged:
                 this.setState(CellState.Questioned);
-                PubSub.publish(EVENT_CELL_FLAG_TOGGLED, -1);
+                PubSub.publish(EVENT_CELL_UNFLAGGED);
                 break;
             case CellState.Questioned:
                 this.setState(CellState.Default);
