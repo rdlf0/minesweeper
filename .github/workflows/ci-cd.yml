@@ -22,9 +22,7 @@ jobs:
           ref: ${{ github.sha }}
 
       - name: Compile the source
-        run: |
-          tsc --sourceMap false \
-              --outDir ${{ env.ARTIFACT_PATH }}/dist
+        run: tsc --outDir ${{ env.ARTIFACT_PATH }}/dist
 
       - name: Prepare artifact
         run: mv index.html require.js styles.css LICENSE ${{ env.ARTIFACT_PATH }}
