@@ -43,6 +43,7 @@ _*** will probably not become available to the user_
 | from URL with hash | from hash | from hash |
 | reset | from settings | random |
 | replay | from settings | from current board |
+
 _**** Represents the positioning of the mines_
 
 Happy wasting of your time! :) 💣
