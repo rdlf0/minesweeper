@@ -19,8 +19,8 @@ There are 3 options from which you can choose:
     Enjoy the published version of the game at [http://rdlf0-minesweeper.s3-website.us-east-2.amazonaws.com/](http://rdlf0-minesweeper.s3-website.us-east-2.amazonaws.com/)
 
 ## Settings *
-| Setting | Options | Note |
-| ------- | ------- | ---- |
+| Setting | Options |
+| ------- | ------- |
 | mode | `beginner`, `intermediate`, `expert` |
 | first click ** | `guaranteed non-mine`, `guaranteed cascade` |
 | debug *** | `true`, `false` |
