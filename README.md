@@ -2,7 +2,7 @@
 
 # Minesweeper
 ## Requirements
-- typescript v3 or later
+- typescript v3 or later (if you choose the compile option below)
 - a non-ancient browser
 
 ## Getting it up and running
