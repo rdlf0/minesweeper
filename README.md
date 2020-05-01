@@ -40,7 +40,7 @@ _*** will probably not become available to the user_
 | Option | Meaning |
 | ------ | ------- |
 | `guaranteed non-mine` | the first clicked cell has a value between 0 and 8 |
-| `guaranteed cascade` | the first clicked cell always has a value of 0 and its neighbouring cells have values between 0 and 8 |
+| `guaranteed cascade` | the first clicked cell always has a value of 0 and its neighboring cells have values between 0 and 8 |
 
 ## Game start options
 | Option | Mode | State **** |
