@@ -177,6 +177,10 @@ ul, li {
     font-family: sans;
 }
 
+.cell.cell-value-0 {
+    color: transparent;
+}
+
 .cell.cell-value-1 {
     color: #0000ff;
 }

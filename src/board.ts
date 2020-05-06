@@ -1,16 +1,18 @@
 import { Cell } from "./cell";
 import { Game } from "./game";
-import { Mode } from "./config";
+import { Mode, FIRST_CLICK } from "./config";
 import { State } from "./state";
 import {
     EVENT_CELL_REVEALED,
     EVENT_GAME_OVER,
+    EVENT_SAFE_AREA_NEEDED,
+    EVENT_SAFE_AREA_CREATED,
     PubSub
 } from "./util/pub-sub";
 
-interface subscriptionPair {
+interface EventSubscriber {
     event: string;
-    function: {
+    subscriber: {
         (data?: any): any
     }
 }
@@ -21,8 +23,10 @@ export class Board {
 
     private revealedCounter: number = 0;
 
-    private eventSubscribers: subscriptionPair[] = [
-        { event: EVENT_CELL_REVEALED, function: this.incrementRevealed.bind(this) }
+    private eventSubscribers: EventSubscriber[] = [
+        { event: EVENT_CELL_REVEALED, subscriber: this.calculateCellValue.bind(this) },
+        { event: EVENT_CELL_REVEALED, subscriber: this.incrementRevealed.bind(this) },
+        { event: EVENT_SAFE_AREA_NEEDED, subscriber: this.makeSafeArea.bind(this) }
     ];
 
     constructor(
@@ -36,15 +40,11 @@ export class Board {
     }
 
     private subscribe(): void {
-        this.eventSubscribers.slice(0).forEach((p: subscriptionPair) => PubSub.subscribe(p.event, p.function))
+        this.eventSubscribers.slice(0).forEach((p: EventSubscriber) => PubSub.subscribe(p.event, p.subscriber))
     }
 
     public unsubscribe(): void {
-        this.eventSubscribers.slice(0).forEach((p: subscriptionPair) => PubSub.unsubscribe(p.event, p.function))
-    }
-
-    public getGame(): Game {
-        return this.game;
+        this.eventSubscribers.slice(0).forEach((p: EventSubscriber) => PubSub.unsubscribe(p.event, p.subscriber))
     }
 
     public getState(): State {
@@ -60,7 +60,7 @@ export class Board {
         for (let i = 0; i < this.mode.rows; i++) {
             this.grid[i] = [];
             for (let j = 0; j < this.mode.cols; j++) {
-                this.grid[i][j] = new Cell(this, i, j);
+                this.grid[i][j] = new Cell(this.game, i, j);
             }
         }
     }
@@ -90,16 +90,17 @@ export class Board {
         while (count < this.mode.mines) {
             const row = this.random(0, this.mode.rows);
             const col = this.random(0, this.mode.cols);
-            const planted = this.grid[row][col].setMine();
-            if (planted === 1) {
+
+            if (!this.grid[row][col].isMine()) {
+                this.grid[row][col].setMine()
                 count++;
                 this.state.setBit(row * this.mode.cols + col);
             }
         }
     }
 
-    public removeFromState(row: number, col: number): void {
-        this.state.unsetBit(row * this.mode.cols + col);
+    private removeFromState(cell: Cell): void {
+        this.state.unsetBit(cell.getRow() * this.mode.cols + cell.getCol());
     }
 
     /**
@@ -111,17 +112,18 @@ export class Board {
      * @param centerRow Center row of the safe area
      * @param centerCol Center column of the safe area
      */
-    public replantMine(centerRow: number, centerCol: number): void {
+    private replantMine(centerRow: number, centerCol: number): void {
         const randomRow = this.random(0, this.mode.rows);
         const randomCol = this.random(0, this.mode.cols);
-        const distance = this.getGame().getConfig().firstClick;
+        const distance = this.game.getConfig().firstClick;
 
         const outOfSafeArea = (randomRow > centerRow + distance || randomRow < centerRow - distance)
             && (randomCol > centerCol + distance || randomCol < centerCol - distance);
 
-        if (!outOfSafeArea || this.grid[randomRow][randomCol].setMine() === 0) {
+        if (!outOfSafeArea || this.grid[randomRow][randomCol].isMine()) {
             this.replantMine(centerRow, centerCol);
         } else {
+            this.grid[randomRow][randomCol].setMine();
             this.state.setBit(randomRow * this.mode.cols + randomCol);
         }
     }
@@ -152,17 +154,56 @@ export class Board {
         }
     }
 
-    public getAdjacentCells(row: number, col: number): Cell[] {
+    private makeSafeArea(centerCell: Cell) {
+        if (centerCell.isMine()) {
+            centerCell.unsetMine();
+            this.removeFromState(centerCell);
+            this.replantMine(centerCell.getRow(), centerCell.getCol());
+        }
+
+        if (this.game.getConfig().firstClick === FIRST_CLICK.GuaranteedCascade) {
+            const adjacentCells = this.getAdjacentCells(centerCell.getRow(), centerCell.getCol());
+            for (const adj of adjacentCells) {
+                if (adj.isMine()) {
+                    adj.unsetMine();
+                    this.removeFromState(adj);
+                    this.replantMine(centerCell.getRow(), centerCell.getCol());
+                }
+            }
+        }
+
+        PubSub.publish(EVENT_SAFE_AREA_CREATED);
+    }
+
+    private calculateCellValue(cell: Cell) {
+        const adjacentCells = this.getAdjacentCells(cell.getRow(), cell.getCol());
+        let value = 0;
+        for (let adj of adjacentCells) {
+            if (adj.isMine()) {
+                value++;
+            }
+        }
+
+        cell.setValue(value);
+
+        if (value == 0) {
+            this.revealCellAdjacentCells(adjacentCells);
+        }
+    }
+
+    private revealCellAdjacentCells(adjacentCells: Cell[]) {
+        adjacentCells.forEach(adj => adj.reveal());
+    }
+
+    private getAdjacentCells(row: number, col: number): Cell[] {
         const adj: Cell[] = [];
 
-        for (let i = row - 1; i <= row + 1; i++) {
-            for (let j = col - 1; j <= col + 1; j++) {
+        for (let i = Math.max(row - 1, 0); i <= Math.min(row + 1, this.mode.rows - 1); i++) {
+            for (let j = Math.max(col - 1, 0); j <= Math.min(col + 1, this.mode.cols - 1); j++) {
                 // Skip current cell
                 if (i == row && j == col) continue;
 
-                if (i >= 0 && i < this.mode.rows && j >= 0 && j < this.mode.cols) {
-                    adj.push(this.grid[i][j]);
-                }
+                adj.push(this.grid[i][j]);
             }
         }
 

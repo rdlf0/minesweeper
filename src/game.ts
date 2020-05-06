@@ -1,8 +1,8 @@
 import { Board } from "./board";
-import { BOARD_CONFIG, Config, Mode } from "./config";
-import { Counter } from "./counter";
-import { State } from "./state";
 import { Timer } from "./timer";
+import { Counter } from "./counter";
+import { BOARD_CONFIG, Config, Mode } from "./config";
+import { State } from "./state";
 import { UrlTool } from "./urlTool";
 import {
     EVENT_CELL_REVEALED,
@@ -146,7 +146,7 @@ export class Game {
         return this.isOver;
     }
 
-    public skipFirstClickCheck(): boolean {
+    public shouldSkipFirstClickCheck(): boolean {
         return this.starter == Starter.Replay ||
             this.starter == Starter.Hash;
     }
