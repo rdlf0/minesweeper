@@ -1,11 +1,11 @@
 import { Game } from "./game";
 import {
+    EVENT_CELL_CLICKED,
     EVENT_CELL_REVEALED,
     EVENT_CELL_FLAGGED,
     EVENT_CELL_UNFLAGGED,
     EVENT_GAME_OVER,
-    EVENT_SAFE_AREA_NEEDED,
-    PubSub
+    PubSub,
 } from "./util/pub-sub";
 
 enum CellState {
@@ -88,9 +88,7 @@ export class Cell {
     public reveal(): void {
         if (this.state !== CellState.Default) return;
 
-        if (!this.game.isStarted() && !this.game.shouldSkipFirstClickCheck()) {
-            PubSub.publish(EVENT_SAFE_AREA_NEEDED, this);
-        }
+        PubSub.publish(EVENT_CELL_CLICKED, this);
 
         if (this.isMine()) {
             this.explode();

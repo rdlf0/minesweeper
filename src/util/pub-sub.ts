@@ -2,11 +2,11 @@ interface callbackFunc {
     (data?: any): any;
 }
 
+export const EVENT_CELL_CLICKED = "cellClicked";
 export const EVENT_CELL_REVEALED = "cellRevealed";
 export const EVENT_CELL_FLAGGED = "cellFlagged";
 export const EVENT_CELL_UNFLAGGED = "cellUnflagged";
 export const EVENT_GAME_OVER = "gameOver";
-export const EVENT_SAFE_AREA_NEEDED = "safeAreaNeeded";
 export const EVENT_SAFE_AREA_CREATED = "safeAreaCreated";
 
 export class PubSub {

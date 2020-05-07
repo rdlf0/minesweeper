@@ -3,9 +3,9 @@ import { Game } from "./game";
 import { Mode, FIRST_CLICK } from "./config";
 import { State } from "./state";
 import {
+    EVENT_CELL_CLICKED,
     EVENT_CELL_REVEALED,
     EVENT_GAME_OVER,
-    EVENT_SAFE_AREA_NEEDED,
     EVENT_SAFE_AREA_CREATED,
     PubSub
 } from "./util/pub-sub";
@@ -24,9 +24,9 @@ export class Board {
     private revealedCounter: number = 0;
 
     private eventSubscribers: EventSubscriber[] = [
+        { event: EVENT_CELL_CLICKED, subscriber: this.secureSafeArea.bind(this) },
         { event: EVENT_CELL_REVEALED, subscriber: this.calculateCellValue.bind(this) },
-        { event: EVENT_CELL_REVEALED, subscriber: this.incrementRevealed.bind(this) },
-        { event: EVENT_SAFE_AREA_NEEDED, subscriber: this.makeSafeArea.bind(this) }
+        { event: EVENT_CELL_REVEALED, subscriber: this.incrementRevealed.bind(this) }
     ];
 
     constructor(
@@ -141,7 +141,13 @@ export class Board {
         });
     }
 
-    private makeSafeArea(centerCell: Cell) {
+    private secureSafeArea(cell: Cell): void {
+        if (!this.game.isStarted() && !this.game.shouldSkipFirstClickCheck()) {
+            this.makeSafeArea(cell);
+        }
+    }
+
+    private makeSafeArea(centerCell: Cell): void {
         if (centerCell.isMine()) {
             centerCell.unsetMine();
             this.removeFromState(centerCell);
@@ -162,7 +168,7 @@ export class Board {
         PubSub.publish(EVENT_SAFE_AREA_CREATED);
     }
 
-    private calculateCellValue(cell: Cell) {
+    private calculateCellValue(cell: Cell): void {
         const adjacentCells = this.getAdjacentCells(cell.getRow(), cell.getCol());
         let value = 0;
         for (let adj of adjacentCells) {
@@ -178,7 +184,7 @@ export class Board {
         }
     }
 
-    private revealCellAdjacentCells(adjacentCells: Cell[]) {
+    private revealCellAdjacentCells(adjacentCells: Cell[]): void {
         adjacentCells.forEach(adj => adj.reveal());
     }
 
