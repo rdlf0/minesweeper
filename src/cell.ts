@@ -145,15 +145,11 @@ export class Cell {
     public handleEvent(e: Event) {
         switch (e.type) {
             case "click":
-                if (!this.game.checkIsOver()) {
-                    this.reveal();
-                }
+                this.reveal();
                 break;
             case "contextmenu":
                 e.preventDefault();
-                if (!this.game.checkIsOver()) {
-                    this.mark();
-                }
+                this.mark();
                 break;
         }
     }

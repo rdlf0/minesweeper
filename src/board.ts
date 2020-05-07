@@ -223,6 +223,17 @@ export class Board {
         }
     }
 
+    public deactivateCells(): void {
+        for (let i = 0; i < this.mode.rows; i++) {
+            for (let j = 0; j < this.mode.cols; j++) {
+                const cell = this.grid[i][j];
+                cell.getElement().removeEventListener("click", cell);
+                cell.getElement().removeEventListener("contextmenu", cell);
+                cell.getElement().addEventListener("contextmenu", e => e.preventDefault());
+            }
+        }
+    }
+
     private incrementRevealed(): void {
         this.revealedCounter++;
         this.checkForWin();

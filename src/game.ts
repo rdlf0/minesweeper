@@ -139,6 +139,7 @@ export class Game {
     private gameOver(win: boolean = false): void {
         this.timer.stop();
         this.isOver = true;
+        this.board.deactivateCells();
         this.board.revealMines(win);
 
         if (win) {
