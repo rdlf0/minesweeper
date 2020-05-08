@@ -1,9 +1,9 @@
 name: CI/CD
 
-on:
-  release:
-    types:
-      - published
+# on:
+#   release:
+#     types:
+#       - published
 
 env:
   ARTIFACT_NAME: ${{ 'minesweeper-compiled' }}
