@@ -5,6 +5,11 @@ name: CI/CD
 #     types:
 #       - published
 
+on:
+  push:
+    branches-ignore:
+      - '**'
+
 env:
   ARTIFACT_NAME: ${{ 'minesweeper-compiled' }}
   ARTIFACT_PATH: ${{ 'artifact' }}
