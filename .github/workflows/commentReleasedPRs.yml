@@ -1,4 +1,4 @@
-name: Comment Released PRs
+name: Comment released PRs
 
 on:
   release:
@@ -7,9 +7,10 @@ on:
 
 jobs:
   comment:
-    name: Comment
+    name: Comment released PRs
     runs-on: ubuntu-latest
     steps:
-      - uses: rdlf0/comment-released-prs-action@v1
+      - name: Comment released PRs
+        uses: rdlf0/comment-released-prs-action@v1
         with:
           repo-token: ${{ secrets.GITHUB_TOKEN }}

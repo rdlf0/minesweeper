@@ -1,14 +1,9 @@
 name: CI/CD
 
-# on:
-#   release:
-#     types:
-#       - published
-
 on:
-  push:
-    branches-ignore:
-      - '**'
+  release:
+    types:
+      - published
 
 env:
   ARTIFACT_NAME: ${{ 'minesweeper-compiled' }}
