@@ -56,11 +56,22 @@ main {
 
 #board {
     display: grid;
-    grid-template-columns: repeat(30, 1fr);
     line-height: 30px;
     font-size: 25px;
     font-family: "Arial Black", "Arial";
     font-weight: 900;
+}
+
+#board.board-beginner {
+    grid-template-columns: repeat(9, 1fr);
+}
+
+#board.board-intermediate {
+    grid-template-columns: repeat(16, 1fr);
+}
+
+#board.board-expert {
+    grid-template-columns: repeat(30, 1fr);
 }
 
 .cell {
