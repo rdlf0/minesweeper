@@ -27,7 +27,7 @@ jobs:
               --outDir ${{ env.ARTIFACT_PATH }}/dist
 
       - name: Prepare artifact
-        run: mv index.html require.js styles.css LICENSE ${{ env.ARTIFACT_PATH }}
+        run: mv index.html require.js main.js styles.css LICENSE ${{ env.ARTIFACT_PATH }}
 
       - name: Prepare release asset
         run: zip -r ${{ env.ASSET_NAME }} ${{ env.ARTIFACT_PATH }}
