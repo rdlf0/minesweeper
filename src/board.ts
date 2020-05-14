@@ -1,6 +1,6 @@
 import { Cell } from "./cell";
-import { Mode } from "./config";
 import { Game } from "./game";
+import { Mode } from "./config";
 import { State } from "./state";
 
 export class Board {
