@@ -6,12 +6,10 @@ enum CellState {
     Flagged = "flagged",
     Questioned = "questioned",
     Revealed = "revealed",
+    RevealedMine = "revealedMine",
     Exploаded = "exploaded",
     WronglyFlagged = "wronglyFlagged",
-};
-
-const MINE_CONTENT = "<span class=\"mine\"></span>";
-const MINE_CONTENT_DEBUG = "<span class=\"mine debug\"></span>";
+}
 
 export class Cell {
 
@@ -32,7 +30,7 @@ export class Cell {
     }
 
     private createHTMLElement(): void {
-        this.el = document.createElement("li");
+        this.el = document.createElement("div");
         this.el.classList.add("cell");
         this.el.addEventListener("click", this);
         this.el.addEventListener("contextmenu", this);
@@ -57,7 +55,7 @@ export class Cell {
             this.value = -1;
 
             if (this.board.getGame().getConfig().debug === true) {
-                this.setContent(MINE_CONTENT_DEBUG);
+                this.el.classList.add("debug-mine");
             }
 
             return 1;
@@ -69,7 +67,7 @@ export class Cell {
     public unsetMine(centerRow: number, centerCol: number): void {
         if (this.isMine()) {
             this.value = -2;
-            this.setContent("");
+            this.el.classList.remove("debug-mine");
             this.board.replantMine(centerRow, centerCol, this.row, this.col);
         }
     }
@@ -84,11 +82,6 @@ export class Cell {
 
     public setWronglyFlagged(): void {
         this.setState(CellState.WronglyFlagged);
-        this.setContent(MINE_CONTENT);
-    }
-
-    private setContent(content: string): void {
-        this.el.innerHTML = content;
     }
 
     private getAdjacentCells(): Cell[] {
@@ -122,8 +115,6 @@ export class Cell {
 
         if (this.value === 0) {
             this.revealAdjacentCells();
-        } else {
-            this.setContent(this.value.toString());
         }
     }
 
@@ -134,7 +125,7 @@ export class Cell {
             for (const adj of this.getAdjacentCells()) {
                 adj.unsetMine(this.row, this.col);
             }
-        };
+        }
 
         // Temporary solution until some kind of publish/subscribe get implemented
         this.board.getGame().updateHash();
@@ -168,10 +159,8 @@ export class Cell {
 
         // Reveal not exploaded mines
         if (this.getState() !== CellState.Exploаded) {
-            this.setState(CellState.Revealed)
-        };
-
-        this.setContent(MINE_CONTENT);
+            this.setState(CellState.RevealedMine)
+        }
     }
 
     public revealFlag(): void {

@@ -67,7 +67,11 @@ export class Game {
         this.isOver = false;
         this.timer.reset();
         this.generateScenario();
-        this.board.draw(document.getElementById("board"));
+
+        const boardEl = document.getElementById("board");
+        boardEl.classList.add(`board-${this.config.mode}`);
+        this.board.draw(boardEl);
+
         this.setFlags(0);
     }
 
