@@ -1,12 +1,7 @@
-:root {
-    --cell-background-size: 65%;
-    --cell-background-repeat: no-repeat;
-    --cell-background-position: center;
+html, body {
     --transition-duration: 100ms;
     --transition-function: linear;
-}
 
-html, body {
     margin: 0;
     padding: 0;
     text-align: center;
@@ -28,18 +23,16 @@ ul, li {
 main {
     display: table;
     background-color: #bdbdbd;
-    border-top: 5px solid #ffffff;
-    border-left: 5px solid #ffffff;
-    border-bottom: 5px solid #7b7b7b;
-    border-right: 5px solid #7b7b7b;
+    border-style: solid;
+    border-width: 5px;
+    border-color: #ffffff #7b7b7b #7b7b7b #ffffff;
     margin: 100px auto 0;
 }
 
 #controls, #board {
-    border-left: 5px solid #7b7b7b;
-    border-top: 5px solid #7b7b7b;
-    border-right: 5px solid #ffffff;
-    border-bottom: 5px solid #ffffff;
+    border-style: solid;
+    border-width: 5px;
+    border-color: #7b7b7b #ffffff #ffffff #7b7b7b;
     margin: 15px;
 }
 
@@ -65,44 +58,49 @@ main {
 }
 
 #board {
+    --cell-side: 33px;
+    --cell-background-size: 65%;
+    --cell-background-repeat: no-repeat;
+    --cell-background-position: center;
+
     display: grid;
     box-sizing: border-box;
+
+    grid-template-columns: repeat(var(--cols), 1fr);
+    width: calc(var(--cell-side) * var(--cols) + 10px);
+    height: calc(var(--cell-side) * var(--rows) + 10px);
 }
 
 #board.board-beginner {
-    grid-template-columns: repeat(9, 1fr);
-    width: 307px;
-    height: 307px;
+    --rows: 9;
+    --cols: 9;
 }
 
 #board.board-intermediate {
-    grid-template-columns: repeat(16, 1fr);
-    width: 538px;
-    height: 538px;
+    --rows: 16;
+    --cols: 16;
 }
 
 #board.board-expert {
-    grid-template-columns: repeat(30, 1fr);
-    width: 1000px;
-    height: 538px;
+    --rows: 16;
+    --cols: 30;
 }
 
 .cell {
     cursor: default;
-    width: 33px;
-    height: 33px;
-    background-color: #CCCCCC;
-    border-top: 5px solid #FFFFFF;
-    border-left: 5px solid #FFFFFF;
-    border-bottom: 5px solid #7b7b7b;
-    border-right: 5px solid #7b7b7b;
+    width: var(--cell-side);
+    height: var(--cell-side);
+    background-size: var(--cell-background-size);
+    background-repeat: var(--cell-background-repeat);
+    background-position: var(--cell-background-position);
+    background-color: #cccccc;
+    border-style: solid;
+    border-width: 5px;
+    border-color: #ffffff #7b7b7b #7b7b7b #ffffff;
     box-sizing: border-box;
     user-select: none;
     align-items: center;
     justify-content: center;
-    background-size: var(--cell-background-size);
-    background-repeat: var(--cell-background-repeat);
-    background-position: var(--cell-background-position);
 }
 
 .cell.state-revealed,
@@ -110,10 +108,9 @@ main {
 .cell.state-exploaded,
 .cell.state-wronglyFlagged {
     background-color: #bdbdbd;
-    border-top: 2px solid #7b7b7b;
-    border-left: 2px solid #7b7b7b;
-    border-bottom: 0 none;
-    border-right: 0 none;
+    border-style: solid none none solid;
+    border-width: 2px;
+    border-color: #7b7b7b;
 }
 
 .cell.debug-mine {
