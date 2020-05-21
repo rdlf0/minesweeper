@@ -1,7 +1,7 @@
 import { Board } from "./board";
 import { Timer } from "./timer";
 import { Counter } from "./counter";
-import { BOARD_CONFIG, Config, Mode } from "./config";
+import { Config, Mode, BOARD_CONFIG } from "./config";
 import { State } from "./state";
 import { UrlTool } from "./urlTool";
 import {

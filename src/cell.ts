@@ -33,7 +33,6 @@ export class Cell {
     public setValue(value: number): void {
         this.value = value;
         this.el.classList.add(`cell-value-${this.value.toString()}`);
-        this.setContent(value.toString());
     }
 
     private createHTMLElement(): void {
@@ -59,10 +58,6 @@ export class Cell {
         this.el.classList.remove(`state-${this.state}`);
         this.el.classList.add(`state-${state}`);
         this.state = state;
-    }
-
-    private setContent(content: string): void {
-        this.el.innerHTML = content;
     }
 
     public setMine(): void {
