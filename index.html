@@ -2,16 +2,18 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Minesweeper</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <link rel="icon" href="assets/favicon-light.svg" data-href-light="assets/favicon-dark.svg"
+        data-href-dark="assets/favicon-light.svg" type="image/svg+xml" />
     <script data-main="dist/main" src="require.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="styles.css" />
 </head>
 
 <body>
-    <div id="container">
+    <main>
         <div id="controls">
             <div id="mines-counter" class="control"></div>
             <div class="buttons-wrapper">
@@ -21,7 +23,7 @@
             <div id="timer" class="control">000</div>
         </div>
         <div id="board"></div>
-    </div>
+    </main>
     <footer>
         <a href="#" id="dark-mode-toggle">Turn dark mode <span>ON</span></a>
         <ul id="version">

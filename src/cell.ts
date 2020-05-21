@@ -13,13 +13,10 @@ enum CellState {
     Flagged = "flagged",
     Questioned = "questioned",
     Revealed = "revealed",
+    RevealedMine = "revealedMine",
     Exploаded = "exploaded",
     WronglyFlagged = "wronglyFlagged",
 }
-
-const CONTENT_EMPTY = "";
-const CONTENT_MINE = "<span class=\"mine\"></span>";
-const CONTENT_MINE_DEBUG = "<span class=\"mine debug\"></span>";
 
 export class Cell {
 
@@ -40,7 +37,7 @@ export class Cell {
     }
 
     private createHTMLElement(): void {
-        this.el = document.createElement("li");
+        this.el = document.createElement("div");
         this.el.classList.add("cell");
         this.el.addEventListener("click", this);
         this.el.addEventListener("contextmenu", this);
@@ -72,13 +69,13 @@ export class Cell {
         this.value = -1;
 
         if (this.game.getConfig().debug === true) {
-            this.setContent(CONTENT_MINE_DEBUG);
+            this.el.classList.add("debug-mine");
         }
     }
 
     public unsetMine(): void {
         this.value = -2;
-        this.setContent(CONTENT_EMPTY);
+        this.el.classList.remove("debug-mine");
     }
 
     public isMine(): boolean {
@@ -91,7 +88,6 @@ export class Cell {
 
     public setWronglyFlagged(): void {
         this.setState(CellState.WronglyFlagged);
-        this.setContent(CONTENT_MINE);
     }
 
     public reveal(): void {
@@ -121,10 +117,8 @@ export class Cell {
 
         // Reveal not exploaded mines
         if (this.state !== CellState.Exploаded) {
-            this.setState(CellState.Revealed)
+            this.setState(CellState.RevealedMine)
         }
-
-        this.setContent(CONTENT_MINE);
     }
 
     public revealFlag(): void {

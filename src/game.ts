@@ -82,7 +82,11 @@ export class Game {
         this.timer.reset();
         this.board?.unsubscribe();
         this.generateScenario();
-        this.board.draw(document.getElementById("board"));
+
+        const boardEl = document.getElementById("board");
+        boardEl.classList.add(`board-${this.config.mode}`);
+        this.board.draw(boardEl);
+
         this.setFlags(0);
     }
 
