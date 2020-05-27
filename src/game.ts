@@ -4,6 +4,14 @@ import { Counter } from "./counter";
 import { Config, Mode, BOARD_CONFIG } from "./config";
 import { State } from "./state";
 import { UrlTool } from "./urlTool";
+import {
+    EVENT_CELL_REVEALED,
+    EVENT_CELL_FLAGGED,
+    EVENT_CELL_UNFLAGGED,
+    EVENT_GAME_OVER,
+    EVENT_SAFE_AREA_CREATED,
+    PubSub
+} from "./util/pub-sub";
 
 enum Starter {
     Default = "Default/Reset", // same as Reset
@@ -41,6 +49,12 @@ export class Game {
             this.config.encoder,
             this.config.modePairer);
 
+        PubSub.subscribe(EVENT_CELL_REVEALED, this.start.bind(this));
+        PubSub.subscribe(EVENT_CELL_FLAGGED, this.incrementFlags.bind(this));
+        PubSub.subscribe(EVENT_CELL_UNFLAGGED, this.decrementFlags.bind(this));
+        PubSub.subscribe(EVENT_GAME_OVER, this.gameOver.bind(this));
+        PubSub.subscribe(EVENT_SAFE_AREA_CREATED, this.updateHash.bind(this));
+
         this.initialize();
     }
 
@@ -66,6 +80,7 @@ export class Game {
         this.starter = this.determineStarter();
         this.isOver = false;
         this.timer.reset();
+        this.board?.unsubscribe();
         this.generateScenario();
 
         const boardEl = document.getElementById("board");
@@ -111,7 +126,7 @@ export class Game {
         this.urlTool.updateHash(mode, this.board.getState());
     }
 
-    public start(): void {
+    private start(): void {
         if (!this.timer.isStarted()) {
             this.timer.start();
         }
@@ -121,7 +136,7 @@ export class Game {
         return this.timer.isStarted();
     }
 
-    public gameOver(win: boolean = false): void {
+    private gameOver(win: boolean = false): void {
         this.timer.stop();
         this.isOver = true;
         this.board.revealMines(win);
@@ -135,9 +150,9 @@ export class Game {
         return this.isOver;
     }
 
-    public skipFirstClickCheck(): boolean {
-        return this.starter == Starter.Replay
-            || this.starter == Starter.Hash;
+    public shouldSkipFirstClickCheck(): boolean {
+        return this.starter == Starter.Replay ||
+            this.starter == Starter.Hash;
     }
 
     private setFlags(value: number): void {
@@ -145,12 +160,15 @@ export class Game {
         this.counter.updateEl(this.board.getMines() - this.flagsCounter);
     }
 
-    public incrementFlags(value: number): void {
-        this.setFlags(this.flagsCounter + value);
+    private incrementFlags(value: number): void {
+        this.setFlags(++this.flagsCounter);
     }
 
-    // Temporary solution until some kind of publish/subscribe get implemented
-    public updateHash(): void {
+    private decrementFlags(): void {
+        this.setFlags(--this.flagsCounter);
+    }
+
+    private updateHash(): void {
         const mode = this.urlTool.extractMode();
         this.urlTool.updateHash(mode, this.board.getState());
     }

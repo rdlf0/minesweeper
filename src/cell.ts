@@ -1,5 +1,12 @@
-import { Board } from "./board";
-import { FIRST_CLICK } from "./config";
+import { Game } from "./game";
+import {
+    EVENT_CELL_REVEALED,
+    EVENT_CELL_FLAGGED,
+    EVENT_CELL_UNFLAGGED,
+    EVENT_GAME_OVER,
+    EVENT_SAFE_AREA_NEEDED,
+    PubSub
+} from "./util/pub-sub";
 
 enum CellState {
     Default = "default",
@@ -16,15 +23,14 @@ export class Cell {
     private value: number;
     private el: HTMLElement;
     private state: CellState;
-    private adjacentCells: Cell[] = [];
 
-    constructor(private board: Board, private row: number, private col: number) {
+    constructor(private game: Game, private row: number, private col: number) {
         this.value = -2;
         this.createHTMLElement();
         this.setState(CellState.Default);
     }
 
-    private setValue(value: number): void {
+    public setValue(value: number): void {
         this.value = value;
         this.el.classList.add(`cell-value-${this.value.toString()}`);
     }
@@ -36,40 +42,35 @@ export class Cell {
         this.el.addEventListener("contextmenu", this);
     }
 
+    public getRow(): number {
+        return this.row;
+    }
+
+    public getCol(): number {
+        return this.col;
+    }
+
     public getElement(): HTMLElement {
         return this.el;
     }
 
-    private getState(): CellState {
-        return this.state;
-    }
-
     private setState(state: CellState): void {
-        this.el.classList.remove(`state-${this.getState()}`);
+        this.el.classList.remove(`state-${this.state}`);
         this.el.classList.add(`state-${state}`);
         this.state = state;
     }
 
-    public setMine(): number {
-        if (!this.isMine()) {
-            this.value = -1;
+    public setMine(): void {
+        this.value = -1;
 
-            if (this.board.getGame().getConfig().debug === true) {
-                this.el.classList.add("debug-mine");
-            }
-
-            return 1;
+        if (this.game.getConfig().debug === true) {
+            this.el.classList.add("debug-mine");
         }
-
-        return 0;
     }
 
-    public unsetMine(centerRow: number, centerCol: number): void {
-        if (this.isMine()) {
-            this.value = -2;
-            this.el.classList.remove("debug-mine");
-            this.board.replantMine(centerRow, centerCol, this.row, this.col);
-        }
+    public unsetMine(): void {
+        this.value = -2;
+        this.el.classList.remove("debug-mine");
     }
 
     public isMine(): boolean {
@@ -77,30 +78,18 @@ export class Cell {
     }
 
     public isFlagged(): boolean {
-        return this.getState() === CellState.Flagged;
+        return this.state === CellState.Flagged;
     }
 
     public setWronglyFlagged(): void {
         this.setState(CellState.WronglyFlagged);
     }
 
-    private getAdjacentCells(): Cell[] {
-        if (this.adjacentCells.length === 0) {
-            this.adjacentCells = this.board.getAdjacentCells(this.row, this.col);
-        }
+    public reveal(): void {
+        if (this.state !== CellState.Default) return;
 
-        return this.adjacentCells;
-    }
-
-    private reveal(): void {
-        if (this.getState() !== CellState.Default) return;
-
-        const isFirstClick = this.board.getGame().isStarted() === false;
-        if (isFirstClick) {
-            this.board.getGame().start();
-            if (!this.board.getGame().skipFirstClickCheck()) {
-                this.makeSafeArea();
-            }
+        if (!this.game.isStarted() && !this.game.shouldSkipFirstClickCheck()) {
+            PubSub.publish(EVENT_SAFE_AREA_NEEDED, this);
         }
 
         if (this.isMine()) {
@@ -109,66 +98,28 @@ export class Cell {
         }
 
         this.setState(CellState.Revealed);
-        this.board.incrementRevealed();
-
-        this.calculateValue();
-
-        if (this.value === 0) {
-            this.revealAdjacentCells();
-        }
-    }
-
-    private makeSafeArea(): void {
-        this.unsetMine(this.row, this.col);
-
-        if (this.board.getGame().getConfig().firstClick === FIRST_CLICK.GuaranteedCascade) {
-            for (const adj of this.getAdjacentCells()) {
-                adj.unsetMine(this.row, this.col);
-            }
-        }
-
-        // Temporary solution until some kind of publish/subscribe get implemented
-        this.board.getGame().updateHash();
+        PubSub.publish(EVENT_CELL_REVEALED, this);
     }
 
     private explode(): void {
         this.setState(CellState.Exploаded);
-        this.board.getGame().gameOver();
-    }
-
-    private calculateValue(): void {
-        let value = 0;
-        for (let adj of this.getAdjacentCells()) {
-            if (adj.isMine()) {
-                value++;
-            }
-        }
-
-        this.setValue(value);
-    }
-
-    private revealAdjacentCells(): void {
-        for (const adj of this.getAdjacentCells()) {
-            adj.reveal();
-        }
+        PubSub.publish(EVENT_GAME_OVER);
     }
 
     public revealMine(): void {
         // Leave flags
-        if (this.getState() === CellState.Flagged) return;
+        if (this.state === CellState.Flagged) return;
 
         // Reveal not exploaded mines
-        if (this.getState() !== CellState.Exploаded) {
+        if (this.state !== CellState.Exploаded) {
             this.setState(CellState.RevealedMine)
         }
     }
 
     public revealFlag(): void {
-        if (this.getState() === CellState.Default) {
+        if (this.state === CellState.Default) {
             this.mark();
-        }
-
-        if (this.getState() === CellState.Questioned) {
+        } else if (this.state === CellState.Questioned) {
             // :)
             this.mark();
             this.mark();
@@ -176,16 +127,16 @@ export class Cell {
     }
 
     private mark(): void {
-        if (this.getState() == CellState.Revealed) return;
+        if (this.state == CellState.Revealed) return;
 
-        switch (this.getState()) {
+        switch (this.state) {
             case CellState.Default:
                 this.setState(CellState.Flagged);
-                this.board.getGame().incrementFlags(1);
+                PubSub.publish(EVENT_CELL_FLAGGED)
                 break;
             case CellState.Flagged:
                 this.setState(CellState.Questioned);
-                this.board.getGame().incrementFlags(-1);
+                PubSub.publish(EVENT_CELL_UNFLAGGED);
                 break;
             case CellState.Questioned:
                 this.setState(CellState.Default);
@@ -196,13 +147,13 @@ export class Cell {
     public handleEvent(e: Event) {
         switch (e.type) {
             case "click":
-                if (!this.board.getGame().checkIsOver()) {
+                if (!this.game.checkIsOver()) {
                     this.reveal();
                 }
                 break;
             case "contextmenu":
                 e.preventDefault();
-                if (!this.board.getGame().checkIsOver()) {
+                if (!this.game.checkIsOver()) {
                     this.mark();
                 }
                 break;

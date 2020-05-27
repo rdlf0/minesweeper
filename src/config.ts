@@ -19,7 +19,7 @@ export enum MODE_NAME {
     Beginner = "beginner",
     Intermediate = "intermediate",
     Expert = "expert"
-};
+}
 
 export interface Mode {
     rows: number;
