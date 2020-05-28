@@ -1,5 +1,4 @@
 import { Cell } from "./cell";
-import { Game } from "./game";
 import { Mode, FIRST_CLICK } from "./config";
 import { State } from "./state";
 import {
@@ -9,6 +8,7 @@ import {
     EVENT_SAFE_AREA_CREATED,
     PubSub
 } from "./util/pub-sub";
+import { Session } from "./util/session";
 
 interface EventSubscriber {
     event: string;
@@ -30,9 +30,8 @@ export class Board {
     ];
 
     constructor(
-        private game: Game,
         private mode: Mode,
-        private state: State
+        private state: State,
     ) {
         this.initGrid();
         this.plantMines();
@@ -60,7 +59,7 @@ export class Board {
         for (let i = 0; i < this.mode.rows; i++) {
             this.grid[i] = [];
             for (let j = 0; j < this.mode.cols; j++) {
-                this.grid[i][j] = new Cell(this.game, i, j);
+                this.grid[i][j] = new Cell(i, j);
             }
         }
     }
@@ -115,7 +114,7 @@ export class Board {
     private replantMine(centerRow: number, centerCol: number): void {
         const randomRow = this.random(0, this.mode.rows);
         const randomCol = this.random(0, this.mode.cols);
-        const distance = this.game.getConfig().firstClick;
+        const distance = Session.get("firstClick") as number;
 
         const outOfSafeArea = (randomRow > centerRow + distance || randomRow < centerRow - distance)
             && (randomCol > centerCol + distance || randomCol < centerCol - distance);
@@ -142,7 +141,7 @@ export class Board {
     }
 
     private secureSafeArea(cell: Cell): void {
-        if (!this.game.isStarted() && !this.game.shouldSkipFirstClickCheck()) {
+        if (!Session.get("gameStarted", false) && Session.get("applyFirstClickRule")) {
             this.makeSafeArea(cell);
         }
     }
@@ -154,7 +153,7 @@ export class Board {
             this.replantMine(centerCell.getRow(), centerCell.getCol());
         }
 
-        if (this.game.getConfig().firstClick === FIRST_CLICK.GuaranteedCascade) {
+        if (Session.get("firstClick") === FIRST_CLICK.GuaranteedCascade) {
             const adjacentCells = this.getAdjacentCells(centerCell.getRow(), centerCell.getCol());
             for (const adj of adjacentCells) {
                 if (adj.isMine()) {

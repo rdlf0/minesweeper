@@ -1,4 +1,3 @@
-import { Game } from "./game";
 import {
     EVENT_CELL_CLICKED,
     EVENT_CELL_REVEALED,
@@ -7,6 +6,7 @@ import {
     EVENT_GAME_OVER,
     PubSub,
 } from "./util/pub-sub";
+import { Session } from "./util/session";
 
 enum CellState {
     Default = "default",
@@ -24,7 +24,10 @@ export class Cell {
     private el: HTMLElement;
     private state: CellState;
 
-    constructor(private game: Game, private row: number, private col: number) {
+    constructor(
+        private row: number,
+        private col: number,
+    ) {
         this.value = -2;
         this.createHTMLElement();
         this.setState(CellState.Default);
@@ -63,7 +66,7 @@ export class Cell {
     public setMine(): void {
         this.value = -1;
 
-        if (this.game.getConfig().debug === true) {
+        if (Session.get("debug") === true) {
             this.el.classList.add("debug-mine");
         }
     }
