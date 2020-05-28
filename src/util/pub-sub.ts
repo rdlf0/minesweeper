@@ -1,3 +1,5 @@
+import { Session } from "./session";
+
 interface callbackFunc {
     (data?: any): any;
 }
@@ -25,8 +27,9 @@ export class PubSub {
 
     public static publish(eventName: string, data?: any): void {
         if (PubSub.events[eventName]) {
-            // @TODO: Enable this when debug is on
-            // console.log(eventName);
+            if (Session.get("debug")) {
+                console.debug(`Event: ${eventName}`);
+            }
             PubSub.events[eventName].slice(0).forEach((f: callbackFunc) => f(data))
         }
     }
