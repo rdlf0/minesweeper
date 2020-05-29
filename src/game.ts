@@ -10,12 +10,12 @@ import {
     EVENT_CELL_UNFLAGGED,
     EVENT_GAME_OVER,
     EVENT_SAFE_AREA_CREATED,
-    PubSub
+    PubSub,
 } from "./util/pub-sub";
 import { Session } from "./util/session";
 
 enum Starter {
-    Default = "Default/Reset", // same as Reset
+    Default = "Default/Reset",
     Hash = "Hash",
     Replay = "Replay",
 }
@@ -48,7 +48,8 @@ export class Game {
 
         this.urlTool = new UrlTool(
             this.config.encoder,
-            this.config.modePairer);
+            this.config.modePairer,
+        );
 
         PubSub.subscribe(EVENT_CELL_REVEALED, this.start.bind(this));
         PubSub.subscribe(EVENT_CELL_FLAGGED, this.incrementFlags.bind(this));

@@ -6,7 +6,7 @@ import {
     EVENT_CELL_REVEALED,
     EVENT_GAME_OVER,
     EVENT_SAFE_AREA_CREATED,
-    PubSub
+    PubSub,
 } from "./util/pub-sub";
 import { Session } from "./util/session";
 
@@ -26,7 +26,7 @@ export class Board {
     private eventSubscribers: EventSubscriber[] = [
         { event: EVENT_CELL_CLICKED, subscriber: this.secureSafeArea.bind(this) },
         { event: EVENT_CELL_REVEALED, subscriber: this.calculateCellValue.bind(this) },
-        { event: EVENT_CELL_REVEALED, subscriber: this.incrementRevealed.bind(this) }
+        { event: EVENT_CELL_REVEALED, subscriber: this.incrementRevealed.bind(this) },
     ];
 
     constructor(

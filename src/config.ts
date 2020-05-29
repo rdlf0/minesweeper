@@ -12,13 +12,13 @@ export interface Config {
 
 export enum FIRST_CLICK {
     GuaranteedCell = 0,
-    GuaranteedCascade = 1
+    GuaranteedCascade = 1,
 }
 
 export enum MODE_NAME {
     Beginner = "beginner",
     Intermediate = "intermediate",
-    Expert = "expert"
+    Expert = "expert",
 }
 
 export interface Mode {
@@ -35,16 +35,16 @@ export const BOARD_CONFIG: BoardConfig = {
     beginner: {
         rows: 9,
         cols: 9,
-        mines: 10
+        mines: 10,
     },
     intermediate: {
         rows: 16,
         cols: 16,
-        mines: 40
+        mines: 40,
     },
     expert: {
         rows: 16,
         cols: 30,
-        mines: 99
+        mines: 99,
     }
 }
