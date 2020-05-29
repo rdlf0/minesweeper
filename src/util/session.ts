@@ -6,7 +6,7 @@ export class Session {
 
     public static set(key: string, value: ValueType): void {
         if (Session.get("debug")) {
-            console.debug(`SESSION SET: key=${key} value=${value}`);
+            console.debug(`SESSION SET: ${key} = ${value}`);
         }
 
         Session.data.set(key, value);
@@ -21,6 +21,10 @@ export class Session {
     }
 
     public static clear(): void {
+        if (Session.get("debug")) {
+            console.debug("SESSION CLEARED");
+        }
+
         Session.data.clear();
     }
 
