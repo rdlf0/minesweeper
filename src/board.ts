@@ -1,14 +1,14 @@
 import { Cell } from "./cell";
-import { Game } from "./game";
 import { Mode, FIRST_CLICK } from "./config";
 import { State } from "./state";
 import {
+    EVENT_CELL_CLICKED,
     EVENT_CELL_REVEALED,
     EVENT_GAME_OVER,
-    EVENT_SAFE_AREA_NEEDED,
     EVENT_SAFE_AREA_CREATED,
-    PubSub
+    PubSub,
 } from "./util/pub-sub";
+import { Session } from "./util/session";
 
 interface EventSubscriber {
     event: string;
@@ -24,15 +24,14 @@ export class Board {
     private revealedCounter: number = 0;
 
     private eventSubscribers: EventSubscriber[] = [
+        { event: EVENT_CELL_CLICKED, subscriber: this.secureSafeArea.bind(this) },
         { event: EVENT_CELL_REVEALED, subscriber: this.calculateCellValue.bind(this) },
         { event: EVENT_CELL_REVEALED, subscriber: this.incrementRevealed.bind(this) },
-        { event: EVENT_SAFE_AREA_NEEDED, subscriber: this.makeSafeArea.bind(this) }
     ];
 
     constructor(
-        private game: Game,
         private mode: Mode,
-        private state: State
+        private state: State,
     ) {
         this.initGrid();
         this.plantMines();
@@ -40,11 +39,11 @@ export class Board {
     }
 
     private subscribe(): void {
-        this.eventSubscribers.slice(0).forEach((p: EventSubscriber) => PubSub.subscribe(p.event, p.subscriber))
+        this.eventSubscribers.forEach((p: EventSubscriber) => PubSub.subscribe(p.event, p.subscriber))
     }
 
     public unsubscribe(): void {
-        this.eventSubscribers.slice(0).forEach((p: EventSubscriber) => PubSub.unsubscribe(p.event, p.subscriber))
+        this.eventSubscribers.forEach((p: EventSubscriber) => PubSub.unsubscribe(p.event, p.subscriber))
     }
 
     public getState(): State {
@@ -60,7 +59,7 @@ export class Board {
         for (let i = 0; i < this.mode.rows; i++) {
             this.grid[i] = [];
             for (let j = 0; j < this.mode.cols; j++) {
-                this.grid[i][j] = new Cell(this.game, i, j);
+                this.grid[i][j] = new Cell(i, j);
             }
         }
     }
@@ -115,7 +114,7 @@ export class Board {
     private replantMine(centerRow: number, centerCol: number): void {
         const randomRow = this.random(0, this.mode.rows);
         const randomCol = this.random(0, this.mode.cols);
-        const distance = this.game.getConfig().firstClick;
+        const distance = Session.get("firstClick") as number;
 
         const outOfSafeArea = (randomRow > centerRow + distance || randomRow < centerRow - distance)
             && (randomCol > centerCol + distance || randomCol < centerCol - distance);
@@ -141,14 +140,20 @@ export class Board {
         });
     }
 
-    private makeSafeArea(centerCell: Cell) {
+    private secureSafeArea(cell: Cell): void {
+        if (!Session.get("gameStarted", false) && Session.get("applyFirstClickRule")) {
+            this.makeSafeArea(cell);
+        }
+    }
+
+    private makeSafeArea(centerCell: Cell): void {
         if (centerCell.isMine()) {
             centerCell.unsetMine();
             this.removeFromState(centerCell);
             this.replantMine(centerCell.getRow(), centerCell.getCol());
         }
 
-        if (this.game.getConfig().firstClick === FIRST_CLICK.GuaranteedCascade) {
+        if (Session.get("firstClick") === FIRST_CLICK.GuaranteedCascade) {
             const adjacentCells = this.getAdjacentCells(centerCell.getRow(), centerCell.getCol());
             for (const adj of adjacentCells) {
                 if (adj.isMine()) {
@@ -162,7 +167,7 @@ export class Board {
         PubSub.publish(EVENT_SAFE_AREA_CREATED);
     }
 
-    private calculateCellValue(cell: Cell) {
+    private calculateCellValue(cell: Cell): void {
         const adjacentCells = this.getAdjacentCells(cell.getRow(), cell.getCol());
         let value = 0;
         for (let adj of adjacentCells) {
@@ -178,7 +183,7 @@ export class Board {
         }
     }
 
-    private revealCellAdjacentCells(adjacentCells: Cell[]) {
+    private revealCellAdjacentCells(adjacentCells: Cell[]): void {
         adjacentCells.forEach(adj => adj.reveal());
     }
 
@@ -213,6 +218,17 @@ export class Board {
                         cell.setWronglyFlagged();
                     }
                 }
+            }
+        }
+    }
+
+    public deactivateCells(): void {
+        for (let i = 0; i < this.mode.rows; i++) {
+            for (let j = 0; j < this.mode.cols; j++) {
+                const cell = this.grid[i][j];
+                cell.getElement().removeEventListener("click", cell);
+                cell.getElement().removeEventListener("contextmenu", cell);
+                cell.getElement().addEventListener("contextmenu", e => e.preventDefault());
             }
         }
     }

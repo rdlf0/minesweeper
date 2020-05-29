@@ -7,5 +7,5 @@ export interface Pairer {
 
 export interface Tuple {
     a: number,
-    b: number
+    b: number,
 }

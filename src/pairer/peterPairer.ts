@@ -31,7 +31,7 @@ export class PeterPairer implements Pairer {
 
         const result: Tuple = {
             a,
-            b
+            b,
         }
 
         return result;

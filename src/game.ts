@@ -10,11 +10,12 @@ import {
     EVENT_CELL_UNFLAGGED,
     EVENT_GAME_OVER,
     EVENT_SAFE_AREA_CREATED,
-    PubSub
+    PubSub,
 } from "./util/pub-sub";
+import { Session } from "./util/session";
 
 enum Starter {
-    Default = "Default/Reset", // same as Reset
+    Default = "Default/Reset",
     Hash = "Hash",
     Replay = "Replay",
 }
@@ -47,7 +48,8 @@ export class Game {
 
         this.urlTool = new UrlTool(
             this.config.encoder,
-            this.config.modePairer);
+            this.config.modePairer,
+        );
 
         PubSub.subscribe(EVENT_CELL_REVEALED, this.start.bind(this));
         PubSub.subscribe(EVENT_CELL_FLAGGED, this.incrementFlags.bind(this));
@@ -77,6 +79,10 @@ export class Game {
     }
 
     private initialize(): void {
+        Session.clear();
+        Session.set("debug", this.config.debug);
+        Session.set("firstClick", this.config.firstClick);
+
         this.starter = this.determineStarter();
         this.isOver = false;
         this.timer.reset();
@@ -98,6 +104,8 @@ export class Game {
         if (this.urlTool.isHashSet()) {
             return Starter.Hash;
         }
+
+        Session.set("applyFirstClickRule", true);
 
         // Default == Reset
         return Starter.Default;
@@ -121,7 +129,7 @@ export class Game {
                 state = null;
         }
 
-        this.board = new Board(this, mode, state);
+        this.board = new Board(mode, state);
 
         this.urlTool.updateHash(mode, this.board.getState());
     }
@@ -129,6 +137,7 @@ export class Game {
     private start(): void {
         if (!this.timer.isStarted()) {
             this.timer.start();
+            Session.set("gameStarted", true);
         }
     }
 
@@ -139,6 +148,7 @@ export class Game {
     private gameOver(win: boolean = false): void {
         this.timer.stop();
         this.isOver = true;
+        this.board.deactivateCells();
         this.board.revealMines(win);
 
         if (win) {
@@ -148,11 +158,6 @@ export class Game {
 
     public checkIsOver(): boolean {
         return this.isOver;
-    }
-
-    public shouldSkipFirstClickCheck(): boolean {
-        return this.starter == Starter.Replay ||
-            this.starter == Starter.Hash;
     }
 
     private setFlags(value: number): void {

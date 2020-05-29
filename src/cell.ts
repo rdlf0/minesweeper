@@ -1,12 +1,12 @@
-import { Game } from "./game";
 import {
+    EVENT_CELL_CLICKED,
     EVENT_CELL_REVEALED,
     EVENT_CELL_FLAGGED,
     EVENT_CELL_UNFLAGGED,
     EVENT_GAME_OVER,
-    EVENT_SAFE_AREA_NEEDED,
-    PubSub
+    PubSub,
 } from "./util/pub-sub";
+import { Session } from "./util/session";
 
 enum CellState {
     Default = "default",
@@ -18,14 +18,20 @@ enum CellState {
     WronglyFlagged = "wronglyFlagged",
 }
 
+const VALUE_DEFAULT = -2;
+const VALUE_MINE = -1;
+
 export class Cell {
 
     private value: number;
     private el: HTMLElement;
     private state: CellState;
 
-    constructor(private game: Game, private row: number, private col: number) {
-        this.value = -2;
+    constructor(
+        private row: number,
+        private col: number,
+    ) {
+        this.value = VALUE_DEFAULT;
         this.createHTMLElement();
         this.setState(CellState.Default);
     }
@@ -61,20 +67,20 @@ export class Cell {
     }
 
     public setMine(): void {
-        this.value = -1;
+        this.value = VALUE_MINE;
 
-        if (this.game.getConfig().debug === true) {
+        if (Session.get("debug") === true) {
             this.el.classList.add("debug-mine");
         }
     }
 
     public unsetMine(): void {
-        this.value = -2;
+        this.value = VALUE_DEFAULT;
         this.el.classList.remove("debug-mine");
     }
 
     public isMine(): boolean {
-        return this.value == -1;
+        return this.value == VALUE_MINE;
     }
 
     public isFlagged(): boolean {
@@ -88,9 +94,7 @@ export class Cell {
     public reveal(): void {
         if (this.state !== CellState.Default) return;
 
-        if (!this.game.isStarted() && !this.game.shouldSkipFirstClickCheck()) {
-            PubSub.publish(EVENT_SAFE_AREA_NEEDED, this);
-        }
+        PubSub.publish(EVENT_CELL_CLICKED, this);
 
         if (this.isMine()) {
             this.explode();
@@ -147,15 +151,11 @@ export class Cell {
     public handleEvent(e: Event) {
         switch (e.type) {
             case "click":
-                if (!this.game.checkIsOver()) {
-                    this.reveal();
-                }
+                this.reveal();
                 break;
             case "contextmenu":
                 e.preventDefault();
-                if (!this.game.checkIsOver()) {
-                    this.mark();
-                }
+                this.mark();
                 break;
         }
     }

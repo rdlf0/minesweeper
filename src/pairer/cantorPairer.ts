@@ -19,7 +19,7 @@ export class CantorPairer implements Pairer {
 
         const result: Tuple = {
             a,
-            b
+            b,
         }
 
         return result;

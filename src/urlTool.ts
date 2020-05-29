@@ -11,8 +11,8 @@ export class UrlTool {
 
     constructor(
         private encoder: Encoder,
-        private pairer: Pairer) {
-    }
+        private pairer: Pairer,
+    ) { }
 
     public isHashSet(): boolean {
         return window.location.hash.length > 1;
@@ -42,7 +42,7 @@ export class UrlTool {
         let result: Mode = {
             rows,
             cols,
-            mines
+            mines,
         }
 
         return result;
@@ -71,14 +71,14 @@ export class UrlTool {
     private encodeMode(mode: Mode): string {
         let t: Tuple = {
             a: mode.rows,
-            b: mode.cols
+            b: mode.cols,
         };
 
         let paired = this.pairer.pair(t);
 
         t = {
             a: paired,
-            b: mode.mines
+            b: mode.mines,
         };
 
         paired = this.pairer.pair(t);
