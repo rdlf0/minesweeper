@@ -39,11 +39,11 @@ export class Board {
     }
 
     private subscribe(): void {
-        this.eventSubscribers.slice(0).forEach((p: EventSubscriber) => PubSub.subscribe(p.event, p.subscriber))
+        this.eventSubscribers.forEach((p: EventSubscriber) => PubSub.subscribe(p.event, p.subscriber))
     }
 
     public unsubscribe(): void {
-        this.eventSubscribers.slice(0).forEach((p: EventSubscriber) => PubSub.unsubscribe(p.event, p.subscriber))
+        this.eventSubscribers.forEach((p: EventSubscriber) => PubSub.unsubscribe(p.event, p.subscriber))
     }
 
     public getState(): State {

@@ -12,7 +12,7 @@ export const EVENT_GAME_OVER = "gameOver";
 export const EVENT_SAFE_AREA_CREATED = "safeAreaCreated";
 
 export class PubSub {
-    private static events: any = {};
+    private static events: Array<Array<callbackFunc>> = new Array();
 
     public static subscribe(eventName: string, func: callbackFunc): void {
         PubSub.events[eventName] = PubSub.events[eventName] || [];
@@ -28,9 +28,9 @@ export class PubSub {
     public static publish(eventName: string, data?: any): void {
         if (PubSub.events[eventName]) {
             if (Session.get("debug")) {
-                console.debug(`Event: ${eventName}`);
+                console.debug(`EVENT: ${eventName}`);
             }
-            PubSub.events[eventName].slice(0).forEach((f: callbackFunc) => f(data))
+            PubSub.events[eventName].forEach((f: callbackFunc) => f(data))
         }
     }
 }

@@ -18,6 +18,9 @@ enum CellState {
     WronglyFlagged = "wronglyFlagged",
 }
 
+const VALUE_DEFAULT = -2;
+const VALUE_MINE = -1;
+
 export class Cell {
 
     private value: number;
@@ -28,7 +31,7 @@ export class Cell {
         private row: number,
         private col: number,
     ) {
-        this.value = -2;
+        this.value = VALUE_DEFAULT;
         this.createHTMLElement();
         this.setState(CellState.Default);
     }
@@ -64,7 +67,7 @@ export class Cell {
     }
 
     public setMine(): void {
-        this.value = -1;
+        this.value = VALUE_MINE;
 
         if (Session.get("debug") === true) {
             this.el.classList.add("debug-mine");
@@ -72,12 +75,12 @@ export class Cell {
     }
 
     public unsetMine(): void {
-        this.value = -2;
+        this.value = VALUE_DEFAULT;
         this.el.classList.remove("debug-mine");
     }
 
     public isMine(): boolean {
-        return this.value == -1;
+        return this.value == VALUE_MINE;
     }
 
     public isFlagged(): boolean {
