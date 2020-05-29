@@ -78,7 +78,7 @@ export class Game {
     }
 
     private initialize(): void {
-        Session.reset();
+        Session.clear();
         Session.set("debug", this.config.debug);
         Session.set("firstClick", this.config.firstClick);
 

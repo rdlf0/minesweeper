@@ -2,9 +2,13 @@ type ValueType = string | number | boolean;
 
 export class Session {
 
-    private static data = new Map<string, ValueType>();
+    private static data: Map<string, ValueType> = new Map();
 
     public static set(key: string, value: ValueType): void {
+        if (Session.get("debug")) {
+            console.debug(`SESSION SET: key=${key} value=${value}`);
+        }
+
         Session.data.set(key, value);
     }
 
@@ -16,7 +20,7 @@ export class Session {
         return defaultValue;
     }
 
-    public static reset(): void {
+    public static clear(): void {
         Session.data.clear();
     }
 
