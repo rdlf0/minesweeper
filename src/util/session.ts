@@ -2,6 +2,8 @@ type ValueType = string | number | boolean;
 
 export class Session {
 
+    private constructor() { };
+
     private static data: Map<string, ValueType> = new Map();
 
     public static set(key: string, value: ValueType): void {

@@ -12,6 +12,9 @@ export const EVENT_GAME_OVER = "gameOver";
 export const EVENT_SAFE_AREA_CREATED = "safeAreaCreated";
 
 export class PubSub {
+
+    private constructor() { };
+
     private static events: Array<Array<callbackFunc>> = new Array();
 
     public static subscribe(eventName: string, func: callbackFunc): void {
