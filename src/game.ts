@@ -55,7 +55,7 @@ export class Game {
         PubSub.subscribe(EVENT_CELL_FLAGGED, this.incrementFlags.bind(this));
         PubSub.subscribe(EVENT_CELL_UNFLAGGED, this.decrementFlags.bind(this));
         PubSub.subscribe(EVENT_GAME_OVER, this.gameOver.bind(this));
-        PubSub.subscribe(EVENT_SAFE_AREA_CREATED, this.updateHash.bind(this));
+        PubSub.subscribe(EVENT_SAFE_AREA_CREATED, this.updateUrlHash.bind(this));
 
         this.initialize();
     }
@@ -131,7 +131,7 @@ export class Game {
 
         this.board = new Board(mode, state);
 
-        this.urlTool.updateHash(mode, this.board.getState());
+        this.updateUrlHash();
     }
 
     private start(): void {
@@ -173,9 +173,8 @@ export class Game {
         this.setFlags(--this.flagsCounter);
     }
 
-    private updateHash(): void {
-        const mode = this.urlTool.extractMode();
-        this.urlTool.updateHash(mode, this.board.getState());
+    private updateUrlHash(): void {
+        this.urlTool.updateHash(this.board.getMode(), this.board.getState());
     }
 
 }

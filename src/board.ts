@@ -46,8 +46,26 @@ export class Board {
         this.eventSubscribers.forEach((p: EventSubscriber) => PubSub.unsubscribe(p.event, p.subscriber))
     }
 
+    public getMode(): Mode {
+        return this.mode;
+    }
+
     public getState(): State {
-        return this.state;
+        if (this.state) {
+            return this.state;
+        }
+
+        const state = new State(this.mode.rows * this.mode.cols);
+
+        for (let row = 0; row < this.mode.rows; row++) {
+            for (let col = 0; col < this.mode.cols; col++) {
+                if (this.grid[row][col].isMine()) {
+                    state.setBit(row * this.mode.cols + col);
+                }
+            }
+        }
+
+        return state;
     }
 
     public getMines(): number {
@@ -83,8 +101,6 @@ export class Board {
     }
 
     private plantMinesRandomly(): void {
-        this.state = new State(this.mode.rows * this.mode.cols);
-
         let count = 0;
         while (count < this.mode.mines) {
             const row = this.random(0, this.mode.rows);
@@ -93,13 +109,8 @@ export class Board {
             if (!this.grid[row][col].isMine()) {
                 this.grid[row][col].setMine()
                 count++;
-                this.state.setBit(row * this.mode.cols + col);
             }
         }
-    }
-
-    private removeFromState(cell: Cell): void {
-        this.state.unsetBit(cell.getRow() * this.mode.cols + cell.getCol());
     }
 
     /**
@@ -123,7 +134,6 @@ export class Board {
             this.replantMine(centerRow, centerCol);
         } else {
             this.grid[randomRow][randomCol].setMine();
-            this.state.setBit(randomRow * this.mode.cols + randomCol);
         }
     }
 
@@ -149,7 +159,6 @@ export class Board {
     private makeSafeArea(centerCell: Cell): void {
         if (centerCell.isMine()) {
             centerCell.unsetMine();
-            this.removeFromState(centerCell);
             this.replantMine(centerCell.getRow(), centerCell.getCol());
         }
 
@@ -158,7 +167,6 @@ export class Board {
             for (const adj of adjacentCells) {
                 if (adj.isMine()) {
                     adj.unsetMine();
-                    this.removeFromState(adj);
                     this.replantMine(centerCell.getRow(), centerCell.getCol());
                 }
             }
