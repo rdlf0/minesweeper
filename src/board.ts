@@ -127,14 +127,16 @@ export class Board {
         const randomCol = this.random(0, this.mode.cols);
         const distance = Session.get("firstClick") as number;
 
-        const outOfSafeArea = (randomRow > centerRow + distance || randomRow < centerRow - distance)
-            && (randomCol > centerCol + distance || randomCol < centerCol - distance);
+        const outOfSafeArea =
+            (randomRow > centerRow + distance || randomRow < centerRow - distance) &&
+            (randomCol > centerCol + distance || randomCol < centerCol - distance);
 
-        if (!outOfSafeArea || this.grid[randomRow][randomCol].isMine()) {
-            this.replantMine(centerRow, centerCol);
-        } else {
+        if (outOfSafeArea && !this.grid[randomRow][randomCol].isMine()) {
             this.grid[randomRow][randomCol].setMine();
+            return;
         }
+
+        this.replantMine(centerRow, centerCol);
     }
 
     private random(from: number, to: number): number {
