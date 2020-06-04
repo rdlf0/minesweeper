@@ -39,11 +39,11 @@ export class Board {
     }
 
     private subscribe(): void {
-        this.eventSubscribers.forEach((p: EventSubscriber) => PubSub.subscribe(p.event, p.subscriber))
+        this.eventSubscribers.forEach((es: EventSubscriber) => PubSub.subscribe(es.event, es.subscriber))
     }
 
     public unsubscribe(): void {
-        this.eventSubscribers.forEach((p: EventSubscriber) => PubSub.unsubscribe(p.event, p.subscriber))
+        this.eventSubscribers.forEach((es: EventSubscriber) => PubSub.unsubscribe(es.event, es.subscriber))
     }
 
     public getMode(): Mode {
@@ -143,12 +143,12 @@ export class Board {
         return Math.floor(Math.random() * to) + from;
     }
 
-    public draw(board: HTMLElement): void {
+    public draw(boardEl: HTMLElement): void {
         // Remove existing cells (on reset/replay)
-        board.textContent = "";
+        boardEl.textContent = "";
 
         this.grid.forEach(row => {
-            row.forEach(cell => board.append(cell.getElement()))
+            row.forEach(cell => boardEl.append(cell.getElement()))
         });
     }
 
