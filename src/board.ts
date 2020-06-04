@@ -39,15 +39,33 @@ export class Board {
     }
 
     private subscribe(): void {
-        this.eventSubscribers.forEach((p: EventSubscriber) => PubSub.subscribe(p.event, p.subscriber))
+        this.eventSubscribers.forEach((es: EventSubscriber) => PubSub.subscribe(es.event, es.subscriber))
     }
 
     public unsubscribe(): void {
-        this.eventSubscribers.forEach((p: EventSubscriber) => PubSub.unsubscribe(p.event, p.subscriber))
+        this.eventSubscribers.forEach((es: EventSubscriber) => PubSub.unsubscribe(es.event, es.subscriber))
+    }
+
+    public getMode(): Mode {
+        return this.mode;
     }
 
     public getState(): State {
-        return this.state;
+        if (this.state) {
+            return this.state;
+        }
+
+        const state = new State(this.mode.rows * this.mode.cols);
+
+        for (let row = 0; row < this.mode.rows; row++) {
+            for (let col = 0; col < this.mode.cols; col++) {
+                if (this.grid[row][col].isMine()) {
+                    state.setBit(row * this.mode.cols + col);
+                }
+            }
+        }
+
+        return state;
     }
 
     public getMines(): number {
@@ -83,8 +101,6 @@ export class Board {
     }
 
     private plantMinesRandomly(): void {
-        this.state = new State(this.mode.rows * this.mode.cols);
-
         let count = 0;
         while (count < this.mode.mines) {
             const row = this.random(0, this.mode.rows);
@@ -93,13 +109,8 @@ export class Board {
             if (!this.grid[row][col].isMine()) {
                 this.grid[row][col].setMine()
                 count++;
-                this.state.setBit(row * this.mode.cols + col);
             }
         }
-    }
-
-    private removeFromState(cell: Cell): void {
-        this.state.unsetBit(cell.getRow() * this.mode.cols + cell.getCol());
     }
 
     /**
@@ -116,27 +127,28 @@ export class Board {
         const randomCol = this.random(0, this.mode.cols);
         const distance = Session.get("firstClick") as number;
 
-        const outOfSafeArea = (randomRow > centerRow + distance || randomRow < centerRow - distance)
-            && (randomCol > centerCol + distance || randomCol < centerCol - distance);
+        const outOfSafeArea =
+            (randomRow > centerRow + distance || randomRow < centerRow - distance) &&
+            (randomCol > centerCol + distance || randomCol < centerCol - distance);
 
-        if (!outOfSafeArea || this.grid[randomRow][randomCol].isMine()) {
-            this.replantMine(centerRow, centerCol);
-        } else {
+        if (outOfSafeArea && !this.grid[randomRow][randomCol].isMine()) {
             this.grid[randomRow][randomCol].setMine();
-            this.state.setBit(randomRow * this.mode.cols + randomCol);
+            return;
         }
+
+        this.replantMine(centerRow, centerCol);
     }
 
     private random(from: number, to: number): number {
         return Math.floor(Math.random() * to) + from;
     }
 
-    public draw(board: HTMLElement): void {
+    public draw(boardEl: HTMLElement): void {
         // Remove existing cells (on reset/replay)
-        board.textContent = "";
+        boardEl.textContent = "";
 
         this.grid.forEach(row => {
-            row.forEach(cell => board.append(cell.getElement()))
+            row.forEach(cell => boardEl.append(cell.getElement()))
         });
     }
 
@@ -149,7 +161,6 @@ export class Board {
     private makeSafeArea(centerCell: Cell): void {
         if (centerCell.isMine()) {
             centerCell.unsetMine();
-            this.removeFromState(centerCell);
             this.replantMine(centerCell.getRow(), centerCell.getCol());
         }
 
@@ -158,7 +169,6 @@ export class Board {
             for (const adj of adjacentCells) {
                 if (adj.isMine()) {
                     adj.unsetMine();
-                    this.removeFromState(adj);
                     this.replantMine(centerCell.getRow(), centerCell.getCol());
                 }
             }
