@@ -10,6 +10,23 @@ html, body {
     transition-timing-function: var(--transition-function);
 }
 
+html {
+    font-size: 1px;
+}
+
+/* MacBook scaling */
+@media
+  only screen and (-webkit-min-device-pixel-ratio: 2),
+  only screen and (   min--moz-device-pixel-ratio: 2),
+  only screen and (     -o-min-device-pixel-ratio: 2/1),
+  only screen and (        min-device-pixel-ratio: 2),
+  only screen and (                min-resolution: 220dpi),
+  only screen and (                min-resolution: 2dppx) { 
+    html {
+        font-size: 0.8px;
+    }
+}
+
 body.night {
     background-color: #1e1e1e;
 }
@@ -24,16 +41,16 @@ main {
     display: table;
     background-color: #bdbdbd;
     border-style: solid;
-    border-width: 5px;
+    border-width: 5rem;
     border-color: #ffffff #7b7b7b #7b7b7b #ffffff;
-    margin: 100px auto 0;
+    margin: 100rem auto 0;
 }
 
 #controls, #board {
     border-style: solid;
-    border-width: 5px;
+    border-width: 5rem;
     border-color: #7b7b7b #ffffff #ffffff #7b7b7b;
-    margin: 15px;
+    margin: 15rem;
 }
 
 #controls {
@@ -42,7 +59,7 @@ main {
 }
 
 #controls .control {
-    margin: 10px;
+    margin: 10rem;
 }
 
 #controls .buttons-wrapper {
@@ -52,13 +69,13 @@ main {
 #controls #mines-counter, #controls #timer {
     background-color: #000000;
     color: #ff0000;
-    font-size: 25px;
+    font-size: 25rem;
     font-family: Courier;
     font-weight: bold;
 }
 
 #board {
-    --cell-side: 33px;
+    --cell-side: 33rem;
     --cell-background-size: 65%;
     --cell-background-repeat: no-repeat;
     --cell-background-position: center;
@@ -67,8 +84,8 @@ main {
     box-sizing: border-box;
 
     grid-template-columns: repeat(var(--cols), 1fr);
-    width: calc(var(--cell-side) * var(--cols) + 10px);
-    height: calc(var(--cell-side) * var(--rows) + 10px);
+    width: calc(var(--cell-side) * var(--cols) + 10rem);
+    height: calc(var(--cell-side) * var(--rows) + 10rem);
 }
 
 #board.board-beginner {
@@ -95,10 +112,11 @@ main {
     background-position: var(--cell-background-position);
     background-color: #cccccc;
     border-style: solid;
-    border-width: 5px;
+    border-width: 5rem;
     border-color: #ffffff #7b7b7b #7b7b7b #ffffff;
     box-sizing: border-box;
-    user-select: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
     align-items: center;
     justify-content: center;
 }
@@ -109,7 +127,7 @@ main {
 .cell.state-wronglyFlagged {
     background-color: #bdbdbd;
     border-style: solid none none solid;
-    border-width: 2px;
+    border-width: 2rem;
     border-color: #7b7b7b;
 }
 
@@ -171,8 +189,9 @@ main {
 }
 
 footer {
-    margin-top: 20px;
+    margin-top: 20rem;
     font-family: monospace;
+    font-size: 13rem;
 }
 
 footer a {
@@ -191,28 +210,22 @@ footer a:hover {
     color: #FF0000;
 }
 
-footer #dark-mode-toggle {
-    display: inline-block;
-    width: 130px;
-    text-align: left;
-}
-
 footer ul#version {
-    margin-top: 10px;
+    margin-top: 10rem;
 }
 
 footer ul#version li {
     display: inline-block;
-    border-left: 2px solid #111111;
-    margin-left: 5px;
-    padding-left: 10px;
+    border-left: 2rem solid #111111;
+    margin-left: 5rem;
+    padding-left: 10rem;
     transition-property: all;
     transition-duration: var(--transition-duration);
     transition-timing-function: var(--transition-function);
 }
 
 .night footer ul#version li {
-    border-left: 2px solid #cccccc;
+    border-left: 2rem solid #cccccc;
 }
 
 footer ul#version li:first-child {

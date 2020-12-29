@@ -25,7 +25,7 @@ if (currentHour >= nigthModeStartHour || currentHour <= nigthModeEndHour) {
 function getVersion() {
     const versionEl = document.getElementById("version_string");
 
-    fetch("http://api.github.com/repos/rdlf0/minesweeper/releases/latest", { method: "GET", headers: {} })
+    fetch("https://api.github.com/repos/rdlf0/minesweeper/releases/latest", { method: "GET", headers: {} })
         .then(resp => resp.json())
         .then(body => versionEl.textContent = body.tag_name.substring(1))
 }
