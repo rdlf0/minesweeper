@@ -10,6 +10,7 @@ env:
   ARTIFACT_PATH: ${{ 'artifact' }}
   ASSET_NAME: ${{ 'minesweeper.zip' }}
   ASSET_TYPE: ${{ 'application/zip' }}
+  PROD_URL: ${{ 'http://rdlf0-minesweeper.s3-website.us-east-2.amazonaws.com/' }}
 
 jobs:
   build:
@@ -50,6 +51,9 @@ jobs:
     name: Deploy
     needs: build
     runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: ${{ env.PROD_URL }}
     steps:
       - name: Download artifact
         uses: actions/download-artifact@v1
