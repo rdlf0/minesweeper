@@ -11,7 +11,7 @@ html, body {
 }
 
 html {
-    font-size: 20px;
+    font-size: 1px;
 }
 
 /* Macbooks scaling */
@@ -23,7 +23,7 @@ html {
   only screen and (                min-resolution: 220dpi),
   only screen and (                min-resolution: 2dppx) { 
     html {
-        font-size: 17px;
+        font-size: 0.7px;
     }
 }
 
@@ -41,16 +41,16 @@ main {
     display: table;
     background-color: #bdbdbd;
     border-style: solid;
-    border-width: 0.25rem;
+    border-width: 5rem;
     border-color: #ffffff #7b7b7b #7b7b7b #ffffff;
-    margin: 5rem auto 0;
+    margin: 100rem auto 0;
 }
 
 #controls, #board {
     border-style: solid;
-    border-width: 0.25rem;
+    border-width: 5rem;
     border-color: #7b7b7b #ffffff #ffffff #7b7b7b;
-    margin: 0.75rem;
+    margin: 15rem;
 }
 
 #controls {
@@ -59,7 +59,7 @@ main {
 }
 
 #controls .control {
-    margin: 0.5rem;
+    margin: 10rem;
 }
 
 #controls .buttons-wrapper {
@@ -69,13 +69,13 @@ main {
 #controls #mines-counter, #controls #timer {
     background-color: #000000;
     color: #ff0000;
-    font-size: 1.25rem;
+    font-size: 25rem;
     font-family: Courier;
     font-weight: bold;
 }
 
 #board {
-    --cell-side: 1.65rem;
+    --cell-side: 33rem;
     --cell-background-size: 65%;
     --cell-background-repeat: no-repeat;
     --cell-background-position: center;
@@ -84,8 +84,8 @@ main {
     box-sizing: border-box;
 
     grid-template-columns: repeat(var(--cols), 1fr);
-    width: calc(var(--cell-side) * var(--cols) + 0.5rem);
-    height: calc(var(--cell-side) * var(--rows) + 0.5rem);
+    width: calc(var(--cell-side) * var(--cols) + 10rem);
+    height: calc(var(--cell-side) * var(--rows) + 10rem);
 }
 
 #board.board-beginner {
@@ -112,10 +112,11 @@ main {
     background-position: var(--cell-background-position);
     background-color: #cccccc;
     border-style: solid;
-    border-width: 0.25rem;
+    border-width: 5rem;
     border-color: #ffffff #7b7b7b #7b7b7b #ffffff;
     box-sizing: border-box;
-    user-select: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
     align-items: center;
     justify-content: center;
 }
@@ -126,7 +127,7 @@ main {
 .cell.state-wronglyFlagged {
     background-color: #bdbdbd;
     border-style: solid none none solid;
-    border-width: 0.1rem;
+    border-width: 2rem;
     border-color: #7b7b7b;
 }
 
@@ -188,9 +189,9 @@ main {
 }
 
 footer {
-    margin-top: 1rem;
+    margin-top: 20rem;
     font-family: monospace;
-    font-size: 0.65rem;
+    font-size: 13rem;
 }
 
 footer a {
@@ -210,21 +211,21 @@ footer a:hover {
 }
 
 footer ul#version {
-    margin-top: 0.5rem;
+    margin-top: 10rem;
 }
 
 footer ul#version li {
     display: inline-block;
-    border-left: 0.1rem solid #111111;
-    margin-left: 0.25rem;
-    padding-left: 0.5rem;
+    border-left: 2rem solid #111111;
+    margin-left: 5rem;
+    padding-left: 10rem;
     transition-property: all;
     transition-duration: var(--transition-duration);
     transition-timing-function: var(--transition-function);
 }
 
 .night footer ul#version li {
-    border-left: 0.1rem solid #cccccc;
+    border-left: 2rem solid #cccccc;
 }
 
 footer ul#version li:first-child {
