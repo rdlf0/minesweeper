@@ -14,7 +14,7 @@ html {
     font-size: 1px;
 }
 
-/* Macbooks scaling */
+/* MacBook scaling */
 @media
   only screen and (-webkit-min-device-pixel-ratio: 2),
   only screen and (   min--moz-device-pixel-ratio: 2),
@@ -23,7 +23,7 @@ html {
   only screen and (                min-resolution: 220dpi),
   only screen and (                min-resolution: 2dppx) { 
     html {
-        font-size: 0.7px;
+        font-size: 0.8px;
     }
 }
 
