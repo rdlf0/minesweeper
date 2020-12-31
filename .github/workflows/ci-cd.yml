@@ -10,53 +10,53 @@ env:
   ARTIFACT_PATH: ${{ 'artifact' }}
   ASSET_NAME: ${{ 'minesweeper.zip' }}
   ASSET_TYPE: ${{ 'application/zip' }}
-  PROD_URL: ${{ 'http://rdlf0-minesweeper.s3-website.us-east-2.amazonaws.com/' }}
+  PROD_URL: http://rdlf0-minesweeper.s3-website.us-east-2.amazonaws.com
 
 jobs:
-  build:
-    name: Build
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check out the code
-        uses: actions/checkout@v2
-        with:
-          ref: ${{ github.sha }}
+  # build:
+  #   name: Build
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Check out the code
+  #       uses: actions/checkout@v2
+  #       with:
+  #         ref: ${{ github.sha }}
 
-      - name: Compile the source
-        run: tsc --outDir ${{ env.ARTIFACT_PATH }}/dist
+  #     - name: Compile the source
+  #       run: tsc --outDir ${{ env.ARTIFACT_PATH }}/dist
 
-      - name: Prepare artifact
-        run: mv index.html require.js main.js styles.css LICENSE assets ${{ env.ARTIFACT_PATH }}
+  #     - name: Prepare artifact
+  #       run: mv index.html require.js main.js styles.css LICENSE assets ${{ env.ARTIFACT_PATH }}
 
-      - name: Prepare release asset
-        run: zip -r ${{ env.ASSET_NAME }} ${{ env.ARTIFACT_PATH }}
+  #     - name: Prepare release asset
+  #       run: zip -r ${{ env.ASSET_NAME }} ${{ env.ARTIFACT_PATH }}
 
-      - name: Upload artifact
-        uses: actions/upload-artifact@v1
-        with:
-          name: ${{ env.ARTIFACT_NAME }}
-          path: ./${{ env.ARTIFACT_PATH }}
+  #     - name: Upload artifact
+  #       uses: actions/upload-artifact@v1
+  #       with:
+  #         name: ${{ env.ARTIFACT_NAME }}
+  #         path: ./${{ env.ARTIFACT_PATH }}
 
-      - name: Upload release asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ github.event.release.upload_url }}
-          asset_path: ./${{ env.ASSET_NAME }}
-          asset_name: ${{ env.ASSET_NAME }}
-          asset_content_type: ${{ env.ASSET_TYPE }}
+  #     - name: Upload release asset
+  #       uses: actions/upload-release-asset@v1
+  #       env:
+  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  #       with:
+  #         upload_url: ${{ github.event.release.upload_url }}
+  #         asset_path: ./${{ env.ASSET_NAME }}
+  #         asset_name: ${{ env.ASSET_NAME }}
+  #         asset_content_type: ${{ env.ASSET_TYPE }}
 
   deploy:
     name: Deploy
-    needs: build
+    # needs: build
     runs-on: ubuntu-latest
     environment:
       name: production
-      url: "http://rdlf0-minesweeper.s3-website.us-east-2.amazonaws.com"
+      url: ${{ env.PROD_URL }}
     steps:
       - name: Test
-        run: echo "It's working!"
+        run: echo ${{ toJson(job) }}
 
       # - name: Download artifact
       #   uses: actions/download-artifact@v1
