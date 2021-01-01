@@ -22,13 +22,13 @@ jobs:
           ref: ${{ github.sha }}
 
       - name: Compile the source
-        run: tsc --outDir $ARTIFACT_PATH/dist
+        run: tsc --outDir ${{ env.ARTIFACT_PATH }}/dist
 
       - name: Prepare artifact
-        run: mv index.html require.js main.js styles.css LICENSE assets $ARTIFACT_PATH
+        run: mv index.html require.js main.js styles.css LICENSE assets ${{ env.ARTIFACT_PATH }}
 
       - name: Prepare release asset
-        run: zip -r $ASSET_NAME $ARTIFACT_PATH
+        run: zip -r ${{ env.ASSET_NAME }} ${{ env.ARTIFACT_PATH }}
 
       - name: Upload artifact
         uses: actions/upload-artifact@v1
@@ -68,6 +68,6 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         run: |
           aws s3 sync \
-              '$ARTIFACT_NAME' s3://$AWS_S3_BUCKET \
+              '${{ env.ARTIFACT_NAME }}' s3://$AWS_S3_BUCKET \
               --no-progress \
               --acl public-read
