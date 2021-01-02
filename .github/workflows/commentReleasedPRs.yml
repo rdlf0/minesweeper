@@ -11,6 +11,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Comment released PRs
-        uses: rdlf0/comment-released-prs-action@v1
+        uses: rdlf0/comment-released-prs-action@v2
         with:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
