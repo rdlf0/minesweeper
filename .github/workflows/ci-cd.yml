@@ -52,7 +52,7 @@ jobs:
     needs: build
     runs-on: ubuntu-20.04
     env:
-      AWS_S3_BUCKET: rdlf0-minesweeper-stage
+      AWS_S3_BUCKET: rdlf0-minesweeper
       AWS_DEFAULT_REGION: us-east-2
     environment:
       name: production
