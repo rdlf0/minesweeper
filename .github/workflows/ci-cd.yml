@@ -6,7 +6,7 @@ on:
       - published
 
 env:
-  ARTIFACT_NAME: ${{ 'minesweeper-compiled' }}
+  ARTIFACT_NAME: minesweeper-compiled
 
 jobs:
   build:
@@ -47,28 +47,28 @@ jobs:
           asset_name: ${{ env.ASSET_NAME }}
           asset_content_type: ${{ env.ASSET_TYPE }}
 
-  deploy:
-    name: Deploy
-    needs: build
-    runs-on: ubuntu-20.04
-    env:
-      AWS_S3_BUCKET: rdlf0-minesweeper-stage
-      AWS_DEFAULT_REGION: us-east-2
-    environment:
-      name: production
-      url: "http://${{ env.AWS_S3_BUCKET }}.s3-website.${{ env.AWS_DEFAULT_REGION }}.amazonaws.com"
-    steps:
-      - name: Download artifact
-        uses: actions/download-artifact@v1
-        with:
-          name: ${{ env.ARTIFACT_NAME }}
+  # deploy:
+  #   name: Deploy
+  #   needs: build
+  #   runs-on: ubuntu-20.04
+  #   env:
+  #     AWS_S3_BUCKET: rdlf0-minesweeper-stage
+  #     AWS_DEFAULT_REGION: us-east-2
+  #   environment:
+  #     name: production
+  #     url: "http://${{ env.AWS_S3_BUCKET }}.s3-website.${{ env.AWS_DEFAULT_REGION }}.amazonaws.com"
+  #   steps:
+  #     - name: Download artifact
+  #       uses: actions/download-artifact@v1
+  #       with:
+  #         name: ${{ env.ARTIFACT_NAME }}
 
-      - name: Upload to S3
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        run: |
-          aws s3 sync \
-              $ARTIFACT_NAME s3://$AWS_S3_BUCKET \
-              --no-progress \
-              --acl public-read
+  #     - name: Upload to S3
+  #       env:
+  #         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  #         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  #       run: |
+  #         aws s3 sync \
+  #             $ARTIFACT_NAME s3://$AWS_S3_BUCKET \
+  #             --no-progress \
+  #             --acl public-read
