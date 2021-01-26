@@ -8,7 +8,7 @@ on:
 jobs:
   comment:
     name: Comment released PRs
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
       - name: Comment released PRs
         uses: rdlf0/comment-released-prs-action@v2
