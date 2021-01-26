@@ -69,6 +69,6 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         run: |
           aws s3 sync \
-              '$ARTIFACT_NAME' s3://$AWS_S3_BUCKET \
+              $ARTIFACT_NAME s3://$AWS_S3_BUCKET \
               --no-progress \
               --acl public-read
