@@ -2,9 +2,8 @@ name: Compilability check
 
 on:
   push:
-    branches:
-      - '*'
-      - '!master'
+    branches-ignore:
+      - 'master'
 
 jobs:
   compile:
