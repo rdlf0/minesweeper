@@ -28,6 +28,9 @@ export class Timer {
     }
 
     private updateEl(): void {
+        let min = Math.floor(this.value / 60);
+        let sec = this.value % 60;
+        this.el.title = `${min}min ${sec}sec`;
         this.el.innerHTML = ("00" + this.value).slice(-3);
     }
 }
