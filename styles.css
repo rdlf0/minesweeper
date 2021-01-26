@@ -72,6 +72,8 @@ main {
     font-size: 25rem;
     font-family: Courier;
     font-weight: bold;
+    padding: 0rem 5rem;
+    cursor: default;
 }
 
 #board {
