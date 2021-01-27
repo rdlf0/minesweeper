@@ -1,7 +1,7 @@
 import { Board } from "./board";
 import { Timer } from "./timer";
 import { Counter } from "./counter";
-import { Config, Mode, BOARD_CONFIG } from "./config";
+import { Config, Mode, BOARD_CONFIG, MODE_NAME } from "./config";
 import { State } from "./state";
 import { UrlTool } from "./urlTool";
 import {
@@ -86,11 +86,15 @@ export class Game {
         this.starter = this.determineStarter();
         this.isOver = false;
         this.timer.reset();
-        this.board?.unsubscribe();
+
+        if (this.board != null) { // Microsoft Edge Mobile doesn't support optional chaining yet
+            this.board.unsubscribe();
+        }
         this.generateScenario();
 
         const boardEl = document.getElementById("board");
-        boardEl.classList.add(`board-${this.config.mode}`);
+        const boardMode = this.findModeNameByMode(this.board.getMode());
+        boardEl.classList.add(`board-${boardMode}`);
         this.board.draw(boardEl);
 
         this.setFlags(0);
@@ -132,6 +136,23 @@ export class Game {
         this.board = new Board(mode, state);
 
         this.updateUrlHash();
+    }
+
+    private findModeNameByMode(mode: Mode): MODE_NAME {
+        if (mode == null) {
+            return null;
+        }
+
+        let modeName: MODE_NAME;
+        for (modeName in BOARD_CONFIG) {
+            if (mode.rows == BOARD_CONFIG[modeName].rows
+                && mode.cols == BOARD_CONFIG[modeName].cols
+                && mode.mines == BOARD_CONFIG[modeName].mines) {
+                return modeName;
+            }
+        }
+
+        return null;
     }
 
     private start(): void {
