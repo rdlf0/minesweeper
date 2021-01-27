@@ -1,6 +1,18 @@
 ![](https://github.com/rdlf0/minesweeper/workflows/CI/CD/badge.svg)
 
 # Minesweeper
+
+## Table of contents
+- [Requirements](#requirements)
+- [Getting it up and running](#getting-it-up-and-running)
+  - [Compile](#compile)
+  - [Download precompiled](#download-precompiled)
+  - [Play online](#play-online)
+- [Settings](#settings)
+- [Game modes](#game-modes)
+- [First click options](#first-click-options)
+- [Game start options](#game-start-options)
+
 ## Requirements
 - typescript v3 or later (if you choose the compile option below)
 - a non-ancient browser
@@ -13,7 +25,7 @@ There are 3 options from which you can choose:
     $ tsc
     ```
     After that open the `index.html`.
-- ### Download already compiled
+- ### Download precompiled
     Simply download the asset from the [latest release](https://github.com/rdlf0/minesweeper/releases/latest), unzip and just open `index.html`.
 - ### Play online  
     Enjoy the published version of the game at [http://rdlf0-minesweeper.s3-website.us-east-2.amazonaws.com/](http://rdlf0-minesweeper.s3-website.us-east-2.amazonaws.com/)
