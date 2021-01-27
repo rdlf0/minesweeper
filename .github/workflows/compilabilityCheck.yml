@@ -2,14 +2,13 @@ name: Compilability check
 
 on:
   push:
-    branches:
-      - '*'
-      - '!master'
+    branches-ignore:
+      - 'master'
 
 jobs:
   compile:
     name: Compile
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
     - name: Check out the code
       uses: actions/checkout@v2
