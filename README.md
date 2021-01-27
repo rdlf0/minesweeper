@@ -47,7 +47,7 @@ _*** will probably not become available to the user_
 | ------ | ---- | ----- |
 | from URL | from settings | random |
 | from URL with hash | from hash | from hash |
-| reset | from settings | random |
+| reset | from current board | random |
 | replay | from current board | from current board |
 
 _**** Represents the positioning of the mines_

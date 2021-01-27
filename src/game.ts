@@ -14,12 +14,6 @@ import {
 } from "./util/pub-sub";
 import { Session } from "./util/session";
 
-enum Starter {
-    Default = "Default/Reset",
-    Hash = "Hash",
-    Replay = "Replay",
-}
-
 export class Game {
 
     // Visual elements
@@ -32,9 +26,9 @@ export class Game {
     // Other properties
     private flagsCounter: number;
     private isOver: boolean;
+    private isReset: boolean;
     private isReplay: boolean;
     private urlTool: UrlTool;
-    private starter: Starter;
 
     constructor(private config: Config) {
         this.counter = new Counter(document.getElementById("mines-counter"));
@@ -67,6 +61,7 @@ export class Game {
     private reset(): void {
         history.replaceState(undefined, undefined, "#");
         this.timer.stop();
+        this.isReset = true;
         this.isReplay = false;
         this.resetBtn.innerHTML = "RESET";
         this.initialize();
@@ -74,6 +69,7 @@ export class Game {
 
     private replay(): void {
         this.timer.stop();
+        this.isReset = false;
         this.isReplay = true;
         this.initialize();
     }
@@ -83,7 +79,6 @@ export class Game {
         Session.set("debug", this.config.debug);
         Session.set("firstClick", this.config.firstClick);
 
-        this.starter = this.determineStarter();
         this.isOver = false;
         this.timer.reset();
 
@@ -101,38 +96,25 @@ export class Game {
         this.setFlags(0);
     }
 
-    private determineStarter(): Starter {
-        if (this.isReplay) {
-            return Starter.Replay;
-        }
-
-        if (this.urlTool.isHashSet()) {
-            return Starter.Hash;
-        }
-
-        Session.set("applyFirstClickRule", true);
-
-        // Default == Reset
-        return Starter.Default;
-    }
-
     private generateScenario(): void {
         let mode: Mode;
         let state: State;
 
-        switch (this.starter) {
-            case Starter.Replay:
-                // Same as Starter.Hash, but here we avoid decoding and unpairing
-                mode = this.board.getMode();
-                state = this.board.getState();
-                break;
-            case Starter.Hash:
-                mode = this.urlTool.extractMode();
-                state = this.urlTool.extractState(mode);
-                break;
-            default:
-                mode = BOARD_CONFIG[this.config.mode];
-                state = null;
+        if (this.isReset) {
+            mode = this.board.getMode();
+            state = null;
+            Session.set("applyFirstClickRule", true);
+        } else if (this.isReplay) {
+            // Same as Starter.Hash, but here we avoid decoding and unpairing
+            mode = this.board.getMode();
+            state = this.board.getState();
+        } else if (this.urlTool.isHashSet()) {
+            mode = this.urlTool.extractMode();
+            state = this.urlTool.extractState(mode);
+        } else {
+            mode = BOARD_CONFIG[this.config.mode];
+            state = null;
+            Session.set("applyFirstClickRule", true);
         }
 
         this.board = new Board(mode, state);
