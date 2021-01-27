@@ -94,6 +94,7 @@ export class Game {
 
         const boardEl = document.getElementById("board");
         const boardMode = this.findModeNameByMode(this.board.getMode());
+        boardEl.className = boardEl.className.replace(/board-\w*/g, '');
         boardEl.classList.add(`board-${boardMode}`);
         this.board.draw(boardEl);
 
@@ -121,7 +122,8 @@ export class Game {
 
         switch (this.starter) {
             case Starter.Replay:
-                mode = BOARD_CONFIG[this.config.mode];
+                // Same as Starter.Hash, but here we avoid decoding and unpairing
+                mode = this.board.getMode();
                 state = this.board.getState();
                 break;
             case Starter.Hash:
