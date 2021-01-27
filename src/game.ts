@@ -59,6 +59,10 @@ export class Game {
     }
 
     private reset(): void {
+        if (Session.get("debug")) {
+            console.debug('======= RESET =======');
+        }
+
         history.replaceState(undefined, undefined, "#");
         this.timer.stop();
         this.isReset = true;
@@ -68,6 +72,10 @@ export class Game {
     }
 
     private replay(): void {
+        if (Session.get("debug")) {
+            console.debug('======= REPLAY =======');
+        }
+
         this.timer.stop();
         this.isReset = false;
         this.isReplay = true;
@@ -105,7 +113,7 @@ export class Game {
             state = null;
             Session.set("applyFirstClickRule", true);
         } else if (this.isReplay) {
-            // Same as Starter.Hash, but here we avoid decoding and unpairing
+            // Same as if started by a URL with a hash, but here we avoid decoding and unpairing
             mode = this.board.getMode();
             state = this.board.getState();
         } else if (this.urlTool.isHashSet()) {
