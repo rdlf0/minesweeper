@@ -25,7 +25,14 @@ export class BinaryToBase64UrlEncoderV2 implements Encoder {
 
     public decode(b64u: string): string {
         const bytes = b64u.split("")
-            .map(ch => ALPHABET.indexOf(ch))
+            .map(ch => {
+                const index = ALPHABET.indexOf(ch);
+                if (index == -1) {
+                    throw "Invalid Base64Url string!";
+                }
+
+                return index;
+            })
             .map(idx => idx.toString(2).padStart(6, "0"))
             .join("");
 

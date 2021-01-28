@@ -32,7 +32,12 @@ export class BinaryToBase64UrlEncoder implements Encoder {
             .replace(/-/g, '+')
             .replace(/_/g, '/');
 
-        const chars = atob(b64);
+        let chars: string;
+        try {
+            chars = atob(b64);
+        } catch (e) {
+            throw "Invalid Base64Url string!";
+        }
 
         const bytes = chars.split("")
             .map(ch => ch.charCodeAt(0).toString(2).padStart(8, "0"))

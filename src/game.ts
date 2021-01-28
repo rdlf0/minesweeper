@@ -130,8 +130,12 @@ export class Game {
             mode = this.board.getMode();
             state = this.board.getState();
         } else if (this.urlTool.isHashSet()) {
-            mode = this.urlTool.extractMode();
+            mode = this.urlTool.extractMode() ?? this.board?.getMode() ?? BOARD_CONFIG[this.config.mode];
             state = this.urlTool.extractState(mode);
+
+            if (state == null) {
+                console.warn("Could not extract mode or state from hash. Falling back to defaults.");
+            }
         } else {
             mode = BOARD_CONFIG[this.config.mode];
             state = null;
