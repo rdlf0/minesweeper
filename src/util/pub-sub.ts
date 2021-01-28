@@ -13,9 +13,9 @@ export const EVENT_SAFE_AREA_CREATED = "safeAreaCreated";
 
 export class PubSub {
 
-    private constructor() { };
+    private constructor() { }
 
-    private static events: Array<Array<callbackFunc>> = new Array();
+    private static events: { [eventName: string]: Array<callbackFunc> } = {};
 
     public static subscribe(eventName: string, func: callbackFunc): void {
         PubSub.events[eventName] = PubSub.events[eventName] || [];

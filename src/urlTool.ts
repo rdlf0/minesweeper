@@ -19,7 +19,7 @@ export class UrlTool {
     }
 
     private getDecodedHash(): string {
-        if (this.isHashSet() && this.decodedHash.length == 0) {
+        if (this.isHashSet()) {
             this.decodedHash = this.encoder.decode(window.location.hash.slice(1));
         }
 
