@@ -35,10 +35,12 @@ export class Game {
         this.timer = new Timer(document.getElementById("timer"));
 
         this.resetBtn = document.getElementById("reset");
-        this.resetBtn.addEventListener("click", (e: Event) => this.reset());
+        this.resetBtn.addEventListener("click", this.reset.bind(this));
 
         this.replayBtn = document.getElementById("replay");
-        this.replayBtn.addEventListener("click", (e: Event) => this.replay());
+        this.replayBtn.addEventListener("click", this.replay.bind(this));
+
+        window.addEventListener("hashchange", this.handleHashChange.bind(this));
 
         this.urlTool = new UrlTool(
             this.config.encoder,
@@ -63,7 +65,7 @@ export class Game {
             console.debug('======= RESET =======');
         }
 
-        history.replaceState(undefined, undefined, "#");
+        this.updateUrlHash(true);
         this.timer.stop();
         this.isReset = true;
         this.isReplay = false;
@@ -79,6 +81,17 @@ export class Game {
         this.timer.stop();
         this.isReset = false;
         this.isReplay = true;
+        this.initialize();
+    }
+
+    private handleHashChange(): void {
+        if (Session.get("debug")) {
+            console.debug('======= HASH CHANGED =======');
+        }
+
+        this.timer.stop();
+        this.isReset = false;
+        this.isReplay = false;
         this.initialize();
     }
 
@@ -117,8 +130,12 @@ export class Game {
             mode = this.board.getMode();
             state = this.board.getState();
         } else if (this.urlTool.isHashSet()) {
-            mode = this.urlTool.extractMode();
+            mode = this.urlTool.extractMode() ?? this.board?.getMode() ?? BOARD_CONFIG[this.config.mode];
             state = this.urlTool.extractState(mode);
+
+            if (state == null) {
+                console.warn("Could not extract mode or state from hash. Falling back to defaults.");
+            }
         } else {
             mode = BOARD_CONFIG[this.config.mode];
             state = null;
@@ -186,8 +203,12 @@ export class Game {
         this.setFlags(--this.flagsCounter);
     }
 
-    private updateUrlHash(): void {
-        this.urlTool.updateHash(this.board.getMode(), this.board.getState());
+    private updateUrlHash(empty: boolean = false): void {
+        if (empty) {
+            this.urlTool.updateHash(null, null);
+        } else {
+            this.urlTool.updateHash(this.board.getMode(), this.board.getState());
+        }
     }
 
 }
