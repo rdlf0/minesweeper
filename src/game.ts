@@ -35,10 +35,12 @@ export class Game {
         this.timer = new Timer(document.getElementById("timer"));
 
         this.resetBtn = document.getElementById("reset");
-        this.resetBtn.addEventListener("click", (e: Event) => this.reset());
+        this.resetBtn.addEventListener("click", this.reset.bind(this));
 
         this.replayBtn = document.getElementById("replay");
-        this.replayBtn.addEventListener("click", (e: Event) => this.replay());
+        this.replayBtn.addEventListener("click", this.replay.bind(this));
+
+        window.addEventListener("hashchange", this.handleHashChange.bind(this));
 
         this.urlTool = new UrlTool(
             this.config.encoder,
@@ -79,6 +81,17 @@ export class Game {
         this.timer.stop();
         this.isReset = false;
         this.isReplay = true;
+        this.initialize();
+    }
+
+    private handleHashChange(): void {
+        if (Session.get("debug")) {
+            console.debug('======= HASH CHANGED =======');
+        }
+
+        this.timer.stop();
+        this.isReset = false;
+        this.isReplay = false;
         this.initialize();
     }
 
