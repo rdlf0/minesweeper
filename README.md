@@ -8,7 +8,7 @@
   - [Compile](#compile)
   - [Download precompiled](#download-precompiled)
   - [Play online](#play-online)
-- [Settings](#settings)
+- [Settings](#settings-)
 - [Game modes](#game-modes)
 - [First click options](#first-click-options)
 - [Game start options](#game-start-options)
