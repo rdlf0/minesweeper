@@ -1,6 +1,6 @@
 import { Encoder } from "./encoder";
 
-enum side {
+enum Side {
     BEGINING,
     END
 }
@@ -15,7 +15,7 @@ const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789
 export class BinaryToBase64UrlEncoderV2 implements Encoder {
 
     public encode(binary: string): string {
-        const padded = BinaryToBase64UrlEncoderV2.padString(binary, side.END, 6, "0");
+        const padded = BinaryToBase64UrlEncoderV2.padString(binary, Side.END, 6, "0");
         const b64u = padded.match(/.{6}/g)
             .map(sextet => ALPHABET[parseInt(sextet, 2)])
             .join("");
@@ -39,10 +39,10 @@ export class BinaryToBase64UrlEncoderV2 implements Encoder {
         return bytes;
     }
 
-    private static padString(str: string, s: side, factor: number, char: string): string {
+    private static padString(str: string, s: Side, factor: number, char: string): string {
         const padLen = (factor - str.length % factor) % factor;
 
-        if (s == side.BEGINING) {
+        if (s == Side.BEGINING) {
             return str.padStart(str.length + padLen, char);
         }
 

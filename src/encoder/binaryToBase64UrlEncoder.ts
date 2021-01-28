@@ -1,6 +1,6 @@
 import { Encoder } from "./encoder";
 
-enum side {
+enum Side {
     BEGINING,
     END
 }
@@ -11,7 +11,7 @@ enum side {
 export class BinaryToBase64UrlEncoder implements Encoder {
 
     public encode(binary: string): string {
-        const padded = BinaryToBase64UrlEncoder.padString(binary, side.END, 8, "0");
+        const padded = BinaryToBase64UrlEncoder.padString(binary, Side.END, 8, "0");
         const bytes = padded.match(/.{8}/g);
         const chars = bytes
             .map(b => String.fromCharCode(parseInt(b, 2)))
@@ -27,7 +27,7 @@ export class BinaryToBase64UrlEncoder implements Encoder {
     }
 
     public decode(b64u: string): string {
-        const padded = BinaryToBase64UrlEncoder.padString(b64u, side.END, 4, "=");
+        const padded = BinaryToBase64UrlEncoder.padString(b64u, Side.END, 4, "=");
         const b64 = padded
             .replace(/-/g, '+')
             .replace(/_/g, '/');
@@ -46,10 +46,10 @@ export class BinaryToBase64UrlEncoder implements Encoder {
         return bytes;
     }
 
-    private static padString(str: string, s: side, factor: number, char: string): string {
+    private static padString(str: string, s: Side, factor: number, char: string): string {
         const padLen = (factor - str.length % factor) % factor;
 
-        if (s == side.BEGINING) {
+        if (s == Side.BEGINING) {
             return str.padStart(str.length + padLen, char);
         }
 
