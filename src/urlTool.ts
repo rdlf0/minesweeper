@@ -61,11 +61,15 @@ export class UrlTool {
     }
 
     public updateHash(mode: Mode, state: State): void {
-        const modeEncoded = this.encodeMode(mode);
-        const decodedHash = modeEncoded + state;
-        const encodedHash = this.encoder.encode(decodedHash);
+        let encodedHash = "";
 
-        history.replaceState(undefined, undefined, "#" + encodedHash);
+        if (mode != null && state != null) {
+            const modeEncoded = this.encodeMode(mode);
+            const decodedHash = modeEncoded + state;
+            encodedHash = this.encoder.encode(decodedHash);
+        }
+
+        history.replaceState(undefined, undefined, `#${encodedHash}`);
     }
 
     private encodeMode(mode: Mode): string {

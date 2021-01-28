@@ -63,7 +63,7 @@ export class Game {
             console.debug('======= RESET =======');
         }
 
-        history.replaceState(undefined, undefined, "#");
+        this.updateUrlHash(true);
         this.timer.stop();
         this.isReset = true;
         this.isReplay = false;
@@ -186,8 +186,12 @@ export class Game {
         this.setFlags(--this.flagsCounter);
     }
 
-    private updateUrlHash(): void {
-        this.urlTool.updateHash(this.board.getMode(), this.board.getState());
+    private updateUrlHash(empty: boolean = false): void {
+        if (empty) {
+            this.urlTool.updateHash(null, null);
+        } else {
+            this.urlTool.updateHash(this.board.getMode(), this.board.getState());
+        }
     }
 
 }
