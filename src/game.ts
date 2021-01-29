@@ -141,6 +141,10 @@ export class Game {
             Session.set("applyFirstClickRule", true);
         }
 
+        if (Session.get("debug")) {
+            console.debug(mode);
+        }
+
         this.board = new Board(mode, state);
 
         this.updateUrlHash();
