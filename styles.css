@@ -90,21 +90,6 @@ main {
     height: calc(var(--cell-side) * var(--rows) + 10rem);
 }
 
-#board.board-beginner {
-    --rows: 9;
-    --cols: 9;
-}
-
-#board.board-intermediate {
-    --rows: 16;
-    --cols: 16;
-}
-
-#board.board-expert {
-    --rows: 16;
-    --cols: 30;
-}
-
 .cell {
     cursor: default;
     width: var(--cell-side);
