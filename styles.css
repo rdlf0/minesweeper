@@ -23,7 +23,7 @@ html {
   only screen and (                min-resolution: 220dpi),
   only screen and (                min-resolution: 2dppx) { 
     html {
-        font-size: 0.8px;
+        font-size: 0.85px;
     }
 }
 
