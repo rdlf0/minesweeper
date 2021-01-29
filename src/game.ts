@@ -109,9 +109,8 @@ export class Game {
         this.generateScenario();
 
         const boardEl = document.getElementById("board");
-        const boardMode = this.findModeNameByMode(this.board.getMode());
-        boardEl.className = boardEl.className.replace(/board-\w*/g, '');
-        boardEl.classList.add(`board-${boardMode}`);
+        boardEl.style.setProperty("--rows", this.board.getMode().rows.toString());
+        boardEl.style.setProperty("--cols", this.board.getMode().cols.toString());
         this.board.draw(boardEl);
 
         this.setFlags(0);
@@ -142,26 +141,13 @@ export class Game {
             Session.set("applyFirstClickRule", true);
         }
 
+        if (Session.get("debug")) {
+            console.debug(mode);
+        }
+
         this.board = new Board(mode, state);
 
         this.updateUrlHash();
-    }
-
-    private findModeNameByMode(mode: Mode): MODE_NAME {
-        if (mode == null) {
-            return null;
-        }
-
-        let modeName: MODE_NAME;
-        for (modeName in BOARD_CONFIG) {
-            if (mode.rows == BOARD_CONFIG[modeName].rows
-                && mode.cols == BOARD_CONFIG[modeName].cols
-                && mode.mines == BOARD_CONFIG[modeName].mines) {
-                return modeName;
-            }
-        }
-
-        return null;
     }
 
     private start(): void {

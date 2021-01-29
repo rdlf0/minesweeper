@@ -23,7 +23,7 @@ html {
   only screen and (                min-resolution: 220dpi),
   only screen and (                min-resolution: 2dppx) { 
     html {
-        font-size: 0.8px;
+        font-size: 0.85px;
     }
 }
 
@@ -88,21 +88,6 @@ main {
     grid-template-columns: repeat(var(--cols), 1fr);
     width: calc(var(--cell-side) * var(--cols) + 10rem);
     height: calc(var(--cell-side) * var(--rows) + 10rem);
-}
-
-#board.board-beginner {
-    --rows: 9;
-    --cols: 9;
-}
-
-#board.board-intermediate {
-    --rows: 16;
-    --cols: 16;
-}
-
-#board.board-expert {
-    --rows: 16;
-    --cols: 30;
 }
 
 .cell {

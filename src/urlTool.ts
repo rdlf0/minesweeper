@@ -4,6 +4,9 @@ import { Mode } from "./config";
 import { State } from "./state";
 
 const MODE_SIZE = 24;
+const MIN_ROWS = 5;
+const MIN_COLS = 5;
+const MAX_MINES_TO_CELLS_RATIO = 0.25;
 
 export class UrlTool {
 
@@ -42,7 +45,9 @@ export class UrlTool {
         const rows = decoded.a;
         const cols = decoded.b;
 
-        if (rows < 1 || cols < 1 || rows * cols < mines) {
+        if (rows < MIN_ROWS ||
+            cols < MIN_COLS ||
+            (mines > rows * cols * MAX_MINES_TO_CELLS_RATIO)) {
             console.error("Invalid hash! Can't extract mode!");
             return null;
         }
