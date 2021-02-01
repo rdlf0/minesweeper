@@ -28,7 +28,7 @@ There are 3 options from which you can choose:
 - ### Download precompiled
     Simply download the asset from the [latest release](https://github.com/rdlf0/minesweeper/releases/latest), unzip and just open `index.html`.
 - ### Play online  
-    Enjoy the published version of the game at [http://rdlf0-minesweeper.s3-website.us-east-2.amazonaws.com/](http://rdlf0-minesweeper.s3-website.us-east-2.amazonaws.com/)
+    Enjoy the published version of the game at [theminesweeper.com](https://theminesweeper.com)
 
 ## Settings *
 | Setting | Options |
