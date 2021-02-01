@@ -130,9 +130,10 @@ export class Game {
             state = this.board.getState();
         } else if (this.urlTool.isHashSet()) {
             mode = this.urlTool.extractMode();
+            // Optional chaining workaround
             if (mode == null && this.board != null) {
                 mode = this.board.getMode();
-            } else {
+            } else if (mode == null) {
                 mode = BOARD_CONFIG[this.config.mode]
             }
 
