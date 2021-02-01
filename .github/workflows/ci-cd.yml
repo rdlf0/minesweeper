@@ -52,11 +52,11 @@ jobs:
     needs: build
     runs-on: ubuntu-20.04
     env:
-      AWS_S3_BUCKET: rdlf0-minesweeper
+      AWS_S3_BUCKET: theminesweeper.com
       AWS_DEFAULT_REGION: us-east-2
     environment:
       name: production
-      url: "http://${{ env.AWS_S3_BUCKET }}.s3-website.${{ env.AWS_DEFAULT_REGION }}.amazonaws.com"
+      url: "https://${{ env.AWS_S3_BUCKET }}"
     steps:
       - name: Download artifact
         uses: actions/download-artifact@v1
