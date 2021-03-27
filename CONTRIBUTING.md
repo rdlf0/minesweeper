@@ -5,7 +5,7 @@
 - **Rule #2**: Really, keep it simple.
 
 ## Discussions and agreement
-Before you start working on something, please make sure we have thoroughly discussed it in the corresponding issue thread and we have agreed on an implementation. Also check if there is not already a PR where someone else is working on the same problem.
+Before you start working on something, please make sure we have thoroughly discussed it in the corresponding issue thread and we have agreed on an implementation. Also, check if there is not already a PR where someone else is working on the same problem.
 
 ## Basic development flow
 1. Clone the repo:
@@ -19,7 +19,10 @@ $ git pull
 $ git checkout -b super-cool-feature
 $ git push -u origin super-cool-feature
 ```
-3. Implement the feature/bug fix - you might find it convenient to run `tsc --sourceMap -w` in order to get your changes compled on save.
+3. Implement the feature/bug fix - in order to get your changes compiled on save and also get their correspodning `.map` files generated (for easier debugging), you might find it convenient to run:
+```sh
+$ tsc --sourceMap -w
+```
 4. Commit your changes:
 ```sh
 $ git commit -am "Something descriptive but concise about the changes I made"
