@@ -37,7 +37,7 @@ There are 3 options from which you can choose:
 | first click ** | `guaranteed non-mine`, `guaranteed cascade` |
 | debug *** | `true`, `false` |
 
-_* not available to the user yet - see #2_  
+_* not available to the user yet - see [issue #2](https://github.com/rdlf0/minesweeper/issues/2)_  
 _** considered only when game is started from URL or by reset (see game start options below)_  
 _*** will probably not become available to the user_
 
