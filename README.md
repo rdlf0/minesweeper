@@ -12,6 +12,7 @@
 - [Game modes](#game-modes)
 - [First click options](#first-click-options)
 - [Game start options](#game-start-options)
+- [Contributing](#contributing)
 
 ## Requirements
 - typescript v3 or later (if you choose the compile option below)
@@ -64,4 +65,7 @@ _*** will probably not become available to the user_
 
 _**** Represents the positioning of the mines_
 
-Happy wasting of your time! :) 💣
+## Contributing
+Please check [CONTRIBUTING.md](CONTRIBUTING.md).  
+<br />
+**_Happy wasting of your time! :) 💣_**
