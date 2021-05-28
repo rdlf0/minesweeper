@@ -2,18 +2,6 @@
 
 # Minesweeper
 
-## Table of contents
-- [Requirements](#requirements)
-- [Getting it up and running](#getting-it-up-and-running)
-  - [Compile](#compile)
-  - [Download precompiled](#download-precompiled)
-  - [Play online](#play-online)
-- [Settings](#settings-)
-- [Game modes](#game-modes)
-- [First click options](#first-click-options)
-- [Game start options](#game-start-options)
-- [Contributing](#contributing)
-
 ## Requirements
 - typescript v3 or later (if you choose the compile option below)
 - a non-ancient browser
