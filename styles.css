@@ -16,19 +16,6 @@ html {
     font-size: 1px;
 }
 
-/* MacBook scaling */
-@media
-  only screen and (-webkit-min-device-pixel-ratio: 2),
-  only screen and (   min--moz-device-pixel-ratio: 2),
-  only screen and (     -o-min-device-pixel-ratio: 2/1),
-  only screen and (        min-device-pixel-ratio: 2),
-  only screen and (                min-resolution: 220dpi),
-  only screen and (                min-resolution: 2dppx) { 
-    html {
-        font-size: 0.85px;
-    }
-}
-
 body.night {
     background-color: #1e1e1e;
 }
@@ -79,8 +66,9 @@ main {
     width: var(--cell-side);
     height: var(--cell-side);
     
+    background-color: #cccccc;
     border-style: solid;
-    border-width: 5rem;
+    border-width: 1.5rem;
     border-color: #ffffff #7b7b7b #7b7b7b #ffffff;
     box-sizing: border-box;
 }
@@ -88,14 +76,19 @@ main {
 #controls .buttons-wrapper .control .icon {
     background-position: var(--cell-background-position);
     background-repeat: var(--cell-background-repeat);
-    background-size: 80%;
-    width: 100%;
-    height: 100%;
+    background-size: contain;
+    -webkit-background-size: contain;
+    width: 21rem;
+    height: 21rem;
+    margin: 4.5rem;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
     transition: transform 200ms;
 }
 
 #controls .buttons-wrapper .control:hover .icon {
     transform: rotate(90deg);
+    -webkit-transform: rotate(90deg);
 }
 
 #controls .buttons-wrapper .control#reset .icon {
@@ -107,7 +100,7 @@ main {
 }
 
 #controls .buttons-wrapper .control#replay .icon {
-    background-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB2ZXJzaW9uPSIxLjEiIHg9IjBweCIgeT0iMHB4IiB2aWV3Qm94PSIwIDAgNjQgNjQiIHN0eWxlPSJlbmFibGUtYmFja2dyb3VuZDpuZXcgMCAwIDY0IDY0OyIgeG1sOnNwYWNlPSJwcmVzZXJ2ZSI+IDxzdHlsZSB0eXBlPSJ0ZXh0L2NzcyI+IC5zdDEwLC5zdDExe2ZpbGw6bm9uZTtzdHJva2U6IzAwMDAwMDtzdHJva2Utd2lkdGg6NjtzdHJva2UtbGluZWNhcDpyb3VuZDtzdHJva2UtbWl0ZXJsaW1pdDoxMDt9IC5zdDExe3N0cm9rZS1saW5lam9pbjpyb3VuZDt9IDwvc3R5bGU+IDxnPiA8cGF0aCBjbGFzcz0ic3QxMCIgZD0iTTE2LjYsN0M4LjcsMTIuMywzLDIxLjksMywzMmMwLDE2LDEzLDI5LDI5LDI5czI5LTEzLDI5LTI5QzYxLDE2LjMsNDguNiwzLjYsMzMsMyIgLz4gPHBvbHlsaW5lIGNsYXNzPSJzdDExIiBwb2ludHM9IjE2LjYsMTguNiAxNi42LDcgNSw3IiAvPiA8L2c+IDwvc3ZnPg==);
+    background-image: url(data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4KPHN2ZyB2aWV3Qm94PSIwIDAgNjQgNjQiIHdpZHRoPSI2NCIgaGVpZ2h0PSI2NCIgc3R5bGU9ImVuYWJsZS1iYWNrZ3JvdW5kOm5ldyAwIDAgNjQgNjQ7IiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgogIDxkZWZzPgogICAgPHN0eWxlIHR5cGU9InRleHQvY3NzIj4KCQkuc3QxMCwuc3QxMXtmaWxsOm5vbmU7c3Ryb2tlOiMwMDAwMDA7c3Ryb2tlLXdpZHRoOjY7c3Ryb2tlLWxpbmVjYXA6cm91bmQ7c3Ryb2tlLW1pdGVybGltaXQ6MTA7fSAuc3QxMXtzdHJva2UtbGluZWpvaW46cm91bmQ7fQoJPC9zdHlsZT4KICA8L2RlZnM+CiAgPGcgdHJhbnNmb3JtPSJtYXRyaXgoMC45NjU1MTcsIDAsIDAsIDAuOTY1NTE3LCAxLjEwMzQ0OCwgMS4xMDM0NDkpIj4KICAgIDxwb2x5bGluZSBjbGFzcz0ic3QxMSIgcG9pbnRzPSI1Ny44OTMgMTcuNSA1Ny44OTMgNC4wMzYgNDQuNDI5IDQuMDM2IiBzdHlsZT0ic3Ryb2tlLXdpZHRoOiA4cHg7IiB0cmFuc2Zvcm09Im1hdHJpeCgwLCAxLCAtMSwgMCwgNjEuOTI5MDAxLCAtNDAuMzkzMDAxKSIvPgogICAgPHBhdGggc3R5bGU9ImZpbGw6IG5vbmU7IHN0cm9rZS1saW5lY2FwOiByb3VuZDsgc3Ryb2tlLW1pdGVybGltaXQ6IDEwOyBzdHJva2Utd2lkdGg6IDguMjg1NzFweDsgc3Ryb2tlOiByZ2IoMCwgMCwgMCk7IHBvaW50ZXItZXZlbnRzOiBub25lOyIgZD0iTSAzMS45NzggMy4wMjIgQyA1NC4yODQgMy4wMjIgNjguMjI3IDI3LjE3MSA1Ny4wNzUgNDYuNDg5IEMgNDUuOTIgNjUuODA4IDE4LjAzOCA2NS44MDggNi44ODEgNDYuNDkxIEMgNC4zMzkgNDIuMDgzIDMgMzcuMDg2IDMgMzEuOTk5IiB0cmFuc2Zvcm09Im1hdHJpeCgtMC43MDcxMDcsIDAuNzA3MTA3LCAtMC43MDcxMDcsIC0wLjcwNzEwNywgNzcuMjU0NTg1LCAzMi4wMDA2MDQpIi8+CiAgPC9nPgo8L3N2Zz4=);
     
 }
 
@@ -124,7 +117,7 @@ main {
     font-weight: bold;
     padding: 0rem 5rem;
     cursor: default;
-    height: 33rem;
+    height: var(--cell-side);
     line-height: 35rem;
 }
 
@@ -151,18 +144,21 @@ main {
     border-width: 5rem;
     border-color: #ffffff #7b7b7b #7b7b7b #ffffff;
     box-sizing: border-box;
+    user-select: none;
     -webkit-user-select: none;
     -ms-user-select: none;
     align-items: center;
     justify-content: center;
-    filter: none;
+    /* filter: none;
     transition-property: filter;
     transition-duration: var(--transition-duration);
-    transition-timing-function: var(--transition-function);
+    transition-timing-function: var(--transition-function); */
 }
 
 #board.settings .cell {
-    filter: blur(5rem) opacity(30%) grayscale(50%);
+    /* This turned out to be too CPU/GPU hungry and the effects started to lag */
+    /* filter: blur(5rem) opacity(30%) grayscale(50%); */
+    display: none;
 }
 
 .cell.state-revealed,
