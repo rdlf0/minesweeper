@@ -20,8 +20,11 @@ export class Game {
     private counter: Counter;
     private resetBtn: HTMLElement;
     private replayBtn: HTMLElement;
+    private toggleSettingsBtn: HTMLElement;
     private timer: Timer;
     private board: Board;
+    private boardEl: HTMLElement;
+    private settingsEl: HTMLElement;
 
     // Other properties
     private flagsCounter: number;
@@ -29,6 +32,7 @@ export class Game {
     private isReset: boolean;
     private isReplay: boolean;
     private urlTool: UrlTool;
+    private settingsOpened: boolean = false;
 
     constructor(private config: Config) {
         this.counter = new Counter(document.getElementById("mines-counter"));
@@ -39,6 +43,12 @@ export class Game {
 
         this.replayBtn = document.getElementById("replay");
         this.replayBtn.addEventListener("click", this.replay.bind(this));
+
+        this.toggleSettingsBtn = document.getElementById("toggle-settings");
+        this.toggleSettingsBtn.addEventListener("click", this.toggleSettings.bind(this));
+
+        this.boardEl = document.getElementById("board");
+        this.settingsEl = document.getElementById("settings");
 
         window.addEventListener("hashchange", this.handleHashChange.bind(this));
 
@@ -65,11 +75,11 @@ export class Game {
             console.debug('======= RESET =======');
         }
 
+        this.closeSettings();
         this.updateUrlHash(true);
         this.timer.stop();
         this.isReset = true;
         this.isReplay = false;
-        this.resetBtn.innerHTML = "RESET";
         this.initialize();
     }
 
@@ -78,6 +88,7 @@ export class Game {
             console.debug('======= REPLAY =======');
         }
 
+        this.closeSettings();
         this.timer.stop();
         this.isReset = false;
         this.isReplay = true;
@@ -108,10 +119,12 @@ export class Game {
         }
         this.generateScenario();
 
-        const boardEl = document.getElementById("board");
-        boardEl.style.setProperty("--rows", this.board.getMode().rows.toString());
-        boardEl.style.setProperty("--cols", this.board.getMode().cols.toString());
-        this.board.draw(boardEl);
+        this.boardEl.style.setProperty("--rows", this.board.getMode().rows.toString());
+        this.boardEl.style.setProperty("--cols", this.board.getMode().cols.toString());
+        this.board.draw(this.boardEl);
+
+        this.settingsEl.style.setProperty("--rows", this.board.getMode().rows.toString());
+        this.settingsEl.style.setProperty("--cols", this.board.getMode().cols.toString());
 
         this.setFlags(0);
     }
@@ -157,6 +170,30 @@ export class Game {
         this.updateUrlHash();
     }
 
+    private toggleSettings(): void {
+        if (!this.settingsOpened) {
+            this.openSettings();
+        } else {
+            this.closeSettings();
+        }
+    }
+
+    private openSettings(): void {
+        this.timer.stop();
+        this.settingsOpened = true;
+        this.boardEl.style.display = "none";
+        this.settingsEl.style.display = "block";
+    }
+
+    private closeSettings(): void {
+        if (this.timer.isStarted() && !this.isOver) {
+            this.timer.start();
+        }
+        this.settingsOpened = false;
+        this.boardEl.style.display = "grid";
+        this.settingsEl.style.display = "none";
+    }
+
     private start(): void {
         if (!this.timer.isStarted()) {
             this.timer.start();
@@ -175,7 +212,7 @@ export class Game {
         this.board.revealMines(win);
 
         if (win) {
-            this.resetBtn.innerHTML = "WIN!";
+            // @TODO: Congratulate the player somehow
         }
     }
 
