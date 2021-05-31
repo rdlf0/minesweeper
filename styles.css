@@ -39,7 +39,7 @@ main {
     margin: 100rem auto 0;
 }
 
-#controls, #board {
+#controls, #board, #settings {
     border-style: solid;
     border-width: 5rem;
     border-color: #7b7b7b #ffffff #ffffff #7b7b7b;
@@ -125,9 +125,11 @@ main {
     --cell-background-size: 65%;
 
     display: grid;
-    box-sizing: border-box;
-
     grid-template-columns: repeat(var(--cols), 1fr);
+}
+
+#board, #settings {
+    box-sizing: border-box;
     width: calc(var(--cell-side) * var(--cols) + 10rem);
     height: calc(var(--cell-side) * var(--rows) + 10rem);
 }
@@ -149,16 +151,6 @@ main {
     -ms-user-select: none;
     align-items: center;
     justify-content: center;
-    /* filter: none;
-    transition-property: filter;
-    transition-duration: var(--transition-duration);
-    transition-timing-function: var(--transition-function); */
-}
-
-#board.settings .cell {
-    /* This turned out to be too CPU/GPU hungry and the effects started to lag */
-    /* filter: blur(5rem) opacity(30%) grayscale(50%); */
-    display: none;
 }
 
 .cell.state-revealed,
@@ -226,6 +218,11 @@ main {
 
 .cell.cell-value-8 {
     background-image: url(data:image/svg+xml;base64,PHN2ZyB2ZXJzaW9uPSIxLjEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHdpZHRoPSIzMXB4IiBoZWlnaHQ9IjMxcHgiPgogICAgPGRlZnM+CiAgICAgICAgPHRleHQgaWQ9ImF4Yk1VeWlnRCIgeD0iMiIgeT0iMzAiIGZvbnQtc2l6ZT0iNDBweCIgZm9udC1mYW1pbHk9IkFyaWFsIEJsYWNrLCBBcmlhbCIgZm9udC13ZWlnaHQ9IjkwMCIgZm9udC1zdHlsZT0ibm9ybWFsIiBzdHlsZT0ibGluZS1oZWlnaHQ6IDQwcHgiPjg8L3RleHQ+CiAgICA8L2RlZnM+CiAgICA8dXNlIHhsaW5rOmhyZWY9IiNheGJNVXlpZ0QiIGZpbGw9IiM4MDgwODAiPjwvdXNlPgo8L3N2Zz4=);
+}
+
+#settings {
+    display: none;
+    font-size: 20rem;
 }
 
 footer {
