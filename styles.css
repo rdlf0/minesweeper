@@ -49,6 +49,7 @@ main {
 #controls {
     display: flex;
     justify-content: space-between;
+    align-items: center;
 }
 
 #controls .control {
@@ -71,6 +72,11 @@ main {
     border-width: 1.5rem;
     border-color: #ffffff #7b7b7b #7b7b7b #ffffff;
     box-sizing: border-box;
+    transition: background-color 200ms;
+}
+
+#controls .buttons-wrapper .control:hover {
+    background-color: #eeeeee;
 }
 
 #controls .buttons-wrapper .control .icon {
@@ -115,10 +121,9 @@ main {
     font-size: 25rem;
     font-family: Courier;
     font-weight: bold;
-    padding: 0rem 5rem;
+    padding: 4rem 5rem;
     cursor: default;
-    height: var(--cell-side);
-    line-height: 35rem;
+    line-height: 25rem;
 }
 
 #board {
