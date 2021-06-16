@@ -121,7 +121,7 @@ export class Game {
 
         this.boardEl.style.setProperty("--rows", this.board.getMode().rows.toString());
         this.boardEl.style.setProperty("--cols", this.board.getMode().cols.toString());
-        this.board.draw(this.boardEl);
+        this.board.draw();
 
         this.settingsEl.style.setProperty("--rows", this.board.getMode().rows.toString());
         this.settingsEl.style.setProperty("--cols", this.board.getMode().cols.toString());
@@ -165,7 +165,7 @@ export class Game {
             console.debug(mode);
         }
 
-        this.board = new Board(mode, state);
+        this.board = new Board(mode, state, this.boardEl);
 
         this.updateUrlHash();
     }
