@@ -213,7 +213,7 @@ export class Board {
         return adj;
     }
 
-    public revealMines(win: boolean): void {
+    public revealMines(win: boolean): void { // nosonar
         for (let i = 0; i < this.mode.rows; i++) {
             for (let j = 0; j < this.mode.cols; j++) {
                 const cell = this.grid[i][j];
