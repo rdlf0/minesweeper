@@ -10,9 +10,11 @@ import {
     EVENT_CELL_UNFLAGGED,
     EVENT_GAME_OVER,
     EVENT_SAFE_AREA_CREATED,
+    EVENT_SETTINGS_CHANGED,
     PubSub,
 } from "./util/pub-sub";
 import { Session } from "./util/session";
+import { Settings } from "./settings";
 
 export class Game {
 
@@ -49,6 +51,7 @@ export class Game {
 
         this.boardEl = document.getElementById("board");
         this.settingsEl = document.getElementById("settings");
+        new Settings(this.settingsEl, this.config); // nosonar
 
         window.addEventListener("hashchange", this.handleHashChange.bind(this));
 
@@ -62,12 +65,9 @@ export class Game {
         PubSub.subscribe(EVENT_CELL_UNFLAGGED, this.decrementFlags.bind(this));
         PubSub.subscribe(EVENT_GAME_OVER, this.gameOver.bind(this));
         PubSub.subscribe(EVENT_SAFE_AREA_CREATED, this.updateUrlHash.bind(this));
+        PubSub.subscribe(EVENT_SETTINGS_CHANGED, this.handleSettingsChange.bind(this));
 
         this.initialize();
-    }
-
-    public getConfig(): Config {
-        return this.config;
     }
 
     private reset(): void {
@@ -100,6 +100,21 @@ export class Game {
             console.debug('======= HASH CHANGED =======');
         }
 
+        this.closeSettings();
+        this.timer.stop();
+        this.isReset = false;
+        this.isReplay = false;
+        this.initialize();
+    }
+
+    private handleSettingsChange(config: Config) {
+        if (Session.get("debug")) {
+            console.debug('======= SETTINGS CHANGED =======');
+        }
+        this.config = config;
+
+        this.closeSettings();
+        this.updateUrlHash(true);
         this.timer.stop();
         this.isReset = false;
         this.isReplay = false;
@@ -141,6 +156,7 @@ export class Game {
             state = this.board.getState();
         } else if (this.urlTool.isHashSet()) {
             mode = this.urlTool.extractMode() ?? this.board?.getMode() ?? BOARD_CONFIG[this.config.mode];
+            this.config.mode = this.getModeNameFromMode(mode);
             state = this.urlTool.extractState(mode);
 
             if (state == null) {
@@ -159,6 +175,24 @@ export class Game {
         this.board = new Board(mode, state, this.boardEl);
 
         this.updateUrlHash();
+    }
+
+    private getModeNameFromMode(mode: Mode): MODE_NAME {
+        for (const modeKey in MODE_NAME) {
+            const modeValue = MODE_NAME[modeKey];
+            const m = BOARD_CONFIG[modeValue];
+            if (m == null) {
+                continue;
+            }
+
+            if (m.rows == mode.rows &&
+                m.cols == mode.cols &&
+                m.mines == mode.mines) {
+                return modeValue;
+            }
+        }
+
+        return MODE_NAME.Custom;
     }
 
     private toggleSettings(): void {

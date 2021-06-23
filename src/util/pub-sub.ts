@@ -14,7 +14,7 @@ export const EVENT_SETTINGS_CHANGED = "settingsChanged";
 
 export class PubSub {
 
-    private constructor() { }
+    private constructor() { } // nosonar
 
     private static events: { [eventName: string]: Array<CallbackFunc> } = {};
 

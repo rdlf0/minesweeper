@@ -19,6 +19,7 @@ export enum MODE_NAME {
     Beginner = "beginner",
     Intermediate = "intermediate",
     Expert = "expert",
+    Custom = "custom",
 }
 
 export interface Mode {
@@ -28,7 +29,7 @@ export interface Mode {
 }
 
 type BoardConfig = {
-    readonly [name in MODE_NAME]: Mode;
+    readonly [name in MODE_NAME]?: Mode;
 }
 
 export const BOARD_CONFIG: BoardConfig = {
