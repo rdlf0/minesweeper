@@ -51,8 +51,6 @@ export class Game {
 
         this.boardEl = document.getElementById("board");
         this.settingsEl = document.getElementById("settings");
-        new Settings(this.settingsEl, this.config); // nosonar
-
         window.addEventListener("hashchange", this.handleHashChange.bind(this));
 
         this.urlTool = new UrlTool(
@@ -68,6 +66,8 @@ export class Game {
         PubSub.subscribe(EVENT_SETTINGS_CHANGED, this.handleSettingsChange.bind(this));
 
         this.initialize();
+
+        new Settings(this.settingsEl, this.config); // nosonar
     }
 
     private reset(): void {
@@ -124,7 +124,7 @@ export class Game {
     private initialize(): void {
         Session.clear();
         Session.set("debug", this.config.debug);
-        Session.set("firstClick", this.config.firstClick);
+        Session.set("firstClick", Number(this.config.firstClick));
 
         this.isOver = false;
         this.timer.reset();
