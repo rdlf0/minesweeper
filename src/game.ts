@@ -10,9 +10,11 @@ import {
     EVENT_CELL_UNFLAGGED,
     EVENT_GAME_OVER,
     EVENT_SAFE_AREA_CREATED,
+    EVENT_SETTINGS_CHANGED,
     PubSub,
 } from "./util/pub-sub";
 import { Session } from "./util/session";
+import { Settings } from "./settings";
 
 export class Game {
 
@@ -20,8 +22,11 @@ export class Game {
     private counter: Counter;
     private resetBtn: HTMLElement;
     private replayBtn: HTMLElement;
+    private toggleSettingsBtn: HTMLElement;
     private timer: Timer;
     private board: Board;
+    private boardEl: HTMLElement;
+    private settingsEl: HTMLElement;
 
     // Other properties
     private flagsCounter: number;
@@ -29,6 +34,7 @@ export class Game {
     private isReset: boolean;
     private isReplay: boolean;
     private urlTool: UrlTool;
+    private settingsOpened: boolean = false;
 
     constructor(private config: Config) {
         this.counter = new Counter(document.getElementById("mines-counter"));
@@ -40,6 +46,11 @@ export class Game {
         this.replayBtn = document.getElementById("replay");
         this.replayBtn.addEventListener("click", this.replay.bind(this));
 
+        this.toggleSettingsBtn = document.getElementById("toggle-settings");
+        this.toggleSettingsBtn.addEventListener("click", this.toggleSettings.bind(this));
+
+        this.boardEl = document.getElementById("board");
+        this.settingsEl = document.getElementById("settings");
         window.addEventListener("hashchange", this.handleHashChange.bind(this));
 
         this.urlTool = new UrlTool(
@@ -52,12 +63,11 @@ export class Game {
         PubSub.subscribe(EVENT_CELL_UNFLAGGED, this.decrementFlags.bind(this));
         PubSub.subscribe(EVENT_GAME_OVER, this.gameOver.bind(this));
         PubSub.subscribe(EVENT_SAFE_AREA_CREATED, this.updateUrlHash.bind(this));
+        PubSub.subscribe(EVENT_SETTINGS_CHANGED, this.handleSettingsChange.bind(this));
 
         this.initialize();
-    }
 
-    public getConfig(): Config {
-        return this.config;
+        new Settings(this.settingsEl, this.config); // nosonar
     }
 
     private reset(): void {
@@ -65,11 +75,11 @@ export class Game {
             console.debug('======= RESET =======');
         }
 
+        this.closeSettings();
         this.updateUrlHash(true);
         this.timer.stop();
         this.isReset = true;
         this.isReplay = false;
-        this.resetBtn.innerHTML = "RESET";
         this.initialize();
     }
 
@@ -78,6 +88,7 @@ export class Game {
             console.debug('======= REPLAY =======');
         }
 
+        this.closeSettings();
         this.timer.stop();
         this.isReset = false;
         this.isReplay = true;
@@ -89,6 +100,21 @@ export class Game {
             console.debug('======= HASH CHANGED =======');
         }
 
+        this.closeSettings();
+        this.timer.stop();
+        this.isReset = false;
+        this.isReplay = false;
+        this.initialize();
+    }
+
+    private handleSettingsChange(config: Config) {
+        if (Session.get("debug")) {
+            console.debug('======= SETTINGS CHANGED =======');
+        }
+        this.config = config;
+
+        this.closeSettings();
+        this.updateUrlHash(true);
         this.timer.stop();
         this.isReset = false;
         this.isReplay = false;
@@ -98,20 +124,20 @@ export class Game {
     private initialize(): void {
         Session.clear();
         Session.set("debug", this.config.debug);
-        Session.set("firstClick", this.config.firstClick);
+        Session.set("firstClick", Number(this.config.firstClick));
 
         this.isOver = false;
         this.timer.reset();
 
-        if (this.board != null) { // Microsoft Edge Mobile doesn't support optional chaining yet
-            this.board.unsubscribe();
-        }
+        this.board?.unsubscribe();
         this.generateScenario();
 
-        const boardEl = document.getElementById("board");
-        boardEl.style.setProperty("--rows", this.board.getMode().rows.toString());
-        boardEl.style.setProperty("--cols", this.board.getMode().cols.toString());
-        this.board.draw(boardEl);
+        this.boardEl.style.setProperty("--rows", this.board.getMode().rows.toString());
+        this.boardEl.style.setProperty("--cols", this.board.getMode().cols.toString());
+        this.board.draw();
+
+        this.settingsEl.style.setProperty("--rows", this.board.getMode().rows.toString());
+        this.settingsEl.style.setProperty("--cols", this.board.getMode().cols.toString());
 
         this.setFlags(0);
     }
@@ -129,14 +155,8 @@ export class Game {
             mode = this.board.getMode();
             state = this.board.getState();
         } else if (this.urlTool.isHashSet()) {
-            mode = this.urlTool.extractMode();
-            // Optional chaining workaround
-            if (mode == null && this.board != null) {
-                mode = this.board.getMode();
-            } else if (mode == null) {
-                mode = BOARD_CONFIG[this.config.mode]
-            }
-
+            mode = this.urlTool.extractMode() ?? this.board?.getMode() ?? BOARD_CONFIG[this.config.mode];
+            this.config.mode = this.getModeNameFromMode(mode);
             state = this.urlTool.extractState(mode);
 
             if (state == null) {
@@ -152,9 +172,51 @@ export class Game {
             console.debug(mode);
         }
 
-        this.board = new Board(mode, state);
+        this.board = new Board(mode, state, this.boardEl);
 
         this.updateUrlHash();
+    }
+
+    private getModeNameFromMode(mode: Mode): MODE_NAME {
+        for (const modeKey in MODE_NAME) {
+            const modeValue = MODE_NAME[modeKey];
+            const m = BOARD_CONFIG[modeValue];
+            if (m == null) {
+                continue;
+            }
+
+            if (m.rows == mode.rows &&
+                m.cols == mode.cols &&
+                m.mines == mode.mines) {
+                return modeValue;
+            }
+        }
+
+        return MODE_NAME.Custom;
+    }
+
+    private toggleSettings(): void {
+        if (!this.settingsOpened) {
+            this.openSettings();
+        } else {
+            this.closeSettings();
+        }
+    }
+
+    private openSettings(): void {
+        this.timer.stop();
+        this.settingsOpened = true;
+        this.boardEl.style.display = "none";
+        this.settingsEl.style.display = "block";
+    }
+
+    private closeSettings(): void {
+        if (this.timer.isStarted() && !this.isOver) {
+            this.timer.start();
+        }
+        this.settingsOpened = false;
+        this.boardEl.style.display = "grid";
+        this.settingsEl.style.display = "none";
     }
 
     private start(): void {
@@ -175,7 +237,7 @@ export class Game {
         this.board.revealMines(win);
 
         if (win) {
-            this.resetBtn.innerHTML = "WIN!";
+            // @TODO: Congratulate the player somehow
         }
     }
 
