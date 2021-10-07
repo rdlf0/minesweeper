@@ -27,7 +27,7 @@ html {
     }
 }
 
-body.night {
+body.dark {
     background-color: #1e1e1e;
 }
 
@@ -189,7 +189,7 @@ footer a {
     transition-timing-function: var(--transition-function);
 }
 
-.night footer a {
+.dark footer a {
     color: #cccccc;
 }
 
@@ -211,7 +211,7 @@ footer ul#version li {
     transition-timing-function: var(--transition-function);
 }
 
-.night footer ul#version li {
+.dark footer ul#version li {
     border-left: 2rem solid #cccccc;
 }
 
