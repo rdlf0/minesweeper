@@ -2,9 +2,9 @@
  * Dark mode toggle
  */
 const darkModeToggle = document.getElementById("dark-mode-toggle");
-darkModeToggle.addEventListener("click", toggleNightMode);
+darkModeToggle.addEventListener("click", toggleDarkMode);
 
-function toggleNightMode(e) {
+function toggleDarkMode(e) {
     e.preventDefault();
     const state = document.body.classList.toggle('dark') ? "OFF" : "ON";
     e.target.childNodes[1].textContent = state;
