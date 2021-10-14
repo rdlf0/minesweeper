@@ -24,7 +24,11 @@ export class Settings {
                 return;
             }
 
-            this.drawMode(modeFieldset, modeKey, modeValue);
+            this.drawModeSwitch(modeFieldset, modeKey, modeValue);
+        });
+
+        Object.keys(BOARD_CONFIG[MODE_NAME.Beginner]).forEach(modeProperty => {
+            this.drawModeDetails(modeFieldset, modeProperty);
         });
 
         // First Click
@@ -48,14 +52,66 @@ export class Settings {
                 this.config.firstClick == FIRST_CLICK[firstClickKey]);
         })
 
+        // Dark mode switch
+        const darkModeFieldset = document.createElement("fieldset");
+        this.el.appendChild(darkModeFieldset)
+
+        const darkModeLegend = document.createElement("legend");
+        darkModeLegend.textContent = "Dark mode";
+        darkModeFieldset.appendChild(darkModeLegend);
+
+        const darkModeWrapper = document.createElement("div");
+        darkModeFieldset.appendChild(darkModeWrapper);
+
+        const darkModeLabel = document.createElement("label");
+        darkModeLabel.setAttribute("for", "darkModeCheckbox");
+        darkModeLabel.textContent = "Dark mode"
+        darkModeFieldset.append(darkModeLabel);
+
+        const darkModeCheckbox = document.createElement("input");
+        darkModeCheckbox.setAttribute("type", "checkbox");
+        darkModeCheckbox.setAttribute("id", "darkModeCheckbox");
+        darkModeCheckbox.addEventListener("click", this.toggleDarkMode.bind(this));
+        darkModeCheckbox.toggleAttribute("checked", this.config.darkModeOn);
+        darkModeFieldset.appendChild(darkModeCheckbox);
+
+        // About
+        const aboutFieldset = document.createElement("fieldset");
+        this.el.appendChild(aboutFieldset)
+
+        const aboutLegend = document.createElement("legend");
+        aboutLegend.textContent = "About";
+
+        const versionWrapper = document.createElement("div");
+        const versionLink = document.createElement("a");
+        versionLink.setAttribute("href", `http://github.com/${this.config.github.owner}/${this.config.github.repo}/releases/latest`);
+        versionLink.setAttribute("target", "blank");
+        versionLink.setAttribute("title", "Check out the changelog");
+        fetch(`https://api.github.com/repos/${this.config.github.owner}/${this.config.github.repo}/releases/latest`, { method: "GET", headers: {} })
+            .then(resp => resp.json())
+            .then(body => versionLink.textContent = `Version ${body.tag_name.substring(1)}`);
+        versionWrapper.appendChild(versionLink);
+        aboutFieldset.appendChild(versionWrapper);
+
+        const ghWrapper = document.createElement("div");
+        const ghLink = document.createElement("a");
+        ghLink.setAttribute("href", `https://github.com/${this.config.github.owner}/${this.config.github.repo}`);
+        ghLink.setAttribute("target", "blank");
+        ghLink.setAttribute("title", "Find the source code at GitHub");
+        ghLink.textContent = "GitHub";
+        ghWrapper.appendChild(ghLink);
+        aboutFieldset.appendChild(ghWrapper);
+
+        aboutFieldset.appendChild(aboutLegend);
+
         // Save button
         const btn = document.createElement("button")
         btn.addEventListener("click", this.publishConfig.bind(this))
-        btn.textContent = "Save"
+        btn.textContent = "Apply"
         this.el.appendChild(btn);
     }
 
-    private drawMode(parent: HTMLElement, modeKey: string, modeValue: MODE_NAME) {
+    private drawModeSwitch(parent: HTMLElement, modeKey: string, modeValue: MODE_NAME) {
         const rows = BOARD_CONFIG[modeValue].rows;
         const cols = BOARD_CONFIG[modeValue].cols;
         const mines = BOARD_CONFIG[modeValue].mines;
@@ -63,28 +119,31 @@ export class Settings {
             cols == BOARD_CONFIG[this.config.mode].cols &&
             mines == BOARD_CONFIG[this.config.mode].mines;
 
-        const wrapper = document.createElement("div");
-        wrapper.setAttribute("data-configKey", "mode")
-        wrapper.setAttribute("data-configValue", modeValue)
-        wrapper.addEventListener("click", this.updateConfig.bind(this));
+        const modeButton = document.createElement("span");
+        modeButton.setAttribute("data-configKey", "mode")
+        modeButton.setAttribute("data-configValue", modeValue)
+        modeButton.addEventListener("click", this.updateConfig.bind(this));
         if (current) {
-            wrapper.style.fontWeight = "bold";
-            wrapper.style.color = "#ff0000";
+            modeButton.style.fontWeight = "bold";
+            modeButton.style.color = "#ff0000";
         }
-        wrapper.textContent = modeKey;
+        modeButton.textContent = modeKey;
 
-        const r = document.createElement("div");
-        r.textContent = `Rows: ${rows}`;
-        wrapper.appendChild(r);
+        parent.appendChild(modeButton);
+    }
 
-        const c = document.createElement("div");
-        c.textContent = `Columns: ${cols}`;
-        wrapper.appendChild(c);
-
-        const mn = document.createElement("div");
-        mn.textContent = `Mines: ${mines}`;
-        wrapper.appendChild(mn);
-
+    private drawModeDetails(parent: HTMLElement, modeProperty: string) {
+        const wrapper = document.createElement("div");
+        const label = document.createElement("label");
+        label.textContent = modeProperty.charAt(0).toUpperCase() + modeProperty.slice(1);
+        label.setAttribute("for", `${modeProperty}Input`);
+        wrapper.appendChild(label);
+        const input = document.createElement("input");
+        input.setAttribute("type", "number");
+        input.setAttribute("id", `${modeProperty}Input`);
+        input.setAttribute("value", BOARD_CONFIG[this.config.mode][modeProperty].toString());
+        input.disabled = true;
+        wrapper.appendChild(input);
         parent.appendChild(wrapper);
     }
 
@@ -113,6 +172,11 @@ export class Settings {
     private updateConfig(e) {
         this.config[e.target.getAttribute("data-configKey")] = e.target.getAttribute("data-configValue");
         this.draw();
+    }
+
+    private toggleDarkMode(e) {
+        const state = document.body.classList.toggle("dark");
+        document.getElementById("darkModeCheckbox").setAttribute("checked", String(state));
     }
 
     private publishConfig(e) {

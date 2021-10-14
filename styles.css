@@ -16,7 +16,7 @@ html {
     font-size: 1px;
 }
 
-body.night {
+body.dark {
     background-color: #1e1e1e;
 }
 
@@ -228,49 +228,4 @@ main {
 #settings {
     display: none;
     font-size: 20rem;
-}
-
-footer {
-    margin-top: 20rem;
-    font-family: monospace;
-    font-size: 13rem;
-}
-
-footer a {
-    color: #111111;
-    text-decoration: none;
-    transition-property: color;
-    transition-duration: var(--transition-duration);
-    transition-timing-function: var(--transition-function);
-}
-
-.night footer a {
-    color: #cccccc;
-}
-
-footer a:hover {
-    color: #FF0000;
-}
-
-footer ul#version {
-    margin-top: 10rem;
-}
-
-footer ul#version li {
-    display: inline-block;
-    border-left: 2rem solid #111111;
-    margin-left: 5rem;
-    padding-left: 10rem;
-    transition-property: all;
-    transition-duration: var(--transition-duration);
-    transition-timing-function: var(--transition-function);
-}
-
-.night footer ul#version li {
-    border-left: 2rem solid #cccccc;
-}
-
-footer ul#version li:first-child {
-    border-left: 0 none;
-    padding-left: 0;
 }

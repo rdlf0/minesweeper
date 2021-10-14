@@ -4,11 +4,16 @@ import { CantorPairer } from "./pairer/cantorPairer";
 import { BinaryToBase64UrlEncoderV2 } from "./encoder/binaryToBase64UrlEncoderV2";
 
 const config: Config = {
-    mode: MODE_NAME.Expert,
+    mode: MODE_NAME.Beginner,
     encoder: BinaryToBase64UrlEncoderV2.prototype,
     modePairer: CantorPairer.prototype,
     firstClick: FIRST_CLICK.GuaranteedCascade,
     debug: false,
+    darkModeOn: true,
+    github: {
+        owner: "rdlf0",
+        repo: "minesweeper"
+    }
 }
 
-new Game(config);
+new Game(config); // nosonar

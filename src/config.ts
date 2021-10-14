@@ -8,6 +8,13 @@ export interface Config {
     modePairer: Pairer;
     firstClick: FIRST_CLICK;
     debug: boolean;
+    darkModeOn: boolean;
+    github: GitHub
+}
+
+interface GitHub {
+    owner: string;
+    repo: string;
 }
 
 export enum FIRST_CLICK {

@@ -37,6 +37,8 @@ export class Game {
     private settingsOpened: boolean = false;
 
     constructor(private config: Config) {
+        document.body.classList.toggle("dark", this.config.darkModeOn);
+
         this.counter = new Counter(document.getElementById("mines-counter"));
         this.timer = new Timer(document.getElementById("timer"));
 
@@ -75,7 +77,9 @@ export class Game {
             console.debug('======= RESET =======');
         }
 
-        this.closeSettings();
+        if (this.settingsOpened) {
+            this.closeSettings();
+        }
         this.updateUrlHash(true);
         this.timer.stop();
         this.isReset = true;
@@ -88,7 +92,9 @@ export class Game {
             console.debug('======= REPLAY =======');
         }
 
-        this.closeSettings();
+        if (this.settingsOpened) {
+            this.closeSettings();
+        }
         this.timer.stop();
         this.isReset = false;
         this.isReplay = true;
@@ -100,7 +106,9 @@ export class Game {
             console.debug('======= HASH CHANGED =======');
         }
 
-        this.closeSettings();
+        if (this.settingsOpened) {
+            this.closeSettings();
+        }
         this.timer.stop();
         this.isReset = false;
         this.isReplay = false;
