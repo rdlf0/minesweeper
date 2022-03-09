@@ -1,6 +1,13 @@
 import { BOARD_CONFIG, Config, FIRST_CLICK, MODE_NAME } from "./config";
 import { EVENT_SETTINGS_CHANGED, PubSub } from "./util/pub-sub";
 
+enum AVAILABLE_SETTINGS {
+    mode = "Mode",
+    firstClick = "First click",
+    darkMode = "Dark mode",
+    about = "About",
+}
+
 export class Settings {
 
     constructor(private el: HTMLElement, private config: Config) {
@@ -8,15 +15,41 @@ export class Settings {
     }
 
     private draw() {
-        this.el.textContent = "";
+        Object.keys(AVAILABLE_SETTINGS).forEach(settingKey => {
+            const key = settingKey as keyof typeof AVAILABLE_SETTINGS;
+            const fieldset = document.createElement("fieldset");
+            this.el.appendChild(fieldset)
 
-        // Mode
-        const modeFieldset = document.createElement("fieldset");
-        this.el.appendChild(modeFieldset)
+            const legend = document.createElement("legend");
+            legend.textContent = AVAILABLE_SETTINGS[key];
+            fieldset.appendChild(legend);
+            this.drawFieldset(key, fieldset);
+        })
 
-        const modeLegend = document.createElement("legend");
-        modeLegend.textContent = "Mode";
-        modeFieldset.appendChild(modeLegend);
+
+        // Save button
+        const btn = document.createElement("button")
+        btn.addEventListener("click", () => PubSub.publish(EVENT_SETTINGS_CHANGED, this.config))
+        btn.type = "button";
+        btn.id = "apply_settings"
+        btn.textContent = "Apply"
+        this.el.appendChild(btn);
+    }
+
+    private drawFieldset(setting: keyof typeof AVAILABLE_SETTINGS, settingFieldset: HTMLElement) {
+        settingFieldset.querySelectorAll(":not(legend)").forEach(e => e.remove());
+        switch (setting) {
+            case "mode": this.drawMode(settingFieldset); break;
+            case "firstClick": this.drawFirstClick(settingFieldset); break;
+            case "darkMode": this.drawDarkMode(settingFieldset); break;
+            case "about": this.drawAbout(settingFieldset); break;
+        }
+    }
+
+    private drawMode(fieldset: HTMLElement) {
+        const modeSwitchWrapper = document.createElement("div");
+        modeSwitchWrapper.id = "mode_switch_wrapper";
+        fieldset.append(modeSwitchWrapper);
 
         Object.keys(MODE_NAME).forEach(modeKey => {
             const modeValue = MODE_NAME[modeKey];
@@ -24,64 +57,50 @@ export class Settings {
                 return;
             }
 
-            this.drawModeSwitch(modeFieldset, modeKey, modeValue);
+            this.drawModeSwitch(modeSwitchWrapper, modeKey, modeValue, fieldset);
         });
 
+        const modeDetailsWrapper = document.createElement("div");
+        modeDetailsWrapper.id = "mode_details_wrapper";
+        fieldset.append(modeDetailsWrapper);
         Object.keys(BOARD_CONFIG[MODE_NAME.Beginner]).forEach(modeProperty => {
-            this.drawModeDetails(modeFieldset, modeProperty);
+            this.drawModeDetails(modeDetailsWrapper, modeProperty);
         });
+    }
 
-        // First Click
-        const firstClickFieldset = document.createElement("fieldset");
-        this.el.appendChild(firstClickFieldset)
-
-        const firstClickLegend = document.createElement("legend");
-        firstClickLegend.textContent = "First click";
-        firstClickFieldset.appendChild(firstClickLegend);
-
+    private drawFirstClick(fieldset: HTMLElement) {
         Object.keys(FIRST_CLICK).forEach(firstClickKey => {
             if (!isNaN(Number(firstClickKey))) {
                 return;
             }
 
             this.drawRadioButton(
-                firstClickFieldset,
+                fieldset,
                 firstClickKey,
                 "firstClick",
                 FIRST_CLICK[firstClickKey],
                 this.config.firstClick == FIRST_CLICK[firstClickKey]);
         })
+    }
 
-        // Dark mode switch
-        const darkModeFieldset = document.createElement("fieldset");
-        this.el.appendChild(darkModeFieldset)
-
-        const darkModeLegend = document.createElement("legend");
-        darkModeLegend.textContent = "Dark mode";
-        darkModeFieldset.appendChild(darkModeLegend);
-
+    private drawDarkMode(fieldset: HTMLElement) {
         const darkModeWrapper = document.createElement("div");
-        darkModeFieldset.appendChild(darkModeWrapper);
+        fieldset.appendChild(darkModeWrapper);
 
         const darkModeLabel = document.createElement("label");
         darkModeLabel.setAttribute("for", "darkModeCheckbox");
         darkModeLabel.textContent = "Dark mode"
-        darkModeFieldset.append(darkModeLabel);
+        fieldset.append(darkModeLabel);
 
         const darkModeCheckbox = document.createElement("input");
         darkModeCheckbox.setAttribute("type", "checkbox");
         darkModeCheckbox.setAttribute("id", "darkModeCheckbox");
         darkModeCheckbox.addEventListener("click", this.toggleDarkMode.bind(this));
         darkModeCheckbox.toggleAttribute("checked", this.config.darkModeOn);
-        darkModeFieldset.appendChild(darkModeCheckbox);
+        fieldset.appendChild(darkModeCheckbox);
+    }
 
-        // About
-        const aboutFieldset = document.createElement("fieldset");
-        this.el.appendChild(aboutFieldset)
-
-        const aboutLegend = document.createElement("legend");
-        aboutLegend.textContent = "About";
-
+    private drawAbout(fieldset: HTMLElement) {
         const versionWrapper = document.createElement("div");
         const versionLink = document.createElement("a");
         versionLink.setAttribute("href", `http://github.com/${this.config.github.owner}/${this.config.github.repo}/releases/latest`);
@@ -91,7 +110,7 @@ export class Settings {
             .then(resp => resp.json())
             .then(body => versionLink.textContent = `Version ${body.tag_name.substring(1)}`);
         versionWrapper.appendChild(versionLink);
-        aboutFieldset.appendChild(versionWrapper);
+        fieldset.appendChild(versionWrapper);
 
         const ghWrapper = document.createElement("div");
         const ghLink = document.createElement("a");
@@ -100,18 +119,10 @@ export class Settings {
         ghLink.setAttribute("title", "Find the source code at GitHub");
         ghLink.textContent = "GitHub";
         ghWrapper.appendChild(ghLink);
-        aboutFieldset.appendChild(ghWrapper);
-
-        aboutFieldset.appendChild(aboutLegend);
-
-        // Save button
-        const btn = document.createElement("button")
-        btn.addEventListener("click", this.publishConfig.bind(this))
-        btn.textContent = "Apply"
-        this.el.appendChild(btn);
+        fieldset.appendChild(ghWrapper);
     }
 
-    private drawModeSwitch(parent: HTMLElement, modeKey: string, modeValue: MODE_NAME) {
+    private drawModeSwitch(parent: HTMLElement, modeKey: string, modeValue: MODE_NAME, fieldset: HTMLElement) {
         const rows = BOARD_CONFIG[modeValue].rows;
         const cols = BOARD_CONFIG[modeValue].cols;
         const mines = BOARD_CONFIG[modeValue].mines;
@@ -119,21 +130,21 @@ export class Settings {
             cols == BOARD_CONFIG[this.config.mode].cols &&
             mines == BOARD_CONFIG[this.config.mode].mines;
 
-        const modeButton = document.createElement("span");
+        const modeButton = document.createElement("div");
         modeButton.setAttribute("data-configKey", "mode")
         modeButton.setAttribute("data-configValue", modeValue)
-        modeButton.addEventListener("click", this.updateConfig.bind(this));
+        modeButton.addEventListener("click", this.updateConfig.bind(this, fieldset));
         if (current) {
-            modeButton.style.fontWeight = "bold";
-            modeButton.style.color = "#ff0000";
+            modeButton.classList.add("active");
         }
-        modeButton.textContent = modeKey;
+        modeButton.title = modeKey;
 
         parent.appendChild(modeButton);
     }
 
     private drawModeDetails(parent: HTMLElement, modeProperty: string) {
         const wrapper = document.createElement("div");
+        wrapper.className = "mode-detail";
         const label = document.createElement("label");
         label.textContent = modeProperty.charAt(0).toUpperCase() + modeProperty.slice(1);
         label.setAttribute("for", `${modeProperty}Input`);
@@ -165,22 +176,19 @@ export class Settings {
         radio.setAttribute("data-configKey", name)
         radio.setAttribute("data-configValue", value);
         radio.checked = checked;
-        radio.addEventListener("click", this.updateConfig.bind(this));
+        radio.addEventListener("click", this.updateConfig.bind(this, parent));
         wrapper.appendChild(radio)
     }
 
-    private updateConfig(e) {
-        this.config[e.target.getAttribute("data-configKey")] = e.target.getAttribute("data-configValue");
-        this.draw();
+    private updateConfig(fieldset: HTMLElement, e: MouseEvent) {
+        const target = e.currentTarget as HTMLElement;
+        this.config[target.getAttribute("data-configKey")] = target.getAttribute("data-configValue");
+        this.drawFieldset(target.getAttribute("data-configKey") as keyof typeof AVAILABLE_SETTINGS, fieldset);
     }
 
-    private toggleDarkMode(e) {
+    private toggleDarkMode() {
         const state = document.body.classList.toggle("dark");
         document.getElementById("darkModeCheckbox").setAttribute("checked", String(state));
-    }
-
-    private publishConfig(e) {
-        PubSub.publish(EVENT_SETTINGS_CHANGED, this.config);
     }
 
 }
