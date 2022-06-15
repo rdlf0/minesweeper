@@ -67,7 +67,7 @@ export class Game {
         PubSub.subscribe(EVENT_SAFE_AREA_CREATED, this.updateUrlHash.bind(this));
         PubSub.subscribe(EVENT_SETTINGS_CHANGED, this.handleSettingsChange.bind(this));
 
-        this.initialize();
+        this.initialize(false, false);
 
         new Settings(this.settingsEl, this.config); // nosonar
     }
@@ -81,10 +81,7 @@ export class Game {
             this.closeSettings();
         }
         this.updateUrlHash(true);
-        this.timer.stop();
-        this.isReset = true;
-        this.isReplay = false;
-        this.initialize();
+        this.initialize(true, false);
     }
 
     private replay(): void {
@@ -95,10 +92,7 @@ export class Game {
         if (this.settingsOpened) {
             this.closeSettings();
         }
-        this.timer.stop();
-        this.isReset = false;
-        this.isReplay = true;
-        this.initialize();
+        this.initialize(false, true);
     }
 
     private handleHashChange(): void {
@@ -109,10 +103,7 @@ export class Game {
         if (this.settingsOpened) {
             this.closeSettings();
         }
-        this.timer.stop();
-        this.isReset = false;
-        this.isReplay = false;
-        this.initialize();
+        this.initialize(false, false);
     }
 
     private handleSettingsChange(config: Config) {
@@ -121,20 +112,19 @@ export class Game {
         }
         this.config = config;
 
-        this.closeSettings();
         this.updateUrlHash(true);
-        this.timer.stop();
-        this.isReset = false;
-        this.isReplay = false;
-        this.initialize();
+        this.initialize(false, false);
     }
 
-    private initialize(): void {
+    private initialize(isReset: boolean, isReplay: boolean): void {
         Session.clear();
         Session.set("debug", this.config.debug);
         Session.set("firstClick", Number(this.config.firstClick));
 
+        this.isReset = isReset;
+        this.isReplay = isReplay;
         this.isOver = false;
+        this.timer.stop();
         this.timer.reset();
 
         this.board?.unsubscribe();
@@ -258,7 +248,7 @@ export class Game {
         this.counter.updateEl(this.board.getMines() - this.flagsCounter);
     }
 
-    private incrementFlags(value: number): void {
+    private incrementFlags(): void {
         this.setFlags(++this.flagsCounter);
     }
 

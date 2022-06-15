@@ -25,15 +25,6 @@ export class Settings {
             fieldset.appendChild(legend);
             this.drawFieldset(key, fieldset);
         })
-
-
-        // Save button
-        const btn = document.createElement("button")
-        btn.addEventListener("click", () => PubSub.publish(EVENT_SETTINGS_CHANGED, this.config))
-        btn.type = "button";
-        btn.id = "apply_settings"
-        btn.textContent = "Apply"
-        this.el.appendChild(btn);
     }
 
     private drawFieldset(setting: keyof typeof AVAILABLE_SETTINGS, settingFieldset: HTMLElement) {
@@ -133,9 +124,10 @@ export class Settings {
         const modeButton = document.createElement("div");
         modeButton.setAttribute("data-configKey", "mode")
         modeButton.setAttribute("data-configValue", modeValue)
-        modeButton.addEventListener("click", this.updateConfig.bind(this, fieldset));
         if (current) {
             modeButton.classList.add("active");
+        } else {
+            modeButton.addEventListener("click", this.updateConfig.bind(this, fieldset));
         }
         modeButton.title = modeKey;
 
@@ -176,7 +168,9 @@ export class Settings {
         radio.setAttribute("data-configKey", name)
         radio.setAttribute("data-configValue", value);
         radio.checked = checked;
-        radio.addEventListener("click", this.updateConfig.bind(this, parent));
+        if (!checked) {
+            radio.addEventListener("click", this.updateConfig.bind(this, parent));
+        }
         wrapper.appendChild(radio)
     }
 
@@ -184,6 +178,7 @@ export class Settings {
         const target = e.currentTarget as HTMLElement;
         this.config[target.getAttribute("data-configKey")] = target.getAttribute("data-configValue");
         this.drawFieldset(target.getAttribute("data-configKey") as keyof typeof AVAILABLE_SETTINGS, fieldset);
+        PubSub.publish(EVENT_SETTINGS_CHANGED, this.config)
     }
 
     private toggleDarkMode() {
