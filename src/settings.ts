@@ -80,7 +80,7 @@ export class Settings {
 
         const darkModeLabel = document.createElement("label");
         darkModeLabel.setAttribute("for", "darkModeCheckbox");
-        darkModeLabel.textContent = "Dark mode"
+        darkModeLabel.textContent = "Enabled"
         fieldset.append(darkModeLabel);
 
         const darkModeCheckbox = document.createElement("input");
@@ -108,7 +108,7 @@ export class Settings {
         ghLink.setAttribute("href", `https://github.com/${this.config.github.owner}/${this.config.github.repo}`);
         ghLink.setAttribute("target", "blank");
         ghLink.setAttribute("title", "Find the source code at GitHub");
-        ghLink.textContent = "GitHub";
+        ghLink.textContent = "Project's code";
         ghWrapper.appendChild(ghLink);
         fieldset.appendChild(ghWrapper);
     }
@@ -154,16 +154,17 @@ export class Settings {
         const wrapper = document.createElement("div");
         parent.appendChild(wrapper);
 
-        const id = labelText.replace(" ", "_");
-
         const label = document.createElement("label");
-        label.textContent = labelText
-        label.setAttribute("for", id);
+        label.textContent =
+            labelText == FIRST_CLICK[FIRST_CLICK.GuaranteedNonMine]
+                ? "Guaranteed non-mine"
+                : "Guaranteed cascade";
+        label.setAttribute("for", labelText);
         wrapper.appendChild(label);
 
         const radio = document.createElement("input")
         radio.setAttribute("type", "radio")
-        radio.setAttribute("id", id)
+        radio.setAttribute("id", labelText)
         radio.setAttribute("name", name)
         radio.setAttribute("data-configKey", name)
         radio.setAttribute("data-configValue", value);
@@ -171,7 +172,7 @@ export class Settings {
         if (!checked) {
             radio.addEventListener("click", this.updateConfig.bind(this, parent));
         }
-        wrapper.appendChild(radio)
+        wrapper.appendChild(radio);
     }
 
     private updateConfig(fieldset: HTMLElement, e: MouseEvent) {

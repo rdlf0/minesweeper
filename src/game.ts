@@ -73,9 +73,7 @@ export class Game {
     }
 
     private reset(): void {
-        if (Session.get("debug")) {
-            console.debug('======= RESET =======');
-        }
+        this.logDebugMessage('======= RESET =======');
 
         if (this.settingsOpened) {
             this.closeSettings();
@@ -85,9 +83,7 @@ export class Game {
     }
 
     private replay(): void {
-        if (Session.get("debug")) {
-            console.debug('======= REPLAY =======');
-        }
+        this.logDebugMessage('======= REPLAY =======');
 
         if (this.settingsOpened) {
             this.closeSettings();
@@ -96,9 +92,7 @@ export class Game {
     }
 
     private handleHashChange(): void {
-        if (Session.get("debug")) {
-            console.debug('======= HASH CHANGED =======');
-        }
+        this.logDebugMessage('======= HASH CHANGED =======');
 
         if (this.settingsOpened) {
             this.closeSettings();
@@ -107,11 +101,9 @@ export class Game {
     }
 
     private handleSettingsChange(config: Config) {
-        if (Session.get("debug")) {
-            console.debug('======= SETTINGS CHANGED =======');
-        }
-        this.config = config;
+        this.logDebugMessage('======= SETTINGS CHANGED =======');
 
+        this.config = config;
         this.updateUrlHash(true);
         this.initialize(false, false);
     }
@@ -166,9 +158,7 @@ export class Game {
             Session.set("applyFirstClickRule", true);
         }
 
-        if (Session.get("debug")) {
-            console.debug(mode);
-        }
+        this.logDebugMessage(mode);
 
         this.board = new Board(mode, state, this.boardEl);
 
@@ -205,7 +195,7 @@ export class Game {
         this.timer.stop();
         this.settingsOpened = true;
         this.boardEl.style.display = "none";
-        this.settingsEl.style.display = "block";
+        this.settingsEl.style.display = "flex";
     }
 
     private closeSettings(): void {
@@ -261,6 +251,12 @@ export class Game {
             this.urlTool.updateHash(null, null);
         } else {
             this.urlTool.updateHash(this.board.getMode(), this.board.getState());
+        }
+    }
+
+    private logDebugMessage(...message: any[]): void {
+        if (Session.get("debug")) {
+            console.debug(message);
         }
     }
 

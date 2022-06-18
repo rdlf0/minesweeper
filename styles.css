@@ -10,10 +10,17 @@ html, body {
     transition-property: background-color;
     transition-duration: var(--transition-duration);
     transition-timing-function: var(--transition-function);
+    height: 100%;
 }
 
 html {
     font-size: 1px;
+}
+
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 body.dark {
@@ -36,7 +43,6 @@ main {
     border-style: solid;
     border-width: 5rem;
     border-color: #ffffff #7b7b7b #7b7b7b #ffffff;
-    margin: 100rem auto 0;
 }
 
 #controls, #board, #settings {
@@ -72,6 +78,9 @@ main {
     border-width: 1.5rem;
     border-color: #ffffff #7b7b7b #7b7b7b #ffffff;
     box-sizing: border-box;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     transition: background-color 200ms;
 }
 
@@ -84,11 +93,8 @@ main {
     background-repeat: var(--cell-background-repeat);
     background-size: contain;
     -webkit-background-size: contain;
-    width: 21rem;
-    height: 21rem;
-    margin: 4.5rem;
-    backface-visibility: hidden;
-    -webkit-backface-visibility: hidden;
+    width: 20rem;
+    height: 20rem;
     transition: transform 200ms;
 }
 
@@ -230,12 +236,18 @@ main {
     font-size: 20rem;
     font-family: monospace;
     overflow-y: scroll;
+    flex-direction: column;
+    align-items: center;
+    transition-property: width, height;
+    transition-duration: var(--transition-duration);
+    transition-timing-function: var(--transition-function);
 }
 
 #settings fieldset {
     margin: 15rem 10rem;
     background-color: #cfcfcf;
     font-size: 16rem;
+    width: 249rem;
 }
 
 #settings fieldset legend {
@@ -244,6 +256,7 @@ main {
     -moz-appereance: none;
     background-color: #000000;
     color: #FFFFFF;
+    padding: 0rem 5rem;
 }
 
 #settings fieldset #mode_switch_wrapper {
@@ -298,11 +311,18 @@ main {
     margin: 0rem 6rem;
 }
 
-#settings fieldset #mode_details_wrapper label {
-    
-}
-
 #settings fieldset #mode_details_wrapper input {
     text-align: center;
     width: 35rem;
+}
+
+#settings fieldset a {
+    color: #000000;
+    transition-property: color;
+    transition-duration: var(--transition-duration);
+    transition-timing-function: var(--transition-function);
+}
+
+#settings fieldset a:hover {
+    color: #ff0000;
 }

@@ -18,7 +18,7 @@ interface GitHub {
 }
 
 export enum FIRST_CLICK {
-    GuaranteedCell = 0,
+    GuaranteedNonMine = 0,
     GuaranteedCascade = 1,
 }
 
