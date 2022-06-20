@@ -4,7 +4,7 @@ import { CantorPairer } from "./pairer/cantorPairer";
 import { BinaryToBase64UrlEncoderV2 } from "./encoder/binaryToBase64UrlEncoderV2";
 
 const config: Config = {
-    mode: MODE_NAME.Beginner,
+    mode: MODE_NAME.Expert,
     encoder: BinaryToBase64UrlEncoderV2.prototype,
     modePairer: CantorPairer.prototype,
     firstClick: FIRST_CLICK.GuaranteedCascade,

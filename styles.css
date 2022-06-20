@@ -241,7 +241,9 @@ main {
     margin: 15rem 10rem;
     background-color: #cfcfcf;
     font-size: 16rem;
-    width: 249rem;
+    line-height: 24rem;
+    width: 232rem;
+    padding-top: 10rem;
 }
 
 #settings fieldset legend {
