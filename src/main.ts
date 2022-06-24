@@ -9,6 +9,11 @@ const config: Config = {
     modePairer: CantorPairer.prototype,
     firstClick: FIRST_CLICK.GuaranteedCascade,
     debug: false,
+    darkModeOn: true,
+    github: {
+        owner: "rdlf0",
+        repo: "minesweeper"
+    }
 }
 
-new Game(config);
+new Game(config); // nosonar

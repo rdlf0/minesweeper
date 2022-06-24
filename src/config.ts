@@ -8,10 +8,17 @@ export interface Config {
     modePairer: Pairer;
     firstClick: FIRST_CLICK;
     debug: boolean;
+    darkModeOn: boolean;
+    github: GitHub
+}
+
+interface GitHub {
+    owner: string;
+    repo: string;
 }
 
 export enum FIRST_CLICK {
-    GuaranteedCell = 0,
+    GuaranteedNonMine = 0,
     GuaranteedCascade = 1,
 }
 
@@ -19,6 +26,7 @@ export enum MODE_NAME {
     Beginner = "beginner",
     Intermediate = "intermediate",
     Expert = "expert",
+    Custom = "custom",
 }
 
 export interface Mode {
@@ -28,7 +36,7 @@ export interface Mode {
 }
 
 type BoardConfig = {
-    readonly [name in MODE_NAME]: Mode;
+    readonly [name in MODE_NAME]?: Mode;
 }
 
 export const BOARD_CONFIG: BoardConfig = {

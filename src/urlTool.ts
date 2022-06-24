@@ -52,13 +52,11 @@ export class UrlTool {
             return null;
         }
 
-        let mode: Mode = {
+        return {
             rows,
             cols,
             mines,
         }
-
-        return mode;
     }
 
     public extractState(mode: Mode): State {

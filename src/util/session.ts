@@ -2,7 +2,7 @@ type ValueType = string | number | boolean;
 
 export class Session {
 
-    private constructor() { }
+    private constructor() { } // nosonar
 
     private static data: Map<string, ValueType> = new Map();
 
