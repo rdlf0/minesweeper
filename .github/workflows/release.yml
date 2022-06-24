@@ -18,7 +18,7 @@ jobs:
       ASSET_TYPE: application/zip
     steps:
       - name: Check out the code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           ref: ${{ github.sha }}
 
@@ -32,7 +32,7 @@ jobs:
         run: zip -r $ASSET_NAME $ARTIFACT_PATH
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: ${{ env.ARTIFACT_NAME }}
           path: ./${{ env.ARTIFACT_PATH }}
@@ -63,7 +63,7 @@ jobs:
       contents: read
     steps:
       - name: Download artifact
-        uses: actions/download-artifact@v1
+        uses: actions/download-artifact@v3
         with:
           name: ${{ env.ARTIFACT_NAME }}
 
