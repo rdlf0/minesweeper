@@ -95,7 +95,7 @@ export class Settings {
         const versionWrapper = document.createElement("div");
         const versionLink = document.createElement("a");
         versionLink.setAttribute("href", `http://github.com/${this.config.github.owner}/${this.config.github.repo}/releases/latest`);
-        versionLink.setAttribute("target", "blank");
+        versionLink.setAttribute("target", "_blank");
         versionLink.setAttribute("title", "Check out the changelog");
         fetch(`https://api.github.com/repos/${this.config.github.owner}/${this.config.github.repo}/releases/latest`, { method: "GET", headers: {} })
             .then(resp => resp.json())
@@ -106,11 +106,20 @@ export class Settings {
         const ghWrapper = document.createElement("div");
         const ghLink = document.createElement("a");
         ghLink.setAttribute("href", `https://github.com/${this.config.github.owner}/${this.config.github.repo}`);
-        ghLink.setAttribute("target", "blank");
+        ghLink.setAttribute("target", "_blank");
         ghLink.setAttribute("title", "Find the source code at GitHub");
         ghLink.textContent = "Project's code";
         ghWrapper.appendChild(ghLink);
         fieldset.appendChild(ghWrapper);
+
+        const reportBugWrapper = document.createElement("div");
+        const reportBugLink = document.createElement("a");
+        reportBugLink.setAttribute("href", this.generateBugReportUrl());
+        reportBugLink.setAttribute("target", "_blank");
+        reportBugLink.setAttribute("title", "Report a bug");
+        reportBugLink.textContent = "Report a bug";
+        reportBugWrapper.appendChild(reportBugLink);
+        fieldset.appendChild(reportBugWrapper);
     }
 
     private drawModeSwitch(parent: HTMLElement, modeKey: string, modeValue: MODE_NAME, fieldset: HTMLElement) {
@@ -173,6 +182,27 @@ export class Settings {
             radio.addEventListener("click", this.updateConfig.bind(this, parent));
         }
         wrapper.appendChild(radio);
+    }
+
+    private generateBugReportUrl(): string {
+        const title = "I found a bug!";
+        const body = `**Describe the bug**
+<!-- Explain with a few words what's wrong and how you expect it to work -->
+
+**Screenshots**
+<!-- Attach a screenshot if you have one -->
+        
+**URL**
+${window.location.href}
+
+**User Agent**
+${navigator.userAgent}`;
+
+        return `http://github.com/${this.config.github.owner}/${this.config.github.repo}/issues/new` +
+            `?assignees=${this.config.github.owner}` +
+            `&labels=bug` +
+            `&title=${encodeURIComponent(title)}` +
+            `&body=${encodeURIComponent(body)}`;
     }
 
     private updateConfig(fieldset: HTMLElement, e: MouseEvent) {
