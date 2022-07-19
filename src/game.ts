@@ -160,6 +160,8 @@ export class Game {
 
         this.logDebugMessage(mode);
 
+        const modeName = this.getModeNameFromMode(mode);
+        document.title = `Minesweeper - ${modeName.charAt(0).toUpperCase() + modeName.slice(1)} mode`
         this.board = new Board(mode, state, this.boardEl);
 
         this.updateUrlHash();
