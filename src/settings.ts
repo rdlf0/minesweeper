@@ -108,7 +108,7 @@ export class Settings {
         ghLink.setAttribute("href", `https://github.com/${this.config.github.owner}/${this.config.github.repo}`);
         ghLink.setAttribute("target", "_blank");
         ghLink.setAttribute("title", "Find the source code at GitHub");
-        ghLink.textContent = "Project's code";
+        ghLink.textContent = "Project's repo";
         ghWrapper.appendChild(ghLink);
         fieldset.appendChild(ghWrapper);
 

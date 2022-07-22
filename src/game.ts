@@ -160,8 +160,8 @@ export class Game {
 
         this.logDebugMessage(mode);
 
+        this.updateTitle(mode);
         this.board = new Board(mode, state, this.boardEl);
-
         this.updateUrlHash();
     }
 
@@ -244,6 +244,11 @@ export class Game {
 
     private decrementFlags(): void {
         this.setFlags(--this.flagsCounter);
+    }
+
+    private updateTitle(mode: Mode) {
+        const modeName = this.getModeNameFromMode(mode);
+        document.title = `Minesweeper - ${modeName.charAt(0).toUpperCase() + modeName.slice(1)} mode`
     }
 
     private updateUrlHash(empty: boolean = false): void {
