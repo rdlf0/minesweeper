@@ -85,16 +85,16 @@ main {
 #controls .buttons-wrapper .control .icon {
     background-position: var(--cell-background-position);
     background-repeat: var(--cell-background-repeat);
-    background-size: contain;
     -webkit-background-size: contain;
+    background-size: contain;
     width: 20rem;
     height: 20rem;
     transition: transform 200ms;
 }
 
 #controls .buttons-wrapper .control:hover .icon {
-    transform: rotate(90deg);
     -webkit-transform: rotate(90deg);
+    transform: rotate(90deg);
 }
 
 #controls .buttons-wrapper .control#reset .icon {
@@ -151,9 +151,9 @@ main {
     border-width: 5rem;
     border-color: #ffffff #7b7b7b #7b7b7b #ffffff;
     box-sizing: border-box;
-    user-select: none;
     -webkit-user-select: none;
     -ms-user-select: none;
+    user-select: none;
     align-items: center;
     justify-content: center;
 }
