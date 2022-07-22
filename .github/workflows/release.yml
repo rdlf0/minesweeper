@@ -115,3 +115,13 @@ jobs:
           --include "*.svg"
           --cache-control "max-age=31536000 immutable"
           --content-type "image/svg+xml; charset=utf-8"
+
+      - name: Upload to S3 (JSON)
+        run: >
+          aws s3 sync $ARTIFACT_NAME s3://$AWS_S3_BUCKET
+          --no-progress
+          --acl public-read
+          --exclude "*"
+          --include "*.json"
+          --cache-control "max-age=31536000 immutable"
+          --content-type "application/json; charset=utf-8"

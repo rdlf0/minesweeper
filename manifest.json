@@ -1,0 +1,37 @@
+{
+    "$schema": "https://json.schemastore.org/web-manifest-combined.json",
+    "name": "Minesweeper",
+    "short_name": "Minesweeper",
+    "description": "The good old Minesweeper game in its simplest form",
+    "background_color": "#1e1e1e",
+    "theme_color": "#1e1e1e",
+    "lang": "en-US",
+    "dir": "ltr",
+    "display": "standalone",
+    "orientation": "landscape",
+    "scope": "/",
+    "start_url": "/",
+    "categories": [
+        "entertainment",
+        "games"
+    ],
+    "screenshots": [],
+    "icons": [],
+    "shortcuts": [
+        {
+            "name": "Beginner",
+            "url": "/#AEbr",
+            "description": "Beginner mode"
+        },
+        {
+            "name": "Intermediate",
+            "url": "/#Apts",
+            "description": "Intermediate mode"
+        },
+        {
+            "name": "Expert",
+            "url": "/#Cy5S",
+            "description": "Expert mode"
+        }
+    ]
+}
