@@ -15,8 +15,35 @@
         "entertainment",
         "games"
     ],
-    "screenshots": [],
-    "icons": [],
+    "screenshots": [
+        {
+            "src": "/assets/minesweeper_expert.png",
+            "type": "image/png",
+            "label": "Expert mode"
+        },
+        {
+            "src": "/assets/minesweeper_intermediate.png",
+            "type": "image/png",
+            "label": "Intermediate mode"
+        },
+        {
+            "src": "/assets/minesweeper_beginner.png",
+            "type": "image/png",
+            "label": "Beginner mode"
+        },
+        {
+            "src": "/assets/minesweeper_settings.png",
+            "type": "image/png",
+            "label": "Settings"
+        }
+    ],
+    "icons": [
+        {
+            "src": "favicon.svg",
+            "sizes": "any",
+            "type": "image/svg+xml"
+        }
+    ],
     "shortcuts": [
         {
             "name": "Beginner",
