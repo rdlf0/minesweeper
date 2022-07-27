@@ -1,5 +1,4 @@
 {
-    "$schema": "https://json.schemastore.org/web-manifest-combined.json",
     "name": "Minesweeper",
     "short_name": "Minesweeper",
     "description": "The good old Minesweeper game in its simplest form",
@@ -9,7 +8,7 @@
     "dir": "ltr",
     "display": "standalone",
     "orientation": "landscape",
-    "scope": "/",
+    "id": "/",
     "start_url": "/",
     "categories": [
         "entertainment",
@@ -17,48 +16,62 @@
     ],
     "screenshots": [
         {
-            "src": "/assets/minesweeper_expert.png",
-            "type": "image/png",
-            "label": "Expert mode"
+            "src": "/assets/screenshots/minesweeper_expert.png",
+            "type": "image/png"
         },
         {
-            "src": "/assets/minesweeper_intermediate.png",
-            "type": "image/png",
-            "label": "Intermediate mode"
+            "src": "/assets/screenshots/minesweeper_intermediate.png",
+            "type": "image/png"
         },
         {
-            "src": "/assets/minesweeper_beginner.png",
-            "type": "image/png",
-            "label": "Beginner mode"
+            "src": "/assets/screenshots/minesweeper_beginner.png",
+            "type": "image/png"
         },
         {
-            "src": "/assets/minesweeper_settings.png",
-            "type": "image/png",
-            "label": "Settings"
+            "src": "/assets/screenshots/minesweeper_settings.png",
+            "type": "image/png"
         }
     ],
     "icons": [
         {
-            "src": "favicon.svg",
-            "sizes": "any",
-            "type": "image/svg+xml"
+            "src": "/assets/icons/favicon_144.svg",
+            "type": "image/svg",
+            "sizes": "144x144",
+            "purpose": "any"
+        },
+        {
+            "src": "/assets/icons/favicon_192_maskable.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "maskable"
+        },
+        {
+            "src": "/assets/icons/favicon_512.png",
+            "type": "image/png",
+            "sizes": "512x512"
+        },
+        {
+            "src": "/assets/icons/favicon_512_maskable.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "maskable"
         }
     ],
     "shortcuts": [
         {
-            "name": "Beginner",
-            "url": "/#AEbr",
-            "description": "Beginner mode"
+            "name": "Beginner mode",
+            "description": "Beginner mode",
+            "url": "/#AEbr"
         },
         {
-            "name": "Intermediate",
-            "url": "/#Apts",
-            "description": "Intermediate mode"
+            "name": "Intermediate mode",
+            "description": "Intermediate mode",
+            "url": "/#Apts"
         },
         {
-            "name": "Expert",
-            "url": "/#Cy5S",
-            "description": "Expert mode"
+            "name": "Expert mode",
+            "description": "Expert mode",
+            "url": "/#Cy5S"
         }
     ]
 }

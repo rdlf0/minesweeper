@@ -26,7 +26,7 @@ jobs:
         run: tsc --outDir "${ARTIFACT_PATH}/dist"
 
       - name: Prepare artifact
-        run: mv index.html require.js styles.css LICENSE $ARTIFACT_PATH
+        run: mv index.html require.js styles.css favicon.svg robots.txt sitemap.xml manifest.webmanifet sw.js LICENSE assets $ARTIFACT_PATH
 
       - name: Prepare release asset
         run: zip -r $ASSET_NAME $ARTIFACT_PATH
@@ -116,6 +116,16 @@ jobs:
           --cache-control "max-age=31536000 immutable"
           --content-type "image/svg+xml; charset=utf-8"
 
+      - name: Upload to S3 (PNG)
+        run: >
+          aws s3 sync $ARTIFACT_NAME s3://$AWS_S3_BUCKET
+          --no-progress
+          --acl public-read
+          --exclude "*"
+          --include "*.png"
+          --cache-control "max-age=31536000 immutable"
+          --content-type "image/png; charset=utf-8"
+
       - name: Upload to S3 (WEBMANIFEST)
         run: >
           aws s3 sync $ARTIFACT_NAME s3://$AWS_S3_BUCKET
@@ -125,3 +135,23 @@ jobs:
           --include "*.webmanifest"
           --cache-control "max-age=31536000 immutable"
           --content-type "application/manifest+json; charset=utf-8"
+
+      - name: Upload to S3 (TXT)
+        run: >
+          aws s3 sync $ARTIFACT_NAME s3://$AWS_S3_BUCKET
+          --no-progress
+          --acl public-read
+          --exclude "*"
+          --include "*.txt"
+          --cache-control "max-age=31536000 immutable"
+          --content-type "text/plain; charset=utf-8"
+
+      - name: Upload to S3 (XML)
+        run: >
+          aws s3 sync $ARTIFACT_NAME s3://$AWS_S3_BUCKET
+          --no-progress
+          --acl public-read
+          --exclude "*"
+          --include "*.xml"
+          --cache-control "max-age=31536000 immutable"
+          --content-type "application/xml; charset=utf-8"

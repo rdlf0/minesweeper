@@ -7,11 +7,20 @@
         content="The good old Minesweeper game in its simplest form! Enjoy beginner, intermediate and expert modes online! Replay the same board, share it with a friend or bookmark it for later!" />
     <meta name="keywords" content="minesweeper, game, puzzle, beginner, intermediate, expert, replay" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#1e1e1e" />
     <title>Minesweeper</title>
     <script data-main="dist/main" src="require.js"></script>
     <link rel="icon" href="favicon.svg" />
+    <link rel="apple-touch-icon" href="favicon_192_apple.png" />
     <link rel="stylesheet" href="styles.css" />
-    <link rel="manifest" href="manifest.webmanifest">
+    <link rel="manifest" href="manifest.webmanifest" />
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js', { scope: '/' })
+            })
+        }
+    </script>
 </head>
 
 <body class="dark">
