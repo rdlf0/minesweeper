@@ -61,17 +61,38 @@
         {
             "name": "Beginner mode",
             "description": "Beginner mode",
-            "url": "/#AEbr"
+            "url": "/#AEbr",
+            "icons": [
+                {
+                    "src": "/assets/icons/favicon_96.svg",
+                    "sizes": "96x96",
+                    "type": "image/svg"
+                }
+            ]
         },
         {
             "name": "Intermediate mode",
             "description": "Intermediate mode",
-            "url": "/#Apts"
+            "url": "/#Apts",
+            "icons": [
+                {
+                    "src": "/assets/icons/favicon_96.svg",
+                    "sizes": "96x96",
+                    "type": "image/svg"
+                }
+            ]
         },
         {
             "name": "Expert mode",
             "description": "Expert mode",
-            "url": "/#Cy5S"
+            "url": "/#Cy5S",
+            "icons": [
+                {
+                    "src": "/assets/icons/favicon_96.svg",
+                    "sizes": "96x96",
+                    "type": "image/svg"
+                }
+            ]
         }
     ]
 }
