@@ -15,6 +15,7 @@ export class Settings {
     }
 
     private draw() {
+        this.el.innerHTML = "";
         Object.keys(AVAILABLE_SETTINGS).forEach(settingKey => {
             const key = settingKey as keyof typeof AVAILABLE_SETTINGS;
             const fieldset = document.createElement("fieldset");
