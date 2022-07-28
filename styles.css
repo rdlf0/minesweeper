@@ -3,6 +3,40 @@
     --transition-function: linear;
 }
 
+* {
+    scrollbar-gutter: stable both-edges;
+}
+
+*::-webkit-scrollbar {
+    display: block;
+    width: 16px;
+}
+
+*::-webkit-scrollbar-button {
+    display: none;
+}
+
+*::-webkit-scrollbar-track {
+    background-color: #00000000;
+}
+
+*::-webkit-scrollbar-track-piece {
+    background-color: #00000000;
+}
+
+*::-webkit-scrollbar-thumb {
+    background-color: #00000040;
+    border: 1px solid #ffffff40;
+    border-radius: 24px;
+}
+
+*::-webkit-scrollbar-thumb {
+    background-color: #00000000;
+    border: 5px solid transparent;
+    border-radius: 24px;
+    box-shadow: 4px 0px 0px 4px #00000040 inset;
+}
+
 html, body {
     margin: 0;
     padding: 0;
