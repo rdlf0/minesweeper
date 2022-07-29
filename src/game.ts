@@ -68,6 +68,8 @@ export class Game {
         PubSub.subscribe(EVENT_SETTINGS_CHANGED, this.handleSettingsChange.bind(this));
 
         this.initialize(false, false);
+
+        new Settings(this.settingsEl, this.config); // nosonar
     }
 
     private reset(): void {
@@ -98,10 +100,9 @@ export class Game {
         this.initialize(false, false);
     }
 
-    private handleSettingsChange(config: Config) {
+    private handleSettingsChange() {
         this.logDebugMessage('======= SETTINGS CHANGED =======');
 
-        this.config = config;
         this.updateUrlHash(true);
         this.initialize(false, false);
     }
@@ -126,8 +127,6 @@ export class Game {
         this.board.draw();
 
         this.setFlags(0);
-
-        new Settings(this.settingsEl, this.config); // nosonar
     }
 
     private generateBoard(): void {

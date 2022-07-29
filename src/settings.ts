@@ -15,7 +15,6 @@ export class Settings {
     }
 
     private draw() {
-        this.el.innerHTML = "";
         Object.keys(AVAILABLE_SETTINGS).forEach(settingKey => {
             const key = settingKey as keyof typeof AVAILABLE_SETTINGS;
             const fieldset = document.createElement("fieldset");
@@ -210,7 +209,7 @@ ${navigator.userAgent}`;
         const target = e.currentTarget as HTMLElement;
         this.config[target.getAttribute("data-configKey")] = target.getAttribute("data-configValue");
         this.drawFieldset(target.getAttribute("data-configKey") as keyof typeof AVAILABLE_SETTINGS, fieldset);
-        PubSub.publish(EVENT_SETTINGS_CHANGED, this.config)
+        PubSub.publish(EVENT_SETTINGS_CHANGED)
     }
 
     private toggleDarkMode() {
