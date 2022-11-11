@@ -341,7 +341,16 @@ main {
 
 
 @media all and (display-mode: standalone) {
+    html {
+        height: 100%;
+    }
+
+    body {
+        height: 100%;
+        display: flex;
+    }
+
     main {
-        margin: 0;
+        margin: auto;
     }
 }
