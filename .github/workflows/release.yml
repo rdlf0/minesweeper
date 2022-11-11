@@ -26,7 +26,7 @@ jobs:
         run: tsc --outDir "${ARTIFACT_PATH}/dist"
 
       - name: Prepare artifact
-        run: mv index.html require.js styles.css favicon.svg robots.txt sitemap.xml manifest.webmanifet sw.js LICENSE assets $ARTIFACT_PATH
+        run: mv index.html require.js main.js styles.css favicon.svg robots.txt sitemap.xml manifest.webmanifet sw.js LICENSE assets $ARTIFACT_PATH
 
       - name: Prepare release asset
         run: zip -r $ASSET_NAME $ARTIFACT_PATH
