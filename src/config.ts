@@ -42,7 +42,7 @@ type BoardConfig = {
 export const BOARD_CONFIG: BoardConfig = {
     beginner: {
         rows: 9,
-        cols: 9,
+        cols: 14,
         mines: 10,
     },
     intermediate: {

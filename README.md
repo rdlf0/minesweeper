@@ -8,7 +8,7 @@
 
 ## Options to play
 ### Online  
-Enjoy the published version of the game at [theminesweeper.com](https://theminesweeper.com)
+Enjoy the published version of the game at [theminesweeper.com](https://theminesweeper.com). You can also install it as a progressive web app!
 ### Locally - download precompiled
 Simply download the asset from the [latest release](https://github.com/rdlf0/minesweeper/releases/latest), unzip, and then open `index.html`.
 ### Locally - compile from source
@@ -32,7 +32,7 @@ _** will probably not become available to the user_
 ## Game modes
 | Mode | Rows | Columns | Mines |
 | ------ | ---- | ----- | ----- |
-| `beginner` | 9 | 9 | 10 |
+| `beginner` | 9 | 14 | 10 |
 | `intermediate` | 16 | 16 | 40 |
 | `expert` | 16 | 30 | 99 |
 

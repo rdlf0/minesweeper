@@ -11,7 +11,7 @@ env:
 jobs:
   build:
     name: Build
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     env:
       ARTIFACT_PATH: artifact
       ASSET_NAME: minesweeper.zip
@@ -26,7 +26,7 @@ jobs:
         run: tsc --outDir "${ARTIFACT_PATH}/dist"
 
       - name: Prepare artifact
-        run: mv index.html require.js styles.css LICENSE $ARTIFACT_PATH
+        run: mv index.html require.js main.js styles.css favicon.svg robots.txt sitemap.xml manifest.webmanifet sw.js LICENSE assets $ARTIFACT_PATH
 
       - name: Prepare release asset
         run: zip -r $ASSET_NAME $ARTIFACT_PATH
@@ -50,7 +50,7 @@ jobs:
   deploy:
     name: Deploy
     needs: build
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     env:
       AWS_S3_BUCKET: theminesweeper.com
       AWS_REGION: us-east-2
@@ -73,45 +73,5 @@ jobs:
           role-to-assume: ${{ env.AWS_ROLE }}
           aws-region: ${{ env.AWS_REGION }}
 
-      # The AWS CLI doesn't allow appending to the content type
-      # so we have to sync the different file types separately
-      - name: Upload to S3 (HTML)
-        run: >
-          aws s3 sync $ARTIFACT_NAME s3://$AWS_S3_BUCKET
-          --delete
-          --no-progress
-          --acl public-read
-          --exclude "*"
-          --include "index.html"
-          --cache-control "no-cache"
-          --content-type "text/html; charset=utf-8"
-
-      - name: Upload to S3 (CSS)
-        run: >
-          aws s3 sync $ARTIFACT_NAME s3://$AWS_S3_BUCKET
-          --no-progress
-          --acl public-read
-          --exclude "*"
-          --include "*.css"
-          --cache-control "max-age=31536000 immutable"
-          --content-type "text/css; charset=utf-8"
-
-      - name: Upload to S3 (JS)
-        run: >
-          aws s3 sync $ARTIFACT_NAME s3://$AWS_S3_BUCKET
-          --no-progress
-          --acl public-read
-          --exclude "*"
-          --include "*.js"
-          --cache-control "max-age=31536000 immutable"
-          --content-type "application/javascript; charset=utf-8"
-
-      - name: Upload to S3 (SVG)
-        run: >
-          aws s3 sync $ARTIFACT_NAME s3://$AWS_S3_BUCKET
-          --no-progress
-          --acl public-read
-          --exclude "*"
-          --include "*.svg"
-          --cache-control "max-age=31536000 immutable"
-          --content-type "image/svg+xml; charset=utf-8"
+      - name: Upload to S3
+        run: .github/workflows/helpers/s3-sync.sh

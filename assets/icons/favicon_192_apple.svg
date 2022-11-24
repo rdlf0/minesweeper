@@ -1,5 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" height="300" width="300" viewBox="0 0 300 300">
+<svg xmlns="http://www.w3.org/2000/svg" height="192" width="192" viewBox="0 0 300 300">
 	<title>mine</title>
+	<rect width="100%" height="100%" fill="#1e1e1e" />
 	<g fill="#ffffff" stroke="#ffffff" stroke-width="1">
 		<circle cx="150" cy="150" r="110" />
 		<g>

@@ -3,6 +3,10 @@
     --transition-function: linear;
 }
 
+*::-webkit-scrollbar {
+    display: none;
+}
+
 html, body {
     margin: 0;
     padding: 0;
@@ -333,4 +337,20 @@ main {
 
 #settings fieldset a:hover {
     color: #ff0000;
+}
+
+
+@media all and (display-mode: standalone) {
+    html {
+        height: 100%;
+    }
+
+    body {
+        height: 100%;
+        display: flex;
+    }
+
+    main {
+        margin: auto;
+    }
 }

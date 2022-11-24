@@ -100,10 +100,9 @@ export class Game {
         this.initialize(false, false);
     }
 
-    private handleSettingsChange(config: Config) {
+    private handleSettingsChange() {
         this.logDebugMessage('======= SETTINGS CHANGED =======');
 
-        this.config = config;
         this.updateUrlHash(true);
         this.initialize(false, false);
     }
@@ -118,21 +117,19 @@ export class Game {
         this.isOver = false;
         this.timer.stop();
         this.timer.reset();
-
         this.board?.unsubscribe();
-        this.generateScenario();
 
-        this.boardEl.style.setProperty("--rows", this.board.getMode().rows.toString());
-        this.boardEl.style.setProperty("--cols", this.board.getMode().cols.toString());
+        this.generateBoard();
+        this.updateTitle();
+        this.updateUrlHash();
+        this.resizeBoard();
+
         this.board.draw();
-
-        this.settingsEl.style.setProperty("--rows", this.board.getMode().rows.toString());
-        this.settingsEl.style.setProperty("--cols", this.board.getMode().cols.toString());
 
         this.setFlags(0);
     }
 
-    private generateScenario(): void {
+    private generateBoard(): void {
         let mode: Mode;
         let state: State;
 
@@ -160,9 +157,7 @@ export class Game {
 
         this.logDebugMessage(mode);
 
-        this.updateTitle(mode);
         this.board = new Board(mode, state, this.boardEl);
-        this.updateUrlHash();
     }
 
     private getModeNameFromMode(mode: Mode): MODE_NAME {
@@ -246,8 +241,8 @@ export class Game {
         this.setFlags(--this.flagsCounter);
     }
 
-    private updateTitle(mode: Mode) {
-        const modeName = this.getModeNameFromMode(mode);
+    private updateTitle(): void {
+        const modeName = this.getModeNameFromMode(this.board.getMode());
         document.title = `Minesweeper - ${modeName.charAt(0).toUpperCase() + modeName.slice(1)} mode`
     }
 
@@ -257,6 +252,14 @@ export class Game {
         } else {
             this.urlTool.updateHash(this.board.getMode(), this.board.getState());
         }
+    }
+
+    private resizeBoard(): void {
+        this.boardEl.style.setProperty("--rows", this.board.getMode().rows.toString());
+        this.boardEl.style.setProperty("--cols", this.board.getMode().cols.toString());
+
+        this.settingsEl.style.setProperty("--rows", this.board.getMode().rows.toString());
+        this.settingsEl.style.setProperty("--cols", this.board.getMode().cols.toString());
     }
 
     private logDebugMessage(...message: any[]): void {

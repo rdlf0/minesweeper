@@ -126,9 +126,9 @@ export class Settings {
         const rows = BOARD_CONFIG[modeValue].rows;
         const cols = BOARD_CONFIG[modeValue].cols;
         const mines = BOARD_CONFIG[modeValue].mines;
-        const current = rows == BOARD_CONFIG[this.config.mode].rows &&
-            cols == BOARD_CONFIG[this.config.mode].cols &&
-            mines == BOARD_CONFIG[this.config.mode].mines;
+        const current = rows == BOARD_CONFIG[this.config.mode]?.rows &&
+            cols == BOARD_CONFIG[this.config.mode]?.cols &&
+            mines == BOARD_CONFIG[this.config.mode]?.mines;
 
         const modeButton = document.createElement("div");
         modeButton.setAttribute("data-configKey", "mode")
@@ -153,7 +153,7 @@ export class Settings {
         const input = document.createElement("input");
         input.setAttribute("type", "number");
         input.setAttribute("id", `${modeProperty}Input`);
-        input.setAttribute("value", BOARD_CONFIG[this.config.mode][modeProperty].toString());
+        input.setAttribute("value", BOARD_CONFIG[this.config.mode] == null ? "" : BOARD_CONFIG[this.config.mode][modeProperty].toString());
         input.disabled = true;
         wrapper.appendChild(input);
         parent.appendChild(wrapper);
@@ -209,7 +209,7 @@ ${navigator.userAgent}`;
         const target = e.currentTarget as HTMLElement;
         this.config[target.getAttribute("data-configKey")] = target.getAttribute("data-configValue");
         this.drawFieldset(target.getAttribute("data-configKey") as keyof typeof AVAILABLE_SETTINGS, fieldset);
-        PubSub.publish(EVENT_SETTINGS_CHANGED, this.config)
+        PubSub.publish(EVENT_SETTINGS_CHANGED)
     }
 
     private toggleDarkMode() {

@@ -7,10 +7,20 @@
         content="The good old Minesweeper game in its simplest form! Enjoy beginner, intermediate and expert modes online! Replay the same board, share it with a friend or bookmark it for later!" />
     <meta name="keywords" content="minesweeper, game, puzzle, beginner, intermediate, expert, replay" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#1e1e1e" />
     <title>Minesweeper</title>
     <script data-main="dist/main" src="require.js"></script>
     <link rel="icon" href="favicon.svg" />
+    <link rel="apple-touch-icon" href="/assets/icons/favicon_192_apple.png" />
     <link rel="stylesheet" href="styles.css" />
+    <link rel="manifest" href="manifest.webmanifest" />
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js', { scope: '/' })
+            })
+        }
+    </script>
 </head>
 
 <body class="dark">
@@ -18,15 +28,22 @@
         <div id="controls">
             <div id="mines-counter" class="control">000</div>
             <div class="buttons-wrapper">
-                <div id="reset" class="control" title="New game"><div class="icon"></div></div>
-                <div id="replay" class="control" title="Replay"><div class="icon"></div></div>
-                <div id="toggle-settings" class="control" title="Settings"><div class="icon"></div></div>
+                <div id="reset" class="control" title="New game">
+                    <div class="icon"></div>
+                </div>
+                <div id="replay" class="control" title="Replay">
+                    <div class="icon"></div>
+                </div>
+                <div id="toggle-settings" class="control" title="Settings">
+                    <div class="icon"></div>
+                </div>
             </div>
             <div id="timer" class="control" title="0m 0s">000</div>
         </div>
         <div id="board"></div>
         <div id="settings"></div>
     </main>
+    <script type="text/javascript" src="main.js"></script>
 </body>
 
 </html>
