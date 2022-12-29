@@ -340,7 +340,7 @@ main {
 }
 
 
-@media all and (display-mode: standalone) {
+@media all and (display-mode: standalone), (max-width: 30rem) {
     html {
         height: 100%;
     }
@@ -352,5 +352,11 @@ main {
 
     main {
         margin: auto;
+    }
+}
+
+@media (max-width: 30rem) {
+    main {
+        --cell-side: 45rem;
     }
 }

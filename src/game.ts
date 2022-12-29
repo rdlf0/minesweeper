@@ -3,7 +3,7 @@ import { Timer } from "./timer";
 import { Counter } from "./counter";
 import { Config, Mode, BOARD_CONFIG, MODE_NAME } from "./config";
 import { State } from "./state";
-import { UrlTool } from "./urlTool";
+import { UrlTool } from "./util/urlUtil";
 import {
     EVENT_CELL_REVEALED,
     EVENT_CELL_FLAGGED,
@@ -15,6 +15,7 @@ import {
 } from "./util/pub-sub";
 import { Session } from "./util/session";
 import { Settings } from "./settings";
+import { MobileUtil } from "./util/mobileUtil";
 
 export class Game {
 
@@ -153,6 +154,13 @@ export class Game {
             mode = BOARD_CONFIG[this.config.mode];
             state = null;
             Session.set("applyFirstClickRule", true);
+        }
+
+        if (MobileUtil.isMobile()) {
+            // Overwrite mode
+            mode = { rows: 12, cols: 8, mines: 15 };
+            console.debug(window.screen.availWidth);
+            console.debug(window.screen.availHeight);
         }
 
         this.logDebugMessage(mode);
