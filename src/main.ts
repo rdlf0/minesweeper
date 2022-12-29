@@ -8,7 +8,7 @@ const config: Config = {
     encoder: BinaryToBase64UrlEncoderV2.prototype,
     modePairer: CantorPairer.prototype,
     firstClick: FIRST_CLICK.GuaranteedCascade,
-    debug: false,
+    debug: true,
     darkModeOn: true,
     github: {
         owner: "rdlf0",
