@@ -110,7 +110,7 @@ jobs:
           do
               echo "Uploading ${files[$i]}"
 
-              aws s3 sync $ARTIFACT_NAME s3://$AWS_S3_BUCKET \
+              aws s3 sync . s3://$AWS_S3_BUCKET \
                     --delete \
                     --acl public-read \
                     --exclude "*" \
