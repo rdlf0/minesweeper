@@ -116,6 +116,5 @@ jobs:
                     --exclude "*" \
                     --include "${files[$i]}" \
                     --cache-control "${caches[$i]}" \
-                    --content-type "${contentTypes[$i]}" \
-                    /
+                    --content-type "${contentTypes[$i]}"
           done
