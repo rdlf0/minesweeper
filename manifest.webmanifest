@@ -7,7 +7,7 @@
     "lang": "en-US",
     "dir": "ltr",
     "display": "standalone",
-    "orientation": "landscape",
+    "orientation": "portrait",
     "id": "/",
     "start_url": "/",
     "categories": [
