@@ -27,7 +27,7 @@ jobs:
           node-version: 22
 
       - name: Install TypeScript
-        run: npm install -g typescript@6.0.3   # keep in sync with the compilability check workflow
+        run: npm install -g typescript@6.0.3   # keep in sync with the PR validation workflow
 
       - name: Compile the source
         run: tsc --outDir "${ARTIFACT_PATH}/dist"

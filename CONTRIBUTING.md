@@ -36,4 +36,8 @@ $ git push
 ```sh
 $ npx serve
 ```
+   And run the unit tests (Node's built-in runner - no dependencies; build first so the compiled `dist/` exists):
+```sh
+$ tsc && node --test
+```
 8. Create a new pull request - assign it to yourself, add some appropriate tags and link it to the corresponding issue
