@@ -14,7 +14,7 @@ enum CellState {
     Questioned = "questioned",
     Revealed = "revealed",
     RevealedMine = "revealedMine",
-    Exploаded = "exploaded",
+    Exploded = "exploded",
     WronglyFlagged = "wronglyFlagged",
 }
 
@@ -106,7 +106,7 @@ export class Cell {
     }
 
     private explode(): void {
-        this.setState(CellState.Exploаded);
+        this.setState(CellState.Exploded);
         PubSub.publish(EVENT_GAME_OVER);
     }
 
@@ -114,8 +114,8 @@ export class Cell {
         // Leave flags
         if (this.state === CellState.Flagged) return;
 
-        // Reveal not exploaded mines
-        if (this.state !== CellState.Exploаded) {
+        // Reveal not exploded mines
+        if (this.state !== CellState.Exploded) {
             this.setState(CellState.RevealedMine)
         }
     }
