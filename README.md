@@ -1,4 +1,4 @@
-![](https://github.com/rdlf0/minesweeper/workflows/CI/CD/badge.svg)
+[![Release](https://github.com/rdlf0/minesweeper/actions/workflows/release.yml/badge.svg)](https://github.com/rdlf0/minesweeper/actions/workflows/release.yml)
 
 # Minesweeper
 
