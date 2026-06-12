@@ -3,20 +3,26 @@
 # Minesweeper
 
 ## Requirements
-- typescript v3 or later (if you choose the compile option below)
 - a non-ancient browser
+- _to play locally:_ a static file server — the game loads as ES modules, which browsers refuse to load over `file://`, so opening `index.html` straight from the filesystem won't work. Any server will do, e.g. `npx serve` (requires [Node.js](https://nodejs.org)).
+- _to compile from source:_ typescript v4 or later
 
 ## Options to play
 ### Online  
 Enjoy the published version of the game at [theminesweeper.com](https://theminesweeper.com). You can also install it as a progressive web app!
 ### Locally - download precompiled
-Simply download the asset from the [latest release](https://github.com/rdlf0/minesweeper/releases/latest), unzip, and then open `index.html`.
+Download the asset from the [latest release](https://github.com/rdlf0/minesweeper/releases/latest), unzip, then serve the folder over HTTP and open the printed URL in your browser:
+```
+$ npx serve
+```
+(Opening `index.html` directly from the filesystem won't work — the game loads as ES modules, which browsers block over `file://`.)
 ### Locally - compile from source
-Clone, go to the root project directory and run:  
+Clone, go to the root project directory, compile, then serve:  
 ```
 $ tsc
+$ npx serve
 ```
-After that open the `index.html`.
+After that open the printed URL (e.g. http://localhost:3000) in your browser.
 
 ## Settings
 | Setting | Options | Default |

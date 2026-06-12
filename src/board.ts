@@ -1,14 +1,14 @@
-import { Cell } from "./cell";
-import { Mode, FIRST_CLICK } from "./config";
-import { State } from "./state";
+import { Cell } from "./cell.js";
+import { Mode, FIRST_CLICK } from "./config.js";
+import { State } from "./state.js";
 import {
     EVENT_CELL_CLICKED,
     EVENT_CELL_REVEALED,
     EVENT_GAME_OVER,
     EVENT_SAFE_AREA_CREATED,
     PubSub,
-} from "./util/pub-sub";
-import { Session } from "./util/session";
+} from "./util/pub-sub.js";
+import { Session } from "./util/session.js";
 
 interface EventSubscriber {
     event: string;

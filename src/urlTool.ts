@@ -1,7 +1,7 @@
-import { Encoder } from "./encoder/encoder";
-import { Pairer, Tuple } from "./pairer/pairer";
-import { Mode } from "./config";
-import { State } from "./state";
+import { Encoder } from "./encoder/encoder.js";
+import { Pairer, Tuple } from "./pairer/pairer.js";
+import { Mode } from "./config.js";
+import { State } from "./state.js";
 
 const MODE_SIZE = 24;
 const MIN_ROWS = 5;

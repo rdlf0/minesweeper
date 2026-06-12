@@ -1,4 +1,4 @@
-import { Encoder } from "./encoder";
+import { Encoder } from "./encoder.js";
 
 enum Side {
     BEGINING,

@@ -1,5 +1,5 @@
-import { BOARD_CONFIG, Config, FIRST_CLICK, MODE_NAME } from "./config";
-import { EVENT_SETTINGS_CHANGED, PubSub } from "./util/pub-sub";
+import { BOARD_CONFIG, Config, FIRST_CLICK, MODE_NAME } from "./config.js";
+import { EVENT_SETTINGS_CHANGED, PubSub } from "./util/pub-sub.js";
 
 enum AVAILABLE_SETTINGS {
     mode = "Mode",

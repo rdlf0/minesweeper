@@ -5,8 +5,8 @@ import {
     EVENT_CELL_UNFLAGGED,
     EVENT_GAME_OVER,
     PubSub,
-} from "./util/pub-sub";
-import { Session } from "./util/session";
+} from "./util/pub-sub.js";
+import { Session } from "./util/session.js";
 
 enum CellState {
     Default = "default",

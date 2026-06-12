@@ -32,5 +32,8 @@ $ git commit -am "Something descriptive but concise about the changes I made"
 $ git push
 ```
 6. Repeat 3-5 as needed
-7. Test your changes locally
+7. Test your changes locally - serve the project root over HTTP and open the printed URL in your browser (the game loads as ES modules, so opening `index.html` from the filesystem won't work):
+```sh
+$ npx serve
+```
 8. Create a new pull request - assign it to yourself, add some appropriate tags and link it to the corresponding issue

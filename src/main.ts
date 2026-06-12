@@ -1,7 +1,7 @@
-import { Game } from "./game";
-import { FIRST_CLICK, MODE_NAME, Config } from "./config";
-import { CantorPairer } from "./pairer/cantorPairer";
-import { BinaryToBase64UrlEncoderV2 } from "./encoder/binaryToBase64UrlEncoderV2";
+import { Game } from "./game.js";
+import { FIRST_CLICK, MODE_NAME, Config } from "./config.js";
+import { CantorPairer } from "./pairer/cantorPairer.js";
+import { BinaryToBase64UrlEncoderV2 } from "./encoder/binaryToBase64UrlEncoderV2.js";
 
 const config: Config = {
     mode: MODE_NAME.Expert,

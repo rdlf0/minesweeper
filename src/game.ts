@@ -1,9 +1,9 @@
-import { Board } from "./board";
-import { Timer } from "./timer";
-import { Counter } from "./counter";
-import { Config, Mode, BOARD_CONFIG, MODE_NAME } from "./config";
-import { State } from "./state";
-import { UrlTool } from "./urlTool";
+import { Board } from "./board.js";
+import { Timer } from "./timer.js";
+import { Counter } from "./counter.js";
+import { Config, Mode, BOARD_CONFIG, MODE_NAME } from "./config.js";
+import { State } from "./state.js";
+import { UrlTool } from "./urlTool.js";
 import {
     EVENT_CELL_REVEALED,
     EVENT_CELL_FLAGGED,
@@ -12,9 +12,9 @@ import {
     EVENT_SAFE_AREA_CREATED,
     EVENT_SETTINGS_CHANGED,
     PubSub,
-} from "./util/pub-sub";
-import { Session } from "./util/session";
-import { Settings } from "./settings";
+} from "./util/pub-sub.js";
+import { Session } from "./util/session.js";
+import { Settings } from "./settings.js";
 
 export class Game {
 

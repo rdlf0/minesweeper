@@ -1,4 +1,4 @@
-import { Pairer, Tuple } from "./pairer";
+import { Pairer, Tuple } from "./pairer.js";
 
 export class PeterPairer implements Pairer {
 
