@@ -16,7 +16,7 @@ export class BinaryToBase64UrlEncoderV2 implements Encoder {
 
     public encode(binary: string): string {
         const padded = BinaryToBase64UrlEncoderV2.padString(binary, Side.END, 6, "0");
-        const b64u = padded.match(/.{6}/g)
+        const b64u = (padded.match(/.{6}/g) ?? [])
             .map(sextet => ALPHABET[parseInt(sextet, 2)])
             .join("");
 

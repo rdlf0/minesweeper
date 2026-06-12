@@ -39,20 +39,20 @@ export class Game {
     constructor(private config: Config) {
         document.body.classList.toggle("dark", this.config.darkModeOn);
 
-        this.counter = new Counter(document.getElementById("mines-counter"));
-        this.timer = new Timer(document.getElementById("timer"));
+        this.counter = new Counter(document.getElementById("mines-counter")!);
+        this.timer = new Timer(document.getElementById("timer")!);
 
-        this.resetBtn = document.getElementById("reset");
+        this.resetBtn = document.getElementById("reset")!;
         this.resetBtn.addEventListener("click", this.reset.bind(this));
 
-        this.replayBtn = document.getElementById("replay");
+        this.replayBtn = document.getElementById("replay")!;
         this.replayBtn.addEventListener("click", this.replay.bind(this));
 
-        this.toggleSettingsBtn = document.getElementById("toggle-settings");
+        this.toggleSettingsBtn = document.getElementById("toggle-settings")!;
         this.toggleSettingsBtn.addEventListener("click", this.toggleSettings.bind(this));
 
-        this.boardEl = document.getElementById("board");
-        this.settingsEl = document.getElementById("settings");
+        this.boardEl = document.getElementById("board")!;
+        this.settingsEl = document.getElementById("settings")!;
         window.addEventListener("hashchange", this.handleHashChange.bind(this));
 
         this.urlTool = new UrlTool(
@@ -131,7 +131,7 @@ export class Game {
 
     private generateBoard(): void {
         let mode: Mode;
-        let state: State;
+        let state: State | null;
 
         if (this.isReset) {
             mode = this.board.getMode();
@@ -150,7 +150,7 @@ export class Game {
                 console.warn("Could not extract mode or state from hash. Falling back to defaults.");
             }
         } else {
-            mode = BOARD_CONFIG[this.config.mode];
+            mode = BOARD_CONFIG[this.config.mode]!;
             state = null;
             Session.set("applyFirstClickRule", true);
         }

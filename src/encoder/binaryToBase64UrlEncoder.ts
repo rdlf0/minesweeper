@@ -12,7 +12,7 @@ export class BinaryToBase64UrlEncoder implements Encoder {
 
     public encode(binary: string): string {
         const padded = BinaryToBase64UrlEncoder.padString(binary, Side.END, 8, "0");
-        const bytes = padded.match(/.{8}/g);
+        const bytes = padded.match(/.{8}/g) ?? [];
         const chars = bytes
             .map(b => String.fromCharCode(parseInt(b, 2)))
             .join("");
