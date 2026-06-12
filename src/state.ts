@@ -16,7 +16,7 @@ export class State {
 
     public isHighBit(index: number): boolean {
         if (index >= this.size) {
-            throw "Index out of bounds!";
+            throw new Error("Index out of bounds!");
         }
 
         return this.data[index] == 1;
@@ -24,7 +24,7 @@ export class State {
 
     public setBit(index: number): void {
         if (index >= this.size) {
-            throw "Index out of bounds!";
+            throw new Error("Index out of bounds!");
         }
 
         this.data[index] = 1;
@@ -32,7 +32,7 @@ export class State {
 
     public unsetBit(index: number): void {
         if (index >= this.size) {
-            throw "Index out of bounds!";
+            throw new Error("Index out of bounds!");
         }
 
         this.data[index] = 0;

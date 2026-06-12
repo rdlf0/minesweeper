@@ -28,7 +28,7 @@ export class BinaryToBase64UrlEncoderV2 implements Encoder {
             .map(ch => {
                 const index = ALPHABET.indexOf(ch);
                 if (index == -1) {
-                    throw "Invalid Base64Url string!";
+                    throw new Error("Invalid Base64Url string!");
                 }
 
                 return index;

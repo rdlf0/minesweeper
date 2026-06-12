@@ -36,7 +36,7 @@ export class BinaryToBase64UrlEncoder implements Encoder {
         try {
             chars = atob(b64);
         } catch (e) {
-            throw "Invalid Base64Url string!";
+            throw new Error("Invalid Base64Url string!");
         }
 
         const bytes = chars.split("")
