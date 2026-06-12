@@ -21,6 +21,14 @@ jobs:
         with:
           ref: ${{ github.sha }}
 
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install TypeScript
+        run: npm install -g typescript@6.0.3   # keep in sync with the compilability check workflow
+
       - name: Compile the source
         run: tsc --outDir "${ARTIFACT_PATH}/dist"
 

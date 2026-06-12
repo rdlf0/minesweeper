@@ -161,8 +161,7 @@ export class Game {
     }
 
     private getModeNameFromMode(mode: Mode): MODE_NAME {
-        for (const modeKey in MODE_NAME) {
-            const modeValue = MODE_NAME[modeKey];
+        for (const modeValue of Object.values(MODE_NAME)) {
             const m = BOARD_CONFIG[modeValue];
             if (m == null) {
                 continue;

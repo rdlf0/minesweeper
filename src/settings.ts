@@ -1,4 +1,4 @@
-import { BOARD_CONFIG, Config, FIRST_CLICK, MODE_NAME } from "./config.js";
+import { BOARD_CONFIG, Config, FIRST_CLICK, Mode, MODE_NAME } from "./config.js";
 import { EVENT_SETTINGS_CHANGED, PubSub } from "./util/pub-sub.js";
 
 enum AVAILABLE_SETTINGS {
@@ -42,8 +42,7 @@ export class Settings {
         modeSwitchWrapper.id = "mode_switch_wrapper";
         fieldset.append(modeSwitchWrapper);
 
-        Object.keys(MODE_NAME).forEach(modeKey => {
-            const modeValue = MODE_NAME[modeKey];
+        Object.entries(MODE_NAME).forEach(([modeKey, modeValue]) => {
             if (BOARD_CONFIG[modeValue] == null) {
                 return;
             }
@@ -65,12 +64,13 @@ export class Settings {
                 return;
             }
 
+            const value = FIRST_CLICK[firstClickKey as keyof typeof FIRST_CLICK];
             this.drawRadioButton(
                 fieldset,
                 firstClickKey,
                 "firstClick",
-                FIRST_CLICK[firstClickKey],
-                this.config.firstClick == FIRST_CLICK[firstClickKey]);
+                value.toString(),
+                this.config.firstClick == value);
         })
     }
 
@@ -155,7 +155,7 @@ export class Settings {
         input.setAttribute("type", "number");
         input.setAttribute("id", `${modeProperty}Input`);
         const currentModeConfig = BOARD_CONFIG[this.config.mode];
-        input.setAttribute("value", currentModeConfig == null ? "" : currentModeConfig[modeProperty].toString());
+        input.setAttribute("value", currentModeConfig == null ? "" : currentModeConfig[modeProperty as keyof Mode].toString());
         input.disabled = true;
         wrapper.appendChild(input);
         parent.appendChild(wrapper);
@@ -213,7 +213,8 @@ ${navigator.userAgent}`;
         if (configKey == null) {
             return;
         }
-        this.config[configKey] = target.getAttribute("data-configValue");
+        // Dynamic write of a config field (mode / firstClick) from a DOM attribute string
+        (this.config as any)[configKey] = target.getAttribute("data-configValue");
         this.drawFieldset(configKey as keyof typeof AVAILABLE_SETTINGS, fieldset);
         PubSub.publish(EVENT_SETTINGS_CHANGED)
     }

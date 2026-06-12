@@ -12,6 +12,14 @@ jobs:
     steps:
     - name: Check out the code
       uses: actions/checkout@v3
-      
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: 22
+
+    - name: Install TypeScript
+      run: npm install -g typescript@6.0.3   # keep in sync with the release workflow
+
     - name: Compile
       run: tsc --noEmit
