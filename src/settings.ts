@@ -1,5 +1,5 @@
 import { BOARD_CONFIG, Config, FIRST_CLICK, Mode, MODE_NAME } from "./config.js";
-import { EVENT_SETTINGS_CHANGED, PubSub } from "./util/pub-sub.js";
+import { EVENT_MODE_CHANGED, EVENT_SETTINGS_CHANGED, PubSub } from "./util/pub-sub.js";
 
 enum AVAILABLE_SETTINGS {
     mode = "Mode",
@@ -11,6 +11,12 @@ enum AVAILABLE_SETTINGS {
 export class Settings {
 
     constructor(private el: HTMLElement, private config: Config) {
+        this.draw();
+        PubSub.subscribe(EVENT_MODE_CHANGED, this.redraw.bind(this));
+    }
+
+    private redraw() {
+        this.el.replaceChildren();
         this.draw();
     }
 
