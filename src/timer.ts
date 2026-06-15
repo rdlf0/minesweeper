@@ -1,5 +1,5 @@
 export class Timer {
-    private intervaID: number;
+    private intervaID: number | undefined;
     private value: number = 0;
 
     constructor(private el: HTMLElement) { }

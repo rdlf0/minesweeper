@@ -1,7 +1,7 @@
-import { Encoder } from "./encoder/encoder";
-import { Pairer, Tuple } from "./pairer/pairer";
-import { Mode } from "./config";
-import { State } from "./state";
+import { Encoder } from "./encoder/encoder.js";
+import { Pairer, Tuple } from "./pairer/pairer.js";
+import { Mode } from "./config.js";
+import { State } from "./state.js";
 
 const MODE_SIZE = 24;
 const MIN_ROWS = 5;
@@ -21,7 +21,7 @@ export class UrlTool {
         return window.location.hash.length > 1;
     }
 
-    public extractMode(): Mode {
+    public extractMode(): Mode | null {
         try {
             this.decodedHash = this.encoder.decode(window.location.hash.slice(1));
         } catch (e) {
@@ -59,7 +59,7 @@ export class UrlTool {
         }
     }
 
-    public extractState(mode: Mode): State {
+    public extractState(mode: Mode): State | null {
         const stateString = this.decodedHash.slice(MODE_SIZE, mode.rows * mode.cols + MODE_SIZE);
         if (mode.rows * mode.cols != stateString.length) {
             console.error("Invalid hash! Can't extract state!");
@@ -75,7 +75,7 @@ export class UrlTool {
         return state;
     }
 
-    public updateHash(mode: Mode, state: State): void {
+    public updateHash(mode: Mode | null, state: State | null): void {
         let encodedHash = "";
 
         if (mode != null && state != null) {
@@ -84,7 +84,7 @@ export class UrlTool {
             encodedHash = this.encoder.encode(decodedHash);
         }
 
-        history.replaceState(undefined, undefined, `#${encodedHash}`);
+        history.replaceState(undefined, "", `#${encodedHash}`);
     }
 
     private encodeMode(mode: Mode): string {

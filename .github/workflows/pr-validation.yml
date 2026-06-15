@@ -1,0 +1,26 @@
+name: PR Validation
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize]
+
+jobs:
+  pr-validation:
+    name: PR Validation
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    steps:
+    - name: Check out the code
+      uses: actions/checkout@v6
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v6
+      with:
+        node-version: 22
+
+    - name: Install TypeScript
+      run: npm install -g typescript@6.0.3   # keep in sync with the release workflow
+
+    - name: Compile and test
+      run: tsc && node --test   # tsc emits to dist/ and type-checks (fails on errors); tests import the build

@@ -8,48 +8,74 @@ on:
 env:
   ARTIFACT_NAME: minesweeper-compiled
 
+concurrency:
+  group: release
+  cancel-in-progress: false
+
 jobs:
   build:
     name: Build
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write        # needed to upload the release asset via the gh CLI
     env:
       ARTIFACT_PATH: artifact
       ASSET_NAME: minesweeper.zip
     steps:
       - name: Check out the code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           ref: ${{ github.sha }}
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+
+      - name: Install TypeScript
+        run: npm install -g typescript@6.0.3   # keep in sync with the PR validation workflow
 
       - name: Compile the source
         run: tsc --outDir "${ARTIFACT_PATH}/dist"
 
       - name: Prepare artifact
-        run: mv index.html require.js main.js styles.css favicon.svg robots.txt sitemap.xml manifest.webmanifest sw.js LICENSE assets $ARTIFACT_PATH
+        run: |
+          rsync -a \
+            --exclude="/.git" \
+            --exclude="/.github" \
+            --exclude="/.vscode" \
+            --exclude="/src" \
+            --exclude="/test" \
+            --exclude="/node_modules" \
+            --exclude="/tsconfig.json" \
+            --exclude="/.gitignore" \
+            --exclude="*.md" \
+            --exclude="/${ARTIFACT_PATH}" \
+            ./ "${ARTIFACT_PATH}/"
 
       - name: Prepare release asset
-        run: zip -r $ASSET_NAME $ARTIFACT_PATH
+        run: zip -r "$ASSET_NAME" "$ARTIFACT_PATH"
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: ${{ env.ARTIFACT_NAME }}
           path: ./${{ env.ARTIFACT_PATH }}
 
       - name: Upload release asset
-        uses: AButler/upload-release-assets@v3.0
-        with:
-          files: "./${{ env.ASSET_NAME }}"
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release upload "${{ github.event.release.tag_name }}" "$ASSET_NAME" --repo "$GITHUB_REPOSITORY"
 
   deploy:
     name: Deploy
     needs: build
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     env:
       AWS_S3_BUCKET: theminesweeper.com
       AWS_REGION: us-east-2
       AWS_ROLE: arn:aws:iam::067429979131:role/github_actions_minesweeper
+      CLOUDFRONT_DISTRIBUTION_ID: E32QGZLPPEMLDF
     environment:
       name: production
       url: "https://${{ env.AWS_S3_BUCKET }}"
@@ -58,63 +84,53 @@ jobs:
       contents: read
     steps:
       - name: Download artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: ${{ env.ARTIFACT_NAME }}
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v6
         with:
           role-to-assume: ${{ env.AWS_ROLE }}
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Upload to S3
         run: |
-          declare -a files=(
-          [0]="index.html"
-          [1]="*.js"
-          [2]="*.css"
-          [3]="*.svg"
-          [4]="*.png"
-          [5]="*.webmanifest"
-          [6]="*.txt"
-          [7]="*.xml"
-          [8]="LICENSE"
+          set -euo pipefail
+
+          # Each rule: <include-glob>|<content-type>|<cache-control>
+          rules=(
+            "index.html|text/html; charset=utf-8|no-cache"
+            "*.js|application/javascript; charset=utf-8|public, max-age=3600"
+            "*.css|text/css; charset=utf-8|public, max-age=3600"
+            "*.svg|image/svg+xml; charset=utf-8|public, max-age=3600"
+            "*.png|image/png; charset=utf-8|public, max-age=3600"
+            "*.webmanifest|application/manifest+json; charset=utf-8|public, max-age=3600"
+            "*.txt|text/plain; charset=utf-8|public, max-age=3600"
+            "*.xml|application/xml; charset=utf-8|public, max-age=3600"
+            "LICENSE|text/plain; charset=utf-8|public, max-age=3600"
           )
 
-          declare -a caches=(
-          [0]="no-caches"
-          [1]="max-age=31536000 immutable"
-          [2]="max-age=31536000 immutable"
-          [3]="max-age=31536000 immutable"
-          [4]="max-age=31536000 immutable"
-          [5]="max-age=31536000 immutable"
-          [6]="max-age=31536000 immutable"
-          [7]="max-age=31536000 immutable"
-          [8]=""
-          )
-
-          declare -a contentTypes=(
-          [0]="text/html; charset=utf-8"
-          [1]="application/javascript; charset=utf-8"
-          [2]="text/css; charset=utf-8"
-          [3]="image/svg+xml; charset=utf-8"
-          [4]="image/png; charset=utf-8"
-          [5]="application/manifest+json; charset=utf-8"
-          [6]="text/plain; charset=utf-8"
-          [7]="application/xml; charset=utf-8"
-          [8]=""
-          )
-
-          for i in "${!files[@]}"
-          do
-              echo "Uploading ${files[$i]}"
-
-              aws s3 sync . s3://$AWS_S3_BUCKET \
-                    --delete \
-                    --acl public-read \
-                    --exclude "*" \
-                    --include "${files[$i]}" \
-                    --cache-control "${caches[$i]}" \
-                    --content-type "${contentTypes[$i]}"
+          for rule in "${rules[@]}"; do
+            IFS="|" read -r glob ctype cache <<< "$rule"
+            echo "Uploading $glob"
+            aws s3 sync . "s3://$AWS_S3_BUCKET" \
+              --delete \
+              --exclude "*" \
+              --include "$glob" \
+              --content-type "$ctype" \
+              --cache-control "$cache"
           done
+
+          # sw.js is uploaded by the *.js rule above; the service worker must always
+          # revalidate, so force its Cache-Control afterwards.
+          aws s3 cp "s3://$AWS_S3_BUCKET/sw.js" "s3://$AWS_S3_BUCKET/sw.js" \
+            --metadata-directive REPLACE \
+            --content-type "application/javascript; charset=utf-8" \
+            --cache-control "no-cache"
+
+      - name: Invalidate CloudFront
+        run: |
+          aws cloudfront create-invalidation \
+            --distribution-id "$CLOUDFRONT_DISTRIBUTION_ID" \
+            --paths "/*"

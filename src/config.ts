@@ -1,5 +1,5 @@
-import { Encoder } from "./encoder/encoder"
-import { Pairer } from "./pairer/pairer"
+import { Encoder } from "./encoder/encoder.js"
+import { Pairer } from "./pairer/pairer.js"
 
 
 export interface Config {

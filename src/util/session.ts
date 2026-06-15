@@ -14,7 +14,7 @@ export class Session {
         }
     }
 
-    public static get(key: string, defaultValue?: ValueType): ValueType {
+    public static get(key: string, defaultValue?: ValueType): ValueType | undefined {
         if (Session.data.has(key)) {
             return Session.data.get(key);
         }

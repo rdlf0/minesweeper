@@ -1,4 +1,4 @@
-import { Pairer, Tuple } from "./pairer";
+import { Pairer, Tuple } from "./pairer.js";
 
 /**
  * Implemetns Cantor pairing and inverted pairing functions

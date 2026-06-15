@@ -1,14 +1,14 @@
-import { Cell } from "./cell";
-import { Mode, FIRST_CLICK } from "./config";
-import { State } from "./state";
+import { Cell } from "./cell.js";
+import { Mode, FIRST_CLICK } from "./config.js";
+import { State } from "./state.js";
 import {
     EVENT_CELL_CLICKED,
     EVENT_CELL_REVEALED,
     EVENT_GAME_OVER,
     EVENT_SAFE_AREA_CREATED,
     PubSub,
-} from "./util/pub-sub";
-import { Session } from "./util/session";
+} from "./util/pub-sub.js";
+import { Session } from "./util/session.js";
 
 interface EventSubscriber {
     event: string;
@@ -31,7 +31,7 @@ export class Board {
 
     constructor(
         private mode: Mode,
-        private state: State,
+        private state: State | null,
         private el: HTMLElement,
     ) {
         this.initGrid();
@@ -92,8 +92,13 @@ export class Board {
     }
 
     private plantMinesFromState(): void {
+        const state = this.state;
+        if (state == null) {
+            return;
+        }
+
         for (let i = 0; i < this.mode.rows * this.mode.cols; i++) {
-            if (this.state.isHighBit(i)) {
+            if (state.isHighBit(i)) {
                 const row = Math.floor(i / this.mode.cols);
                 const col = i % this.mode.cols;
                 this.grid[row][col].setMine();

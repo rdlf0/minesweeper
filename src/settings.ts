@@ -1,5 +1,5 @@
-import { BOARD_CONFIG, Config, FIRST_CLICK, MODE_NAME } from "./config";
-import { EVENT_SETTINGS_CHANGED, PubSub } from "./util/pub-sub";
+import { BOARD_CONFIG, Config, FIRST_CLICK, Mode, MODE_NAME } from "./config.js";
+import { EVENT_SETTINGS_CHANGED, PubSub } from "./util/pub-sub.js";
 
 enum AVAILABLE_SETTINGS {
     mode = "Mode",
@@ -42,8 +42,7 @@ export class Settings {
         modeSwitchWrapper.id = "mode_switch_wrapper";
         fieldset.append(modeSwitchWrapper);
 
-        Object.keys(MODE_NAME).forEach(modeKey => {
-            const modeValue = MODE_NAME[modeKey];
+        Object.entries(MODE_NAME).forEach(([modeKey, modeValue]) => {
             if (BOARD_CONFIG[modeValue] == null) {
                 return;
             }
@@ -54,7 +53,7 @@ export class Settings {
         const modeDetailsWrapper = document.createElement("div");
         modeDetailsWrapper.id = "mode_details_wrapper";
         fieldset.append(modeDetailsWrapper);
-        Object.keys(BOARD_CONFIG[MODE_NAME.Beginner]).forEach(modeProperty => {
+        Object.keys(BOARD_CONFIG[MODE_NAME.Beginner]!).forEach(modeProperty => {
             this.drawModeDetails(modeDetailsWrapper, modeProperty);
         });
     }
@@ -65,12 +64,13 @@ export class Settings {
                 return;
             }
 
+            const value = FIRST_CLICK[firstClickKey as keyof typeof FIRST_CLICK];
             this.drawRadioButton(
                 fieldset,
                 firstClickKey,
                 "firstClick",
-                FIRST_CLICK[firstClickKey],
-                this.config.firstClick == FIRST_CLICK[firstClickKey]);
+                value.toString(),
+                this.config.firstClick == value);
         })
     }
 
@@ -123,9 +123,10 @@ export class Settings {
     }
 
     private drawModeSwitch(parent: HTMLElement, modeKey: string, modeValue: MODE_NAME, fieldset: HTMLElement) {
-        const rows = BOARD_CONFIG[modeValue].rows;
-        const cols = BOARD_CONFIG[modeValue].cols;
-        const mines = BOARD_CONFIG[modeValue].mines;
+        const modeConfig = BOARD_CONFIG[modeValue]!;
+        const rows = modeConfig.rows;
+        const cols = modeConfig.cols;
+        const mines = modeConfig.mines;
         const current = rows == BOARD_CONFIG[this.config.mode]?.rows &&
             cols == BOARD_CONFIG[this.config.mode]?.cols &&
             mines == BOARD_CONFIG[this.config.mode]?.mines;
@@ -153,7 +154,8 @@ export class Settings {
         const input = document.createElement("input");
         input.setAttribute("type", "number");
         input.setAttribute("id", `${modeProperty}Input`);
-        input.setAttribute("value", BOARD_CONFIG[this.config.mode] == null ? "" : BOARD_CONFIG[this.config.mode][modeProperty].toString());
+        const currentModeConfig = BOARD_CONFIG[this.config.mode];
+        input.setAttribute("value", currentModeConfig == null ? "" : currentModeConfig[modeProperty as keyof Mode].toString());
         input.disabled = true;
         wrapper.appendChild(input);
         parent.appendChild(wrapper);
@@ -207,14 +209,19 @@ ${navigator.userAgent}`;
 
     private updateConfig(fieldset: HTMLElement, e: MouseEvent) {
         const target = e.currentTarget as HTMLElement;
-        this.config[target.getAttribute("data-configKey")] = target.getAttribute("data-configValue");
-        this.drawFieldset(target.getAttribute("data-configKey") as keyof typeof AVAILABLE_SETTINGS, fieldset);
+        const configKey = target.getAttribute("data-configKey");
+        if (configKey == null) {
+            return;
+        }
+        // Dynamic write of a config field (mode / firstClick) from a DOM attribute string
+        (this.config as any)[configKey] = target.getAttribute("data-configValue");
+        this.drawFieldset(configKey as keyof typeof AVAILABLE_SETTINGS, fieldset);
         PubSub.publish(EVENT_SETTINGS_CHANGED)
     }
 
     private toggleDarkMode() {
         const state = document.body.classList.toggle("dark");
-        document.getElementById("darkModeCheckbox").setAttribute("checked", String(state));
+        document.getElementById("darkModeCheckbox")!.setAttribute("checked", String(state));
     }
 
 }

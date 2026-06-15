@@ -1,4 +1,4 @@
-import { Session } from "./session";
+import { Session } from "./session.js";
 
 interface CallbackFunc {
     (data?: any): any;

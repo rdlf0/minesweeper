@@ -1,4 +1,4 @@
-import { Encoder } from "./encoder";
+import { Encoder } from "./encoder.js";
 
 enum Side {
     BEGINING,
@@ -16,7 +16,7 @@ export class BinaryToBase64UrlEncoderV2 implements Encoder {
 
     public encode(binary: string): string {
         const padded = BinaryToBase64UrlEncoderV2.padString(binary, Side.END, 6, "0");
-        const b64u = padded.match(/.{6}/g)
+        const b64u = (padded.match(/.{6}/g) ?? [])
             .map(sextet => ALPHABET[parseInt(sextet, 2)])
             .join("");
 
@@ -28,7 +28,7 @@ export class BinaryToBase64UrlEncoderV2 implements Encoder {
             .map(ch => {
                 const index = ALPHABET.indexOf(ch);
                 if (index == -1) {
-                    throw "Invalid Base64Url string!";
+                    throw new Error("Invalid Base64Url string!");
                 }
 
                 return index;
