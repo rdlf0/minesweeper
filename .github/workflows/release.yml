@@ -39,8 +39,6 @@ jobs:
         run: tsc --outDir "${ARTIFACT_PATH}/dist"
 
       - name: Prepare artifact
-        # Ship the whole site, excluding dev tooling, so new static files are picked
-        # up automatically instead of having to be added to a hand-maintained list.
         run: |
           rsync -a \
             --exclude="/.git" \
@@ -100,9 +98,6 @@ jobs:
         run: |
           set -euo pipefail
 
-          # Filenames are NOT content-hashed, so assets must NOT be 'immutable':
-          # they get a short TTL and CloudFront is invalidated below, so a deploy
-          # reaches users right away. index.html and sw.js always revalidate.
           # Each rule: <include-glob>|<content-type>|<cache-control>
           rules=(
             "index.html|text/html; charset=utf-8|no-cache"
@@ -135,9 +130,6 @@ jobs:
             --cache-control "no-cache"
 
       - name: Invalidate CloudFront
-        # Asset filenames are stable (not content-hashed), so without this CloudFront
-        # keeps serving the previous deploy from its edge cache. The deploy IAM role
-        # needs cloudfront:CreateInvalidation.
         run: |
           aws cloudfront create-invalidation \
             --distribution-id "$CLOUDFRONT_DISTRIBUTION_ID" \

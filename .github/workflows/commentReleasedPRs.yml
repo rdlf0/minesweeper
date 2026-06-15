@@ -10,7 +10,7 @@ jobs:
     name: Comment released PRs
     runs-on: ubuntu-24.04
     permissions:
-      contents: read          # read the release and its commits
+      contents: read           # read the release and its commits
       pull-requests: write     # comment on and label the released PRs
     steps:
       - name: Comment released PRs
