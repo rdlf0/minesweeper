@@ -11,6 +11,7 @@ export const EVENT_CELL_UNFLAGGED = "cellUnflagged";
 export const EVENT_GAME_OVER = "gameOver";
 export const EVENT_SAFE_AREA_CREATED = "safeAreaCreated";
 export const EVENT_SETTINGS_CHANGED = "settingsChanged";
+export const EVENT_MODE_CHANGED = "modeChanged";
 
 export class PubSub {
 

@@ -11,6 +11,7 @@ import {
     EVENT_GAME_OVER,
     EVENT_SAFE_AREA_CREATED,
     EVENT_SETTINGS_CHANGED,
+    EVENT_MODE_CHANGED,
     PubSub,
 } from "./util/pub-sub.js";
 import { Session } from "./util/session.js";
@@ -98,6 +99,9 @@ export class Game {
             this.closeSettings();
         }
         this.initialize(false, false);
+
+        // The hash may carry a different mode, so let the settings section re-sync.
+        PubSub.publish(EVENT_MODE_CHANGED);
     }
 
     private handleSettingsChange() {
