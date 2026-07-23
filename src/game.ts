@@ -1,7 +1,7 @@
 import { Board } from "./board.js";
 import { Timer } from "./timer.js";
 import { Counter } from "./counter.js";
-import { Config, Mode, BOARD_CONFIG, MODE_NAME } from "./config.js";
+import { Config, Mode, BOARD_CONFIG, MODE_NAME, HINT_MODE } from "./config.js";
 import { State } from "./state.js";
 import { UrlTool } from "./urlTool.js";
 import {
@@ -12,6 +12,7 @@ import {
     EVENT_SAFE_AREA_CREATED,
     EVENT_SETTINGS_CHANGED,
     EVENT_MODE_CHANGED,
+    EVENT_HINT_MODE_CHANGED,
     PubSub,
 } from "./util/pub-sub.js";
 import { Session } from "./util/session.js";
@@ -23,11 +24,17 @@ export class Game {
     private counter: Counter;
     private resetBtn: HTMLElement;
     private replayBtn: HTMLElement;
+    private hintBtn: HTMLElement;
     private toggleSettingsBtn: HTMLElement;
     private timer: Timer;
     private board: Board;
     private boardEl: HTMLElement;
     private settingsEl: HTMLElement;
+    private hintMessageEl: HTMLElement;
+    private hintMessageTimeout: number | undefined;
+    // Blocks re-invoking the hint until the player makes a move.
+    private hintUsed: boolean = false;
+    private lastHintMessage: string | undefined;
 
     // Other properties
     private flagsCounter: number;
@@ -49,11 +56,16 @@ export class Game {
         this.replayBtn = document.getElementById("replay")!;
         this.replayBtn.addEventListener("click", this.replay.bind(this));
 
+        this.hintBtn = document.getElementById("hint")!;
+        this.hintBtn.title = `Get a hint (+${this.config.hintCost}s)`;
+        this.hintBtn.addEventListener("click", this.showHint.bind(this));
+
         this.toggleSettingsBtn = document.getElementById("toggle-settings")!;
         this.toggleSettingsBtn.addEventListener("click", this.toggleSettings.bind(this));
 
         this.boardEl = document.getElementById("board")!;
         this.settingsEl = document.getElementById("settings")!;
+        this.hintMessageEl = document.getElementById("hint-message")!;
         window.addEventListener("hashchange", this.handleHashChange.bind(this));
 
         this.urlTool = new UrlTool(
@@ -62,7 +74,10 @@ export class Game {
         );
 
         PubSub.subscribe(EVENT_CELL_REVEALED, this.start.bind(this));
+        PubSub.subscribe(EVENT_CELL_REVEALED, this.allowHint.bind(this));
         PubSub.subscribe(EVENT_CELL_FLAGGED, this.incrementFlags.bind(this));
+        PubSub.subscribe(EVENT_CELL_FLAGGED, this.allowHint.bind(this));
+        PubSub.subscribe(EVENT_HINT_MODE_CHANGED, this.allowHint.bind(this));
         PubSub.subscribe(EVENT_CELL_UNFLAGGED, this.decrementFlags.bind(this));
         PubSub.subscribe(EVENT_GAME_OVER, this.gameOver.bind(this));
         PubSub.subscribe(EVENT_SAFE_AREA_CREATED, this.updateUrlHash.bind(this));
@@ -92,6 +107,56 @@ export class Game {
         this.initialize(false, true);
     }
 
+    private showHint(): void {
+        if (this.isOver || this.settingsOpened) {
+            return;
+        }
+
+        if (!this.isStarted()) {
+            this.flashHintMessage("Click any cell — your first move is always safe.");
+            return;
+        }
+
+        if (this.hintUsed) {
+            if (this.lastHintMessage !== undefined) {
+                this.flashHintMessage(this.lastHintMessage);
+            }
+            return;
+        }
+
+        const found = this.board.showHint(this.config.hintMode);
+
+        // Using the helper costs the player time, even when it finds nothing.
+        this.timer.addTime(this.config.hintCost);
+        this.hintUsed = true;
+
+        if (found === 0) {
+            this.lastHintMessage = this.config.hintMode === HINT_MODE.Mines
+                ? "No mine can be logically pinned down yet."
+                : "No logical move — you'll have to take a guess.";
+            this.flashHintMessage(this.lastHintMessage);
+        } else {
+            this.lastHintMessage = undefined;
+        }
+    }
+
+    private allowHint(): void {
+        this.hintUsed = false;
+        this.lastHintMessage = undefined;
+    }
+
+    private flashHintMessage(message: string): void {
+        this.hintMessageEl.textContent = message;
+        this.hintMessageEl.classList.add("show");
+
+        if (this.hintMessageTimeout !== undefined) {
+            clearTimeout(this.hintMessageTimeout);
+        }
+        this.hintMessageTimeout = window.setTimeout(() => {
+            this.hintMessageEl.classList.remove("show");
+        }, 3000);
+    }
+
     private handleHashChange(): void {
         this.logDebugMessage('======= HASH CHANGED =======');
 
@@ -119,6 +184,8 @@ export class Game {
         this.isReset = isReset;
         this.isReplay = isReplay;
         this.isOver = false;
+        this.hintUsed = false;
+        this.lastHintMessage = undefined;
         this.timer.stop();
         this.timer.reset();
         this.board?.unsubscribe();
@@ -191,6 +258,8 @@ export class Game {
 
     private openSettings(): void {
         this.timer.stop();
+        this.board.clearHints();
+        this.allowHint();
         this.settingsOpened = true;
         this.boardEl.style.display = "none";
         this.settingsEl.style.display = "flex";

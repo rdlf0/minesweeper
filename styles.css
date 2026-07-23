@@ -35,6 +35,7 @@ main {
     --cell-background-repeat: no-repeat;
     --cell-background-position: center;
 
+    position: relative;
     display: table;
     background-color: #bdbdbd;
     border-style: solid;
@@ -62,7 +63,7 @@ main {
 
 #controls .buttons-wrapper {
     display: flex;
-    width: 120rem;
+    width: 165rem;
     justify-content: space-between;
 }
 
@@ -114,6 +115,10 @@ main {
     
 }
 
+#controls .buttons-wrapper .control#hint .icon {
+    background-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCI+PGcgZmlsbD0iIzAwMDAwMCI+PHBhdGggZD0iTTMyIDVjLTkuNCAwLTE3IDcuNi0xNyAxNyAwIDYuNSAzLjYgMTEgNi45IDE0LjIgMS45IDEuOSAzLjEgNCAzLjEgNi44djFoMTR2LTFjMC0yLjggMS4yLTQuOSAzLjEtNi44QzQ4LjQgMzMgNTIgMjguNSA1MiAyMmMwLTkuNC03LjYtMTctMTctMTd6Ii8+PHJlY3QgeD0iMjQiIHk9IjQ3IiB3aWR0aD0iMTYiIGhlaWdodD0iNSIgcng9IjIuNSIvPjxyZWN0IHg9IjI2IiB5PSI1NCIgd2lkdGg9IjEyIiBoZWlnaHQ9IjQiIHJ4PSIyIi8+PHJlY3QgeD0iMjkiIHk9IjU5IiB3aWR0aD0iNiIgaGVpZ2h0PSIzIiByeD0iMS41Ii8+PC9nPjwvc3ZnPg==);
+}
+
 #controls .buttons-wrapper .control#toggle-settings .icon {
     background-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB2ZXJzaW9uPSIxLjEiIHg9IjBweCIgeT0iMHB4IiB2aWV3Qm94PSIwIDAgNjQgNjQiIHN0eWxlPSJlbmFibGUtYmFja2dyb3VuZDpuZXcgMCAwIDY0IDY0OyIgeG1sOnNwYWNlPSJwcmVzZXJ2ZSI+IDxzdHlsZSB0eXBlPSJ0ZXh0L2NzcyI+IC5zdDEze3N0cm9rZTojMDAwMDAwO3N0cm9rZS13aWR0aDoyO3N0cm9rZS1taXRlcmxpbWl0OjEwO30gPC9zdHlsZT4gPGc+IDxwYXRoIGNsYXNzPSJzdDEzIiBkPSJNNjIuNCw0MC45bC05LjQtN2MwLjEtMS4yLDAuMS0yLjUsMC0zLjdsOS4xLTYuN2MwLjgtMC42LDEuMS0xLjYsMC43LTIuNWwtMS4zLTMuMmMtMC4zLTAuNi0wLjktMS0xLjYtMC45ICAgbC0xMS42LDEuN2MtMC44LTEtMS43LTEuOC0yLjctMi42bDEuNy0xMS4yYzAuMS0xLTAuNC0xLjktMS4zLTIuM2wtMy4yLTEuM2MtMC42LTAuMy0xLjQtMC4xLTEuOCwwLjVsLTcsOS40ICAgYy0xLjItMC4xLTIuNS0wLjEtMy43LDBMMjMuNCwyYy0wLjYtMC44LTEuNi0xLjEtMi41LTAuN2wtMy4yLDEuM2MtMC42LDAuMy0xLDAuOS0wLjksMS42bDEuNywxMS42Yy0xLDAuOC0xLjgsMS43LTIuNiwyLjcgICBMNC43LDE2LjhjLTEtMC4xLTEuOSwwLjQtMi4zLDEuM2wtMS4zLDMuMmMtMC4zLDAuNi0wLjEsMS40LDAuNSwxLjhsOS40LDdjLTAuMSwxLjItMC4xLDIuNSwwLDMuN0wyLDQwLjYgICBjLTAuOCwwLjYtMS4xLDEuNi0wLjcsMi41bDEuMywzLjJjMC4zLDAuNiwwLjksMSwxLjYsMC45bDExLjYtMS43YzAuOCwxLDEuNywxLjgsMi43LDIuNmwtMS43LDExLjJjLTAuMSwxLDAuNCwxLjksMS4zLDIuMyAgIGwzLjIsMS4zYzAuNiwwLjMsMS40LDAuMSwxLjgtMC41bDctOS40YzEuMiwwLjEsMi41LDAuMSwzLjcsMGw2LjcsOS4xYzAuNiwwLjgsMS42LDEuMSwyLjUsMC43bDMuMi0xLjNjMC42LTAuMywxLTAuOSwwLjktMS42ICAgbC0xLjctMTEuNmMxLTAuOCwxLjgtMS43LDIuNi0yLjdsMTEuMiwxLjdjMSwwLjEsMS45LTAuNCwyLjMtMS4zbDEuMy0zLjJDNjMuMiw0Miw2Mi45LDQxLjMsNjIuNCw0MC45eiBNMzIsNDQgICBjLTYuNiwwLTEyLTUuNC0xMi0xMmMwLTYuNiw1LjQtMTIsMTItMTJzMTIsNS40LDEyLDEyQzQ0LDM4LjYsMzguNiw0NCwzMiw0NHoiIC8+IDwvZz4gPC9zdmc+);
     
@@ -128,6 +133,16 @@ main {
     padding: 4rem 5rem;
     cursor: default;
     line-height: 25rem;
+}
+
+#controls #timer {
+    transition: color var(--transition-duration) var(--transition-function),
+        background-color var(--transition-duration) var(--transition-function);
+}
+
+#controls #timer.bump {
+    color: #000000;
+    background-color: #ff0000;
 }
 
 #board {
@@ -170,6 +185,35 @@ main {
     border-style: solid none none solid;
     border-width: 2rem;
     border-color: #7b7b7b;
+}
+
+.cell.hint {
+    cursor: help;
+    animation: hint-pulse 1s ease-in-out infinite;
+}
+
+@keyframes hint-pulse {
+    0%, 100% { background-color: #a6f0a6; }
+    50% { background-color: #4fc44f; }
+}
+
+.cell.hint.hint-danger {
+    animation: hint-danger-pulse 1s ease-in-out infinite;
+}
+
+@keyframes hint-danger-pulse {
+    0%, 100% { background-color: #ffb3b3; }
+    50% { background-color: #ff3b3b; }
+}
+
+.cell.hint-ref-a {
+    box-shadow: inset 0 0 0 4rem #ff8c00;
+    background-color: #ffd7a6;
+}
+
+.cell.hint-ref-b {
+    box-shadow: inset 0 0 0 4rem #9c27b0;
+    background-color: #e6bff0;
 }
 
 .cell.debug-mine {
@@ -339,6 +383,31 @@ main {
     color: #ff0000;
 }
 
+
+#hint-message {
+    position: absolute;
+    left: 50%;
+    bottom: 30rem;
+    transform: translateX(-50%);
+    max-width: calc(100% - 50rem);
+    box-sizing: border-box;
+    text-align: center;
+    background-color: #000000;
+    color: #ffffff;
+    font-family: monospace;
+    font-size: 16rem;
+    line-height: 22rem;
+    padding: 10rem 16rem;
+    border-radius: 4rem;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 200ms var(--transition-function);
+    z-index: 10;
+}
+
+#hint-message.show {
+    opacity: 0.95;
+}
 
 @media all and (display-mode: standalone) {
     html {

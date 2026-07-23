@@ -7,6 +7,9 @@ export interface Config {
     encoder: Encoder;
     modePairer: Pairer;
     firstClick: FIRST_CLICK;
+    hintMode: HINT_MODE;
+    /** Seconds added to the timer each time a hint is shown. */
+    hintCost: number;
     debug: boolean;
     darkModeOn: boolean;
     github: GitHub
@@ -20,6 +23,11 @@ interface GitHub {
 export enum FIRST_CLICK {
     GuaranteedNonMine = 0,
     GuaranteedCascade = 1,
+}
+
+export enum HINT_MODE {
+    Mines = "mines",
+    Safe = "safe",
 }
 
 export enum MODE_NAME {

@@ -1,6 +1,7 @@
 export class Timer {
     private intervaID: number | undefined;
     private value: number = 0;
+    private bumpTimeout: number | undefined;
 
     constructor(private el: HTMLElement) { }
 
@@ -25,6 +26,17 @@ export class Timer {
         this.value = 0;
         this.intervaID = undefined;
         this.updateEl();
+    }
+
+    public addTime(seconds: number): void {
+        this.value += seconds;
+        this.updateEl();
+
+        this.el.classList.add("bump");
+        if (this.bumpTimeout !== undefined) {
+            window.clearTimeout(this.bumpTimeout);
+        }
+        this.bumpTimeout = window.setTimeout(() => this.el.classList.remove("bump"), 1000);
     }
 
     private updateEl(): void {

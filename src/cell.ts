@@ -87,6 +87,35 @@ export class Cell {
         return this.state === CellState.Flagged;
     }
 
+    public isRevealed(): boolean {
+        return this.state === CellState.Revealed;
+    }
+
+    public getValue(): number {
+        return this.value;
+    }
+
+    public setHint(reason: string, danger: boolean): void {
+        this.el.classList.add("hint");
+        if (danger) {
+            this.el.classList.add("hint-danger");
+        }
+        this.el.setAttribute("title", reason);
+    }
+
+    public clearHint(): void {
+        this.el.classList.remove("hint", "hint-danger");
+        this.el.removeAttribute("title");
+    }
+
+    public addReference(kind: string): void {
+        this.el.classList.add(`hint-ref-${kind}`);
+    }
+
+    public clearReference(): void {
+        this.el.classList.remove("hint-ref-a", "hint-ref-b");
+    }
+
     public setWronglyFlagged(): void {
         this.setState(CellState.WronglyFlagged);
     }
