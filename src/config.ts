@@ -15,6 +15,10 @@ export interface Config {
     github: GitHub
 }
 
+/** The JSON-serializable settings loaded from `config.json`. The code-only fields
+ * (`encoder`, `modePairer`, `github`) are supplied in `main.ts`. */
+export type ConfigData = Omit<Config, "encoder" | "modePairer" | "github">;
+
 interface GitHub {
     owner: string;
     repo: string;

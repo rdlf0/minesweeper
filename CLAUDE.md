@@ -48,9 +48,13 @@ subscribing over wiring direct method calls.
 
 Core flow:
 
-- **`main.ts`** — entry point. Builds the `Config` object (mode, encoder, pairer,
-  first-click rule, dark mode, debug flag) and instantiates `Game`. This is the one
-  place to swap which `Encoder` / `Pairer` implementation is used.
+- **`main.ts`** — entry point. `fetch`es the tunable settings (mode, first-click rule,
+  hint mode/cost, dark mode, debug flag) from `config.json` at the project root, merges
+  in the code-only fields (`encoder`, `modePairer`, `github`) to build the `Config`
+  object, and instantiates `Game`. This is the one place to swap which `Encoder` /
+  `Pairer` implementation is used, and where the `github` repo is set. `config.json` is
+  served over HTTP alongside the app (which is why local play needs a server, not
+  `file://`); the release workflow uploads it to S3 with a dedicated no-cache rule.
 - **`Game`** (`game.ts`) — orchestrator. Owns the UI controls (counter, timer, reset
   / replay / settings buttons), subscribes to game events, and drives `initialize()`
   which decides how a board is created: reset, replay, from a URL hash, or fresh from
