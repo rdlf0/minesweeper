@@ -29,6 +29,7 @@ After that open the printed URL (e.g. http://localhost:3000) in your browser.
 | ------- | ------- | ------- |
 | mode | `beginner`, `intermediate`, `expert` | `expert` |
 | first click * | `guaranteed non-mine`, `guaranteed cascade` | `guaranteed cascade` |
+| hint shows | `mines`, `safe cells` | `mines` |
 | dark mode | `enabled`, `disabled` | `enabled` |
 | debug ** | `true`, `false` | `false` |
 
@@ -47,6 +48,14 @@ _** will probably not become available to the user_
 | ------ | ------- |
 | `guaranteed non-mine` | the first clicked cell has a value between 0 and 8 |
 | `guaranteed cascade` | the first clicked cell has a value of 0 |
+
+## Hint options
+The hint button (💡) runs a built-in logic solver over the current board and highlights every cell it can prove, each with an explanation shown on hover. It never guesses — only cells that logic guarantees are highlighted — and it reasons purely from what's on the board, so every explanation is checkable at a glance. Each hint costs the player some time (added to the timer); the cost is shown in the button's tooltip.
+
+| Option | Meaning |
+| ------ | ------- |
+| `mines` | highlight the cells that are provably mines (pulsing red) |
+| `safe cells` | highlight the cells that are provably safe to reveal (pulsing green) |
 
 ## Game start options
 | Option | Mode | State *** |
