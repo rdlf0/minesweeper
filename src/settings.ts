@@ -1,9 +1,10 @@
-import { BOARD_CONFIG, Config, FIRST_CLICK, Mode, MODE_NAME } from "./config.js";
-import { EVENT_MODE_CHANGED, EVENT_SETTINGS_CHANGED, PubSub } from "./util/pub-sub.js";
+import { BOARD_CONFIG, Config, FIRST_CLICK, HINT_MODE, Mode, MODE_NAME } from "./config.js";
+import { EVENT_HINT_MODE_CHANGED, EVENT_MODE_CHANGED, EVENT_SETTINGS_CHANGED, PubSub } from "./util/pub-sub.js";
 
 enum AVAILABLE_SETTINGS {
     mode = "Mode",
     firstClick = "First click",
+    hintMode = "Hint shows",
     darkMode = "Dark mode",
     about = "About",
 }
@@ -38,6 +39,7 @@ export class Settings {
         switch (setting) {
             case "mode": this.drawMode(settingFieldset); break;
             case "firstClick": this.drawFirstClick(settingFieldset); break;
+            case "hintMode": this.drawHintMode(settingFieldset); break;
             case "darkMode": this.drawDarkMode(settingFieldset); break;
             case "about": this.drawAbout(settingFieldset); break;
         }
@@ -65,19 +67,33 @@ export class Settings {
     }
 
     private drawFirstClick(fieldset: HTMLElement) {
-        Object.keys(FIRST_CLICK).forEach(firstClickKey => {
-            if (!isNaN(Number(firstClickKey))) {
-                return;
-            }
+        const options: { label: string, value: FIRST_CLICK }[] = [
+            { label: "Guaranteed non-mine", value: FIRST_CLICK.GuaranteedNonMine },
+            { label: "Guaranteed cascade", value: FIRST_CLICK.GuaranteedCascade },
+        ];
+        options.forEach(({ label, value }) => {
+            this.drawRadioButton(fieldset, "firstClick", label, value.toString(), this.config.firstClick == value, () => {
+                this.config.firstClick = value;
+                this.drawFieldset("firstClick", fieldset);
+                PubSub.publish(EVENT_SETTINGS_CHANGED);
+            });
+        });
+    }
 
-            const value = FIRST_CLICK[firstClickKey as keyof typeof FIRST_CLICK];
-            this.drawRadioButton(
-                fieldset,
-                firstClickKey,
-                "firstClick",
-                value.toString(),
-                this.config.firstClick == value);
-        })
+    private drawHintMode(fieldset: HTMLElement) {
+        const options: { label: string, value: HINT_MODE }[] = [
+            { label: "Mines", value: HINT_MODE.Mines },
+            { label: "Safe cells", value: HINT_MODE.Safe },
+        ];
+        options.forEach(({ label, value }) => {
+            this.drawRadioButton(fieldset, "hintMode", label, value, this.config.hintMode === value, () => {
+                this.config.hintMode = value;
+                this.drawFieldset("hintMode", fieldset);
+                // Only changes what the hint button reveals — no board reset, so
+                // this deliberately doesn't publish EVENT_SETTINGS_CHANGED.
+                PubSub.publish(EVENT_HINT_MODE_CHANGED);
+            });
+        });
     }
 
     private drawDarkMode(fieldset: HTMLElement) {
@@ -167,27 +183,24 @@ export class Settings {
         parent.appendChild(wrapper);
     }
 
-    private drawRadioButton(parent: HTMLElement, labelText: string, name: string, value: string, checked: boolean) {
+    private drawRadioButton(parent: HTMLElement, name: string, labelText: string, value: string, checked: boolean, onSelect: () => void) {
         const wrapper = document.createElement("div");
         parent.appendChild(wrapper);
 
+        const id = `${name}_${value}`;
+
         const label = document.createElement("label");
-        label.textContent =
-            labelText == FIRST_CLICK[FIRST_CLICK.GuaranteedNonMine]
-                ? "Guaranteed non-mine"
-                : "Guaranteed cascade";
-        label.setAttribute("for", labelText);
+        label.textContent = labelText;
+        label.setAttribute("for", id);
         wrapper.appendChild(label);
 
         const radio = document.createElement("input")
         radio.setAttribute("type", "radio")
-        radio.setAttribute("id", labelText)
+        radio.setAttribute("id", id)
         radio.setAttribute("name", name)
-        radio.setAttribute("data-configKey", name)
-        radio.setAttribute("data-configValue", value);
         radio.checked = checked;
         if (!checked) {
-            radio.addEventListener("click", this.updateConfig.bind(this, parent));
+            radio.addEventListener("click", onSelect);
         }
         wrapper.appendChild(radio);
     }
@@ -219,7 +232,7 @@ ${navigator.userAgent}`;
         if (configKey == null) {
             return;
         }
-        // Dynamic write of a config field (mode / firstClick) from a DOM attribute string
+        // Dynamic write of a config field (mode) from a DOM attribute string
         (this.config as any)[configKey] = target.getAttribute("data-configValue");
         this.drawFieldset(configKey as keyof typeof AVAILABLE_SETTINGS, fieldset);
         PubSub.publish(EVENT_SETTINGS_CHANGED)

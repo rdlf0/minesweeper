@@ -1,8 +1,10 @@
 import { Cell } from "./cell.js";
-import { Mode, FIRST_CLICK } from "./config.js";
+import { Mode, FIRST_CLICK, HINT_MODE } from "./config.js";
 import { State } from "./state.js";
+import { solve, CellView } from "./solver/minesweeperSolver.js";
 import {
     EVENT_CELL_CLICKED,
+    EVENT_CELL_FLAGGED,
     EVENT_CELL_REVEALED,
     EVENT_GAME_OVER,
     EVENT_SAFE_AREA_CREATED,
@@ -23,10 +25,21 @@ export class Board {
 
     private revealedCounter: number = 0;
 
+    private hintedCells: Cell[] = [];
+
+    private hintHovers: { cell: Cell; enter: () => void; leave: () => void; refs: { cell: Cell; kind: string }[] }[] = [];
+
+    // Whether the currently shown hints are mines (cleared on flag) rather than
+    // safe cells (cleared on reveal).
+    private hintDanger: boolean = false;
+
     private eventSubscribers: EventSubscriber[] = [
         { event: EVENT_CELL_CLICKED, subscriber: this.secureSafeArea.bind(this) },
+        { event: EVENT_CELL_CLICKED, subscriber: this.clearHintsOnReveal.bind(this) },
+        { event: EVENT_CELL_FLAGGED, subscriber: this.clearHintsOnFlag.bind(this) },
         { event: EVENT_CELL_REVEALED, subscriber: this.calculateCellValue.bind(this) },
         { event: EVENT_CELL_REVEALED, subscriber: this.incrementRevealed.bind(this) },
+        { event: EVENT_GAME_OVER, subscriber: this.clearHints.bind(this) },
     ];
 
     constructor(
@@ -247,6 +260,64 @@ export class Board {
                 cell.getElement().addEventListener("contextmenu", e => e.preventDefault());
             }
         }
+    }
+
+    public showHint(mode: HINT_MODE): number {
+        this.clearHints();
+
+        const view: CellView[][] = this.grid.map(row =>
+            row.map(cell => ({
+                revealed: cell.isRevealed(),
+                flagged: cell.isFlagged(),
+                value: cell.isRevealed() ? cell.getValue() : 0,
+            }))
+        );
+
+        const result = solve(view);
+        const danger = mode === HINT_MODE.Mines;
+        this.hintDanger = danger;
+        const cells = danger ? result.mines : result.safe;
+        for (const { row, col, reason, references } of cells) {
+            const cell = this.grid[row][col];
+            cell.setHint(reason, danger);
+            this.hintedCells.push(cell);
+
+            const refs = references.map(([r, c], i) => ({
+                cell: this.grid[r][c],
+                kind: i === 0 ? "a" : "b",
+            }));
+            const enter = () => refs.forEach(({ cell, kind }) => cell.addReference(kind));
+            const leave = () => refs.forEach(({ cell }) => cell.clearReference());
+            const el = cell.getElement();
+            el.addEventListener("mouseenter", enter);
+            el.addEventListener("mouseleave", leave);
+            this.hintHovers.push({ cell, enter, leave, refs });
+        }
+
+        return cells.length;
+    }
+
+    private clearHintsOnReveal(): void {
+        this.clearHints();
+    }
+
+    private clearHintsOnFlag(): void {
+        if (this.hintDanger) {
+            this.clearHints();
+        }
+    }
+
+    public clearHints(): void {
+        this.hintedCells.forEach(cell => cell.clearHint());
+        this.hintedCells = [];
+
+        this.hintHovers.forEach(({ cell, enter, leave, refs }) => {
+            const el = cell.getElement();
+            el.removeEventListener("mouseenter", enter);
+            el.removeEventListener("mouseleave", leave);
+            refs.forEach(ref => ref.cell.clearReference());
+        });
+        this.hintHovers = [];
     }
 
     private incrementRevealed(): void {
