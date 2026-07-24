@@ -31,20 +31,18 @@ recompile (the game must be served over HTTP — see [Requirements](#requirement
 `mode`, `first click`, `hint mode`, and `dark mode` are also adjustable at runtime
 through the in-game settings panel; `hint cost` and `debug` are configuration-only.
 
-Each row below maps an option to the `config.json` value it corresponds to
-(✓ marks the default):
 
 | Setting | Config key | Option | Config value | Default |
 | ------- | ---------- | ------ | ------------ | :-----: |
 | mode | `mode` | `beginner`<br>`intermediate`<br>`expert` | `"beginner"`<br>`"intermediate"`<br>`"expert"` | <br><br>✓ |
 | first click * | `firstClick` | `guaranteed non-mine`<br>`guaranteed cascade` | `0`<br>`1` | <br>✓ |
 | hint mode | `hintMode` | `mines`<br>`safe cells` | `"mines"`<br>`"safe"` | ✓<br>&nbsp; |
-| hint cost | `hintCost` | any whole number of seconds added to the timer per hint | `10` | `10` |
+| hint cost ** | `hintCost` | any whole number of seconds added to the timer per hint | `10` | `10` |
 | dark mode | `darkModeOn` | `enabled`<br>`disabled` | `true`<br>`false` | ✓<br>&nbsp; |
 | debug ** | `debug` | `false`<br>`true` | `false`<br>`true` | ✓<br>&nbsp; |
 
-_* considered only for new game_  
-_** will probably not become available to the user_
+_* considered only for a new game (e.g. ignored on replay or load from URL hash)_  
+_** in the configuration only, not available in the settings panel_
 
 ## Game modes
 | Mode | Rows | Columns | Mines |
