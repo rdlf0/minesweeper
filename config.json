@@ -1,0 +1,8 @@
+{
+    "mode": "expert",
+    "firstClick": 1,
+    "hintMode": "mines",
+    "hintCost": 10,
+    "debug": false,
+    "darkModeOn": true
+}

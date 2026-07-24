@@ -101,6 +101,7 @@ jobs:
           # Each rule: <include-glob>|<content-type>|<cache-control>
           rules=(
             "index.html|text/html; charset=utf-8|no-cache"
+            "config.json|application/json; charset=utf-8|no-cache"
             "*.js|application/javascript; charset=utf-8|public, max-age=3600"
             "*.css|text/css; charset=utf-8|public, max-age=3600"
             "*.svg|image/svg+xml; charset=utf-8|public, max-age=3600"
