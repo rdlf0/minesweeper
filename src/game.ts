@@ -31,6 +31,8 @@ export class Game {
     private boardEl: HTMLElement;
     private settingsEl: HTMLElement;
     private hintMessageEl: HTMLElement;
+    private winMessageEl: HTMLElement;
+    private winMessageTimeout: number | undefined;
     private hintMessageTimeout: number | undefined;
     // Blocks re-invoking the hint until the player makes a move.
     private hintUsed: boolean = false;
@@ -63,9 +65,16 @@ export class Game {
         this.toggleSettingsBtn = document.getElementById("toggle-settings")!;
         this.toggleSettingsBtn.addEventListener("click", this.toggleSettings.bind(this));
 
+        if (this.config.debug) {
+            const testWinBtn = document.getElementById("test-win")!;
+            testWinBtn.style.display = "block";
+            testWinBtn.addEventListener("click", () => this.gameOver(true));
+        }
+
         this.boardEl = document.getElementById("board")!;
         this.settingsEl = document.getElementById("settings")!;
         this.hintMessageEl = document.getElementById("hint-message")!;
+        this.winMessageEl = document.getElementById("win-message")!;
         window.addEventListener("hashchange", this.handleHashChange.bind(this));
 
         this.urlTool = new UrlTool(
@@ -188,6 +197,12 @@ export class Game {
         this.lastHintMessage = undefined;
         this.timer.stop();
         this.timer.reset();
+        this.boardEl.classList.remove("won");
+        this.winMessageEl.classList.remove("show");
+        if (this.winMessageTimeout !== undefined) {
+            clearTimeout(this.winMessageTimeout);
+            this.winMessageTimeout = undefined;
+        }
         this.board?.unsubscribe();
 
         this.generateBoard();
@@ -292,8 +307,27 @@ export class Game {
         this.board.revealMines(win);
 
         if (win) {
-            // @TODO: Congratulate the player somehow
+            this.restartAnimation(this.boardEl, "won");
+            this.showWinMessage();
         }
+    }
+
+    private showWinMessage(): void {
+        this.restartAnimation(this.winMessageEl, "show");
+
+        if (this.winMessageTimeout !== undefined) {
+            clearTimeout(this.winMessageTimeout);
+        }
+        this.winMessageTimeout = window.setTimeout(() => {
+            this.winMessageEl.classList.remove("show");
+        }, 4000);
+    }
+
+    // Re-adds a class so its CSS animation replays even if it was already applied.
+    private restartAnimation(el: HTMLElement, className: string): void {
+        el.classList.remove(className);
+        void el.offsetWidth; // force reflow so the animation restarts
+        el.classList.add(className);
     }
 
     public checkIsOver(): boolean {
