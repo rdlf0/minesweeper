@@ -17,6 +17,10 @@ import {
 } from "./util/pub-sub.js";
 import { Session } from "./util/session.js";
 import { Settings } from "./settings.js";
+import { isTouchDevice, getDeviceBoardArea, computeDeviceMode } from "./util/device.js";
+
+/** Debounce for the resize-driven recomputation of the device mode. */
+const RESIZE_DEBOUNCE_MS = 150;
 
 export class Game {
 
@@ -45,6 +49,7 @@ export class Game {
     private isReplay: boolean;
     private urlTool: UrlTool;
     private settingsOpened: boolean = false;
+    private resizeTimeout: number | undefined;
 
     constructor(private config: Config) {
         document.body.classList.toggle("dark", this.config.darkModeOn);
@@ -76,6 +81,10 @@ export class Game {
         this.hintMessageEl = document.getElementById("hint-message")!;
         this.winMessageEl = document.getElementById("win-message")!;
         window.addEventListener("hashchange", this.handleHashChange.bind(this));
+        // orientationchange fires a resize too, so this covers rotation as well.
+        window.addEventListener("resize", this.handleResize.bind(this));
+
+        this.lockPortraitOrientation();
 
         this.urlTool = new UrlTool(
             this.config.encoder,
@@ -178,6 +187,56 @@ export class Game {
         PubSub.publish(EVENT_MODE_CHANGED);
     }
 
+    /** An installed mobile PWA can genuinely hold portrait. Everywhere else this is
+     * unsupported and rejects harmlessly — the landscape message in `styles.css` is
+     * what actually guarantees portrait-only play. */
+    private lockPortraitOrientation(): void {
+        if (!isTouchDevice()) {
+            return;
+        }
+
+        const orientation = screen.orientation as ScreenOrientation & {
+            lock?: (orientation: string) => Promise<void>;
+        };
+
+        orientation?.lock?.("portrait").catch(() => { /* not supported here */ });
+    }
+
+    /** The device mode is derived from the viewport, so it has to be recomputed when
+     * the viewport changes — but never mid-game, or an in-progress board would be
+     * thrown away. */
+    private handleResize(): void {
+        if (!isTouchDevice() || Session.get("gameStarted") === true) {
+            return;
+        }
+
+        if (this.resizeTimeout !== undefined) {
+            clearTimeout(this.resizeTimeout);
+        }
+
+        this.resizeTimeout = window.setTimeout(() => {
+            this.resizeTimeout = undefined;
+
+            const mode = this.getDeviceMode();
+            const current = this.board.getMode();
+
+            if (mode.rows === current.rows &&
+                mode.cols === current.cols &&
+                mode.mines === current.mines) {
+                return;
+            }
+
+            this.logDebugMessage('======= DEVICE MODE CHANGED =======');
+            this.initialize(false, false);
+        }, RESIZE_DEBOUNCE_MS);
+    }
+
+    private getDeviceMode(): Mode {
+        const area = getDeviceBoardArea();
+
+        return computeDeviceMode(area.width, area.height, this.config.mobileMineDensity);
+    }
+
     private handleSettingsChange() {
         this.logDebugMessage('======= SETTINGS CHANGED =======');
 
@@ -227,7 +286,9 @@ export class Game {
             // Same as if started by a URL with a hash, but here we avoid decoding and unpairing
             mode = this.board.getMode();
             state = this.board.getState();
-        } else if (this.urlTool.isHashSet()) {
+        } else if (!isTouchDevice() && this.urlTool.isHashSet()) {
+            // Touch devices skip this branch: a shared board carries fixed dimensions
+            // that would not fit the screen, so they always play a device-derived one.
             mode = this.urlTool.extractMode() ?? this.board?.getMode() ?? BOARD_CONFIG[this.config.mode];
             this.config.mode = this.getModeNameFromMode(mode);
             state = this.urlTool.extractState(mode);
@@ -236,7 +297,7 @@ export class Game {
                 console.warn("Could not extract mode or state from hash. Falling back to defaults.");
             }
         } else {
-            mode = BOARD_CONFIG[this.config.mode]!;
+            mode = isTouchDevice() ? this.getDeviceMode() : BOARD_CONFIG[this.config.mode]!;
             state = null;
             Session.set("applyFirstClickRule", true);
         }

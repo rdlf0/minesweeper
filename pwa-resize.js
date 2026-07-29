@@ -1,5 +1,6 @@
 (function () {
-    if (matchMedia("(display-mode: standalone)").matches) {
+    // Desktop only — resizeTo is a no-op on mobile, where the board fills the screen.
+    if (matchMedia("(display-mode: standalone)").matches && !matchMedia("(pointer: coarse)").matches) {
         let width;
         let height;
         const widthPadding = 53;

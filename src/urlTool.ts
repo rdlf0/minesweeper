@@ -1,12 +1,9 @@
 import { Encoder } from "./encoder/encoder.js";
 import { Pairer, Tuple } from "./pairer/pairer.js";
-import { Mode } from "./config.js";
+import { Mode, MIN_ROWS, MIN_COLS, MAX_MINES_TO_CELLS_RATIO } from "./config.js";
 import { State } from "./state.js";
 
 const MODE_SIZE = 24;
-const MIN_ROWS = 5;
-const MIN_COLS = 5;
-const MAX_MINES_TO_CELLS_RATIO = 0.25;
 
 export class UrlTool {
 

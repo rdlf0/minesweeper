@@ -7,6 +7,19 @@ import {
     PubSub,
 } from "./util/pub-sub.js";
 import { Session } from "./util/session.js";
+import {
+    isTouchDevice,
+    vibrate,
+    LONG_PRESS_MS,
+    LONG_PRESS_MOVE_TOLERANCE,
+} from "./util/device.js";
+
+/** Double buzz when a mine goes off. Flagging gets no buzz from us — Android already
+ * fires its own haptic on a press-and-hold. */
+const HAPTIC_EXPLOSION = [80, 40, 160];
+
+/** The listeners a cell needs on touch: a tap reveals, a press-and-hold flags. */
+const TOUCH_EVENTS = ["click", "pointerdown", "pointermove", "pointerup", "pointercancel"];
 
 enum CellState {
     Default = "default",
@@ -26,6 +39,10 @@ export class Cell {
     private value: number;
     private el: HTMLElement;
     private state: CellState;
+    private longPressTimeout: number | undefined;
+    private pressX: number = 0;
+    private pressY: number = 0;
+    private suppressClick: boolean = false;
 
     constructor(
         private row: number,
@@ -44,8 +61,13 @@ export class Cell {
     private createHTMLElement(): void {
         this.el = document.createElement("div");
         this.el.classList.add("cell");
-        this.el.addEventListener("click", this);
-        this.el.addEventListener("contextmenu", this);
+
+        if (isTouchDevice()) {
+            TOUCH_EVENTS.forEach(type => this.el.addEventListener(type, this));
+        } else {
+            this.el.addEventListener("click", this);
+            this.el.addEventListener("contextmenu", this);
+        }
     }
 
     public getRow(): number {
@@ -136,6 +158,7 @@ export class Cell {
 
     private explode(): void {
         this.setState(CellState.Exploded);
+        vibrate(HAPTIC_EXPLOSION);
         PubSub.publish(EVENT_GAME_OVER);
     }
 
@@ -180,12 +203,78 @@ export class Cell {
     public handleEvent(e: Event) {
         switch (e.type) {
             case "click":
+                if (!isTouchDevice()) {
+                    this.reveal();
+                    break;
+                }
+
+                // A press-and-hold already acted on this cell; swallow its trailing click.
+                if (this.suppressClick) {
+                    this.suppressClick = false;
+                    break;
+                }
+
                 this.reveal();
+                break;
+            case "pointerdown":
+                this.startLongPress(e as PointerEvent);
+                break;
+            case "pointermove":
+                this.cancelLongPressIfDragged(e as PointerEvent);
+                break;
+            case "pointerup":
+            case "pointercancel":
+                this.cancelLongPress();
                 break;
             case "contextmenu":
                 e.preventDefault();
                 this.mark();
                 break;
         }
+    }
+
+    /** Arms the press-and-hold that flags. */
+    private startLongPress(e: PointerEvent): void {
+        this.suppressClick = false;
+        this.pressX = e.clientX;
+        this.pressY = e.clientY;
+
+        this.longPressTimeout = window.setTimeout(() => {
+            this.longPressTimeout = undefined;
+            // Deliberately no vibrate() here — Android fires its own haptic on a
+            // press-and-hold, and ours on top of it lands as a double buzz.
+            this.mark();
+            // Otherwise the release would reveal a cell the hold just cycled back to default.
+            this.suppressClick = true;
+        }, LONG_PRESS_MS);
+    }
+
+    /** A finger that travels is swiping, not holding. Touch pointers are implicitly
+     * captured, so these moves keep arriving here even once it leaves the cell. */
+    private cancelLongPressIfDragged(e: PointerEvent): void {
+        if (this.longPressTimeout === undefined) {
+            return;
+        }
+
+        if (Math.abs(e.clientX - this.pressX) > LONG_PRESS_MOVE_TOLERANCE ||
+            Math.abs(e.clientY - this.pressY) > LONG_PRESS_MOVE_TOLERANCE) {
+            this.cancelLongPress();
+        }
+    }
+
+    private cancelLongPress(): void {
+        if (this.longPressTimeout !== undefined) {
+            window.clearTimeout(this.longPressTimeout);
+            this.longPressTimeout = undefined;
+        }
+    }
+
+    /** Stops the cell responding to input once the game is over. */
+    public deactivate(): void {
+        this.cancelLongPress();
+
+        TOUCH_EVENTS.forEach(type => this.el.removeEventListener(type, this));
+        this.el.removeEventListener("contextmenu", this);
+        this.el.addEventListener("contextmenu", e => e.preventDefault());
     }
 }

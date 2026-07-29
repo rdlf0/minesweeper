@@ -83,8 +83,10 @@ main {
     transition: background-color 200ms;
 }
 
-#controls .buttons-wrapper .control:hover {
-    background-color: #eeeeee;
+@media (hover: hover) {
+    #controls .buttons-wrapper .control:hover {
+        background-color: #eeeeee;
+    }
 }
 
 #controls .buttons-wrapper .control .icon {
@@ -97,9 +99,11 @@ main {
     transition: transform 200ms;
 }
 
-#controls .buttons-wrapper .control:hover .icon {
-    -webkit-transform: rotate(90deg);
-    transform: rotate(90deg);
+@media (hover: hover) {
+    #controls .buttons-wrapper .control:hover .icon {
+        -webkit-transform: rotate(90deg);
+        transform: rotate(90deg);
+    }
 }
 
 #controls .buttons-wrapper .control#reset .icon {
@@ -163,6 +167,10 @@ main {
     cursor: default;
     width: var(--cell-side);
     height: var(--cell-side);
+    /* Removes the browser's ~300ms tap delay and its double-tap-to-zoom, which would
+       otherwise swallow the second tap of the touch reveal gesture. */
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
     background-size: var(--cell-background-size);
     background-repeat: var(--cell-background-repeat);
     background-position: var(--cell-background-position);
@@ -174,6 +182,8 @@ main {
     -webkit-user-select: none;
     -ms-user-select: none;
     user-select: none;
+    /* Stops iOS Safari popping its callout menu on a press-and-hold. */
+    -webkit-touch-callout: none;
     align-items: center;
     justify-content: center;
 }
@@ -323,8 +333,10 @@ main {
     box-sizing: border-box;
 }
 
-#settings fieldset #mode_switch_wrapper div:hover {
-    background-color: #eeeeee;
+@media (hover: hover) {
+    #settings fieldset #mode_switch_wrapper div:hover {
+        background-color: #eeeeee;
+    }
 }
 
 #settings fieldset #mode_switch_wrapper div.active {
@@ -355,6 +367,79 @@ main {
     background-image: url(data:image/svg+xml;base64,PHN2ZyB3aWR0aD0nNDA5JyBoZWlnaHQ9JzMzNycgdmVyc2lvbj0nMS4xJyB2aWV3Qm94PScwIDAgNDA5IDMzNycgeG1sbnM9J2h0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnJz48cmVjdCB4PSc3JyB5PScxOTMnIHdpZHRoPSc4MycgaGVpZ2h0PScxMzYnIHN0cm9rZT0nd2hpdGUnIGZpbGw9J2JsYWNrJyBzdHJva2Utd2lkdGg9JzE1JyByeD0nMScgcnk9JzEnIC8+PHJlY3QgeD0nMTU5JyB5PScxMTMnIHdpZHRoPSc4MycgaGVpZ2h0PScyMTYnIHN0cm9rZT0nd2hpdGUnIGZpbGw9J2JsYWNrJyBzdHJva2Utd2lkdGg9JzE1JyByeD0nMScgcnk9JzEnIC8+PHJlY3QgeD0nMzE4JyB5PSc3JyB3aWR0aD0nODMnIGhlaWdodD0nMzIyJyBzdHJva2U9J3doaXRlJyBmaWxsPSdibGFjaycgc3Ryb2tlLXdpZHRoPScxNScgcng9JzEnIHJ5PScxJyAvPjwvc3ZnPg==);
 }
 
+#settings fieldset #density_wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 4rem 14rem 10rem;
+}
+
+#settings fieldset #density_wrapper label {
+    /* Keeps the readout from jittering as the digits change mid-drag. */
+    font-variant-numeric: tabular-nums;
+    margin-bottom: 8rem;
+}
+
+#settings fieldset #density_wrapper input[type=range] {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    margin: 0;
+    background: transparent;
+    /* Tall enough to grab with a finger, even though the track is thin. */
+    height: 30rem;
+}
+
+/* The track and thumb need one rule per engine — a selector list containing a
+   pseudo-element the browser doesn't know is dropped whole. */
+#settings fieldset #density_wrapper input[type=range]::-webkit-slider-runnable-track {
+    height: 10rem;
+    background-color: #bdbdbd;
+    border-style: solid;
+    border-width: 2rem;
+    border-color: #7b7b7b #ffffff #ffffff #7b7b7b;
+    box-sizing: border-box;
+}
+
+#settings fieldset #density_wrapper input[type=range]::-moz-range-track {
+    height: 10rem;
+    background-color: #bdbdbd;
+    border-style: solid;
+    border-width: 2rem;
+    border-color: #7b7b7b #ffffff #ffffff #7b7b7b;
+    box-sizing: border-box;
+}
+
+#settings fieldset #density_wrapper input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 18rem;
+    height: 26rem;
+    /* Centres the thumb on the track: (track 10 - thumb 26) / 2. */
+    margin-top: -8rem;
+    background-color: #cccccc;
+    border-style: solid;
+    border-width: 2rem;
+    border-color: #ffffff #7b7b7b #7b7b7b #ffffff;
+    box-sizing: border-box;
+}
+
+#settings fieldset #density_wrapper input[type=range]::-moz-range-thumb {
+    width: 18rem;
+    height: 26rem;
+    border-radius: 0;
+    background-color: #cccccc;
+    border-style: solid;
+    border-width: 2rem;
+    border-color: #ffffff #7b7b7b #7b7b7b #ffffff;
+    box-sizing: border-box;
+}
+
+#settings fieldset #density_wrapper input[type=range]:focus-visible {
+    outline: 2rem solid #000000;
+    outline-offset: 2rem;
+}
+
 #settings fieldset #mode_details_wrapper {
     display: flex;
     justify-content: center;
@@ -380,8 +465,10 @@ main {
     transition-timing-function: var(--transition-function);
 }
 
-#settings fieldset a:hover {
-    color: #ff0000;
+@media (hover: hover) {
+    #settings fieldset a:hover {
+        color: #ff0000;
+    }
 }
 
 
@@ -480,5 +567,102 @@ main {
 
     main {
         margin: auto;
+    }
+}
+
+/* ---------------------------------------------------------------------------
+   Touch devices. The board is derived from the screen (see util/device.ts) and
+   fills the viewport edge to edge, so all the fixed widths, margins and borders
+   that frame the desktop board are dropped here.
+   Must come last so it wins over the standalone block above.
+   --------------------------------------------------------------------------- */
+@media (pointer: coarse) {
+    main {
+        width: 100vw;
+        height: 100vh;
+        height: 100dvh; /* accounts for the collapsing browser UI; ignored if unsupported */
+        margin: 0;
+        border: none;
+        display: flex;
+        flex-direction: column;
+        box-sizing: border-box;
+        overflow: hidden;
+    }
+
+    /* Height must stay in step with MOBILE_CONTROLS_HEIGHT in src/util/device.ts. */
+    #controls {
+        flex: 0 0 auto;
+        height: 56rem;
+        margin: 0;
+        border-width: 0 0 5rem 0;
+        box-sizing: border-box;
+    }
+
+    #controls .buttons-wrapper {
+        width: 200rem;
+    }
+
+    #controls .buttons-wrapper .control {
+        width: 36rem;
+        height: 36rem;
+    }
+
+    /* Overrides the desktop calc() sizing — the grid gets whatever is left over. */
+    #board, #settings {
+        width: auto;
+        height: auto;
+        margin: 0;
+        border: none;
+        flex: 1 1 auto;
+        min-height: 0;
+    }
+
+    #board {
+        grid-template-columns: repeat(var(--cols), 1fr);
+        grid-template-rows: repeat(var(--rows), 1fr);
+    }
+
+    /* 1fr tracks size the cells, so the grid fills the area exactly. */
+    .cell {
+        width: auto;
+        height: auto;
+    }
+
+    #settings {
+        overflow-y: auto;
+    }
+}
+
+#rotate-message {
+    display: none;
+}
+
+/* The game is portrait-only, Wordle-style. */
+@media (pointer: coarse) and (orientation: landscape) {
+    main {
+        display: none;
+    }
+
+    #rotate-message {
+        position: fixed;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 12rem;
+        padding: 24rem;
+        box-sizing: border-box;
+        background-color: #1e1e1e;
+        color: #ffffff;
+        font-family: monospace;
+        font-size: 18rem;
+        line-height: 26rem;
+        z-index: 30;
+    }
+
+    #rotate-message .rotate-icon {
+        font-size: 56rem;
+        line-height: 56rem;
     }
 }

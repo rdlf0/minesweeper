@@ -4,5 +4,6 @@
     "hintMode": "mines",
     "hintCost": 10,
     "debug": false,
-    "darkModeOn": true
+    "darkModeOn": true,
+    "mobileMineDensity": 0.18
 }

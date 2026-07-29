@@ -12,6 +12,9 @@ export interface Config {
     hintCost: number;
     debug: boolean;
     darkModeOn: boolean;
+    /** Mine-to-cell ratio for boards derived from the device screen (touch devices).
+     * Clamped to [MIN_MINES_TO_CELLS_RATIO, MAX_MINES_TO_CELLS_RATIO]. */
+    mobileMineDensity: number;
     github: GitHub
 }
 
@@ -46,6 +49,13 @@ export interface Mode {
     cols: number;
     mines: number;
 }
+
+/** Bounds every mode must satisfy — enforced when decoding a shared board in
+ * `urlTool.ts` and when deriving a board from the device screen in `util/device.ts`. */
+export const MIN_ROWS = 5;
+export const MIN_COLS = 5;
+export const MIN_MINES_TO_CELLS_RATIO = 0.05;
+export const MAX_MINES_TO_CELLS_RATIO = 0.25;
 
 type BoardConfig = {
     readonly [name in MODE_NAME]?: Mode;

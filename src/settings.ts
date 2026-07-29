@@ -1,12 +1,28 @@
-import { BOARD_CONFIG, Config, FIRST_CLICK, HINT_MODE, Mode, MODE_NAME } from "./config.js";
+import {
+    BOARD_CONFIG,
+    Config,
+    FIRST_CLICK,
+    HINT_MODE,
+    Mode,
+    MODE_NAME,
+    MIN_MINES_TO_CELLS_RATIO,
+    MAX_MINES_TO_CELLS_RATIO,
+} from "./config.js";
 import { EVENT_HINT_MODE_CHANGED, EVENT_MODE_CHANGED, EVENT_SETTINGS_CHANGED, PubSub } from "./util/pub-sub.js";
+import { isTouchDevice, getDeviceBoardArea, computeDeviceMode } from "./util/device.js";
 
 enum AVAILABLE_SETTINGS {
     mode = "Mode",
+    mineDensity = "Mine density",
     firstClick = "First click",
     hintMode = "Hint shows",
     darkMode = "Dark mode",
     about = "About",
+}
+
+/** The slider works in whole percent so dragging can't accumulate float drift. */
+function toPercent(ratio: number): number {
+    return Math.round(ratio * 100);
 }
 
 export class Settings {
@@ -24,6 +40,18 @@ export class Settings {
     private draw() {
         Object.keys(AVAILABLE_SETTINGS).forEach(settingKey => {
             const key = settingKey as keyof typeof AVAILABLE_SETTINGS;
+
+            // On touch devices the board is derived from the screen and its mine
+            // density comes from config, so the preset picker can't change anything.
+            if (key === "mode" && isTouchDevice()) {
+                return;
+            }
+
+            // Density only shapes device-derived boards, which desktop never builds.
+            if (key === "mineDensity" && !isTouchDevice()) {
+                return;
+            }
+
             const fieldset = document.createElement("fieldset");
             this.el.appendChild(fieldset)
 
@@ -38,6 +66,7 @@ export class Settings {
         settingFieldset.querySelectorAll(":not(legend)").forEach(e => e.remove());
         switch (setting) {
             case "mode": this.drawMode(settingFieldset); break;
+            case "mineDensity": this.drawMineDensity(settingFieldset); break;
             case "firstClick": this.drawFirstClick(settingFieldset); break;
             case "hintMode": this.drawHintMode(settingFieldset); break;
             case "darkMode": this.drawDarkMode(settingFieldset); break;
@@ -63,6 +92,43 @@ export class Settings {
         fieldset.append(modeDetailsWrapper);
         Object.keys(BOARD_CONFIG[MODE_NAME.Beginner]!).forEach(modeProperty => {
             this.drawModeDetails(modeDetailsWrapper, modeProperty);
+        });
+    }
+
+    private drawMineDensity(fieldset: HTMLElement) {
+        const wrapper = document.createElement("div");
+        wrapper.id = "density_wrapper";
+        fieldset.appendChild(wrapper);
+
+        const readout = document.createElement("label");
+        readout.setAttribute("for", "densitySlider");
+        wrapper.appendChild(readout);
+
+        const slider = document.createElement("input");
+        slider.setAttribute("type", "range");
+        slider.setAttribute("id", "densitySlider");
+        slider.min = toPercent(MIN_MINES_TO_CELLS_RATIO).toString();
+        slider.max = toPercent(MAX_MINES_TO_CELLS_RATIO).toString();
+        slider.step = "1";
+        slider.value = toPercent(this.config.mobileMineDensity).toString();
+        wrapper.appendChild(slider);
+
+        // The ratio behind the slider is an implementation detail; the mine count it
+        // produces on this screen is the thing a player can actually reason about.
+        const describe = () => {
+            const area = getDeviceBoardArea();
+            const mode = computeDeviceMode(area.width, area.height, Number(slider.value) / 100);
+            readout.textContent = `${mode.mines} mines`;
+        };
+
+        describe();
+
+        // Dragging only moves the readout. Rebuilding the board on every input event
+        // would regenerate it dozens of times per drag, so that waits for the release.
+        slider.addEventListener("input", describe);
+        slider.addEventListener("change", () => {
+            this.config.mobileMineDensity = Number(slider.value) / 100;
+            PubSub.publish(EVENT_SETTINGS_CHANGED);
         });
     }
 
