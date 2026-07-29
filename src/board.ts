@@ -29,6 +29,13 @@ export class Board {
 
     private hintHovers: { cell: Cell; enter: () => void; leave: () => void; refs: { cell: Cell; kind: string }[] }[] = [];
 
+    /** The hints from the last solve, in the order the hint button steps through them.
+     * Carries the explanation so it can be surfaced without a hover. */
+    private hints: { cell: Cell; reason: string; refs: { cell: Cell; kind: string }[] }[] = [];
+
+    /** Index into `hints` currently being explained, or -1 when none is. */
+    private focusedHint: number = -1;
+
     // Whether the currently shown hints are mines (cleared on flag) rather than
     // safe cells (cleared on reveal).
     private hintDanger: boolean = false;
@@ -284,14 +291,52 @@ export class Board {
                 kind: i === 0 ? "a" : "b",
             }));
             const enter = () => refs.forEach(({ cell, kind }) => cell.addReference(kind));
-            const leave = () => refs.forEach(({ cell }) => cell.clearReference());
+            const leave = () => {
+                refs.forEach(({ cell }) => cell.clearReference());
+                // Hovering away shouldn't strip the references of the focused hint.
+                this.applyFocusReferences();
+            };
             const el = cell.getElement();
             el.addEventListener("mouseenter", enter);
             el.addEventListener("mouseleave", leave);
             this.hintHovers.push({ cell, enter, leave, refs });
+            this.hints.push({ cell, reason, refs });
         }
 
         return cells.length;
+    }
+
+    public getHintCount(): number {
+        return this.hints.length;
+    }
+
+    /** Marks one hint as the one being explained, lights the cells its deduction rests on,
+     * and returns its explanation plus the row it sits on, so the caller can keep its
+     * message from covering it. Wraps, so the caller can just keep incrementing. */
+    public focusHint(index: number): { reason: string; row: number } | null {
+        if (this.hints.length === 0) {
+            return null;
+        }
+
+        this.hints.forEach(hint => {
+            hint.cell.setHintFocus(false);
+            hint.refs.forEach(ref => ref.cell.clearReference());
+        });
+
+        this.focusedHint = index % this.hints.length;
+        const hint = this.hints[this.focusedHint];
+        hint.cell.setHintFocus(true);
+        this.applyFocusReferences();
+
+        return { reason: hint.reason, row: hint.cell.getRow() };
+    }
+
+    private applyFocusReferences(): void {
+        if (this.focusedHint < 0 || this.focusedHint >= this.hints.length) {
+            return;
+        }
+
+        this.hints[this.focusedHint].refs.forEach(({ cell, kind }) => cell.addReference(kind));
     }
 
     private clearHintsOnReveal(): void {
@@ -307,6 +352,8 @@ export class Board {
     public clearHints(): void {
         this.hintedCells.forEach(cell => cell.clearHint());
         this.hintedCells = [];
+        this.hints = [];
+        this.focusedHint = -1;
 
         this.hintHovers.forEach(({ cell, enter, leave, refs }) => {
             const el = cell.getElement();

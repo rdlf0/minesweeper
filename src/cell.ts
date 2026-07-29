@@ -125,8 +125,13 @@ export class Cell {
         this.el.setAttribute("title", reason);
     }
 
+    /** Marks this hint as the one currently being explained. */
+    public setHintFocus(focused: boolean): void {
+        this.el.classList.toggle("hint-focus", focused);
+    }
+
     public clearHint(): void {
-        this.el.classList.remove("hint", "hint-danger");
+        this.el.classList.remove("hint", "hint-danger", "hint-focus");
         this.el.removeAttribute("title");
     }
 

@@ -98,6 +98,35 @@ implementations selected in `main.ts`; the encoder/pairer chosen must stay consi
 between encode and decode, so changing the default in `main.ts` invalidates
 previously shared URLs.
 
+### Hints
+
+`Board.showHint` runs `solver/minesweeperSolver.ts` and marks the results, keeping them in
+`hints` (cell + `reason` + the cells the deduction rests on). The hint button then steps
+through them: the first press solves and charges `hintCost`, and each press after that
+calls `Board.focusHint(i)` to advance — same solve, so it is **not** charged again.
+`Game.allowHint` resets the cycle whenever the board changes.
+
+**How the explanation is delivered differs by device**, because the original design was
+hover-only and unusable on touch:
+
+- **Desktop** keeps the `title` tooltip `Cell.setHint` sets, plus the `mouseenter`
+  reference highlighting. `explainFocusedHint` returns early here — a toast big enough for
+  a solver sentence lands on the controls, and hover already works. Repeat presses of the
+  hint button therefore do nothing, as before the stepping existed.
+- **Touch** gets the `#hint-message` toast, prefixed `(n/total)` — without that counter
+  nothing tells the player more hints are waiting — and a `hint-focus` ring so it's clear
+  which cell the text describes. `focusHint` returns the hinted cell's row so `Game` can
+  flip the toast to whichever half the cell **isn't** in (`.at-top`, a touch-only class);
+  the board fills the screen here, so a fixed anchor would cover the cell being explained.
+
+The toast has **no timeout** — an explanation is read at the player's pace. It clears on
+dismiss, on stepping to another hint, on any board change, and on game over. That last one
+is easy to miss: detonating a mine returns early in `Cell.reveal` and never publishes
+`EVENT_CELL_REVEALED`, so `allowHint` never runs and `gameOver` has to retire the hint
+itself. It takes `pointer-events` only while `.show` is set — opaque to input on purpose,
+since letting taps through would fire whichever cell sits under the text, unseen — and a
+click anywhere on it dismisses, with `#hint-message-close` as the visible affordance.
+
 ### Mobile / touch (`util/device.ts`)
 
 Touch devices take a different path throughout. The single detector is
