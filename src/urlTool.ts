@@ -22,7 +22,9 @@ export class UrlTool {
         try {
             this.decodedHash = this.encoder.decode(window.location.hash.slice(1));
         } catch (e) {
-            console.error("Invalid hash!", e);
+            // Log the message, not the Error — its stack only points into the encoder
+            // and says nothing the message doesn't.
+            console.error(`Invalid hash! ${e instanceof Error ? e.message : String(e)}`);
             return null;
         }
 
@@ -33,7 +35,7 @@ export class UrlTool {
         const mines = decoded.b;
 
         if (mines < 1) {
-            console.error("Invalid hash! Can't extract mode!");
+            console.error(`Invalid hash! Decoded a board with no mines (${mines}).`);
             return null;
         }
 
@@ -42,10 +44,13 @@ export class UrlTool {
         const rows = decoded.a;
         const cols = decoded.b;
 
-        if (rows < MIN_ROWS ||
-            cols < MIN_COLS ||
-            (mines > rows * cols * MAX_MINES_TO_CELLS_RATIO)) {
-            console.error("Invalid hash! Can't extract mode!");
+        if (rows < MIN_ROWS || cols < MIN_COLS) {
+            console.error(`Invalid hash! Decoded board ${cols}x${rows} is below the ${MIN_COLS}x${MIN_ROWS} minimum.`);
+            return null;
+        }
+
+        if (mines > rows * cols * MAX_MINES_TO_CELLS_RATIO) {
+            console.error(`Invalid hash! Decoded board ${cols}x${rows} packs ${mines} mines, over the ${MAX_MINES_TO_CELLS_RATIO} limit.`);
             return null;
         }
 
@@ -57,8 +62,18 @@ export class UrlTool {
     }
 
     public extractState(mode: Mode): State | null {
-        const stateString = this.decodedHash.slice(MODE_SIZE, mode.rows * mode.cols + MODE_SIZE);
-        if (mode.rows * mode.cols != stateString.length) {
+        const expectedLength = mode.rows * mode.cols;
+        const stateString = this.decodedHash.slice(MODE_SIZE, expectedLength + MODE_SIZE);
+
+        // A hash that stops after the mode is well-formed — it just asks for a fresh
+        // board of that size. The PWA shortcuts in manifest.webmanifest are exactly this.
+        if (stateString.length === 0) {
+            console.warn("Hash carries a mode but no mine layout. Planting a new board.");
+            return null;
+        }
+
+        // Some layout bits are present but they don't fill the board: truncated or corrupt.
+        if (stateString.length !== expectedLength) {
             console.error("Invalid hash! Can't extract state!");
             return null;
         }

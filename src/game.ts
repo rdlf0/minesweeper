@@ -289,12 +289,18 @@ export class Game {
         } else if (!isTouchDevice() && this.urlTool.isHashSet()) {
             // Touch devices skip this branch: a shared board carries fixed dimensions
             // that would not fit the screen, so they always play a device-derived one.
-            mode = this.urlTool.extractMode() ?? this.board?.getMode() ?? BOARD_CONFIG[this.config.mode];
+            const decodedMode = this.urlTool.extractMode();
+            mode = decodedMode ?? this.board?.getMode() ?? BOARD_CONFIG[this.config.mode];
             this.config.mode = this.getModeNameFromMode(mode);
-            state = this.urlTool.extractState(mode);
 
-            if (state == null) {
-                console.warn("Could not extract mode or state from hash. Falling back to defaults.");
+            if (decodedMode == null) {
+                // Nothing usable in the hash at all — extractMode has already said why.
+                console.warn("Could not read a board from the hash. Falling back to defaults.");
+                state = null;
+            } else {
+                // Only worth reading a layout once we know which board it belongs to.
+                // extractState reports a missing layout itself, at the right severity.
+                state = this.urlTool.extractState(mode);
             }
         } else {
             mode = isTouchDevice() ? this.getDeviceMode() : BOARD_CONFIG[this.config.mode]!;

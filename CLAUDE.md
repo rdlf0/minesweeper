@@ -86,7 +86,14 @@ share-a-board work. The encoding pipeline:
 
 Decoding reverses this. `extractMode` validates the result (min rows/cols,
 mines-to-cells ratio) and returns `null` on anything malformed, so callers must handle
-the fallback. `Pairer` and `Encoder` are interfaces with interchangeable
+the fallback. A hash may legitimately stop after the 24-bit mode and carry no layout —
+that asks for a fresh board of that size, and the PWA shortcuts in `manifest.webmanifest`
+are exactly this. `extractState` distinguishes the two: no layout bits at all is a `warn`,
+while layout bits that don't fill the board are an `error`. `Game.generateBoard` only
+reads a layout once `extractMode` has succeeded, so a hash with no valid mode can't
+produce a misleading "missing layout" message. Those shortcut hashes are hand-maintained
+and go stale when a preset changes — regenerate them with the current `Pairer`/`Encoder`
+rather than editing by hand. `Pairer` and `Encoder` are interfaces with interchangeable
 implementations selected in `main.ts`; the encoder/pairer chosen must stay consistent
 between encode and decode, so changing the default in `main.ts` invalidates
 previously shared URLs.
