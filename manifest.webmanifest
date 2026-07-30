@@ -7,7 +7,7 @@
     "lang": "en-US",
     "dir": "ltr",
     "display": "standalone",
-    "orientation": "landscape",
+    "orientation": "any",
     "id": "/",
     "start_url": "/",
     "categories": [
@@ -61,7 +61,7 @@
         {
             "name": "Beginner mode",
             "description": "Beginner mode",
-            "url": "/#AEbr",
+            "url": "/#ALBo",
             "icons": [
                 {
                     "src": "/assets/icons/favicon_96.svg",
