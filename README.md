@@ -105,7 +105,7 @@ back. Installed as a PWA it also asks the system to lock the orientation.
 | Gesture | Action |
 | ------- | ------ |
 | tap | reveal a cell (no-op on a flagged or questioned cell, same as a desktop left click) |
-| press and hold (0.4s) | cycle the mark: flag → question mark → unmarked |
+| press and hold (0.25s) | cycle the mark: flag → question mark → unmarked |
 
 Sliding your finger away during a hold cancels it, so scrolling or dragging across the
 board won't scatter flags. A hold that marks a cell won't also reveal it on release.

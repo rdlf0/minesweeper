@@ -14,7 +14,7 @@ export const TARGET_CELL_SIDE = 40;
 export const MOBILE_CONTROLS_HEIGHT = 56;
 
 /** How long a press must be held before it flags. */
-export const LONG_PRESS_MS = 400;
+export const LONG_PRESS_MS = 250;
 
 /** A press that drifts further than this (in px) is a drag, not a hold. */
 export const LONG_PRESS_MOVE_TOLERANCE = 10;
