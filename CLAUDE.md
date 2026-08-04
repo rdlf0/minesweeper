@@ -32,12 +32,38 @@ Tests live in `test/*.test.mjs` and run on Node's built-in runner (`node:test` +
 only — pairers, encoders, `State` (the URL round-trip pipeline); the DOM-heavy parts
 (`Board`, `Cell`, `Game`) are not unit-tested. No linter is configured. CI runs
 `tsc && node --test` on every non-`master` branch (type-check + unit tests); releases
-compile and deploy the static files to S3. Both
+compile and deploy the static files to S3, then create the tag and GitHub release (see
+"Releasing" below). Both
 workflows pin `typescript@6.0.3` (installed via `npm i -g`) so the runner can't drift
 — bump both `.github/workflows/*.yml` together if you upgrade. The compiler is the
 quality gate: `tsconfig.json` runs full `strict` mode (only `strictPropertyInitialization`
 is disabled, because fields are assigned in `initialize()` lifecycle methods, not the
 constructor).
+
+## Releasing
+
+`.github/workflows/release.yml` is started **manually** — `workflow_dispatch` with a
+`version_type` input of `patch` / `minor` / `major`. Nothing is tagged beforehand; the
+workflow owns the whole release:
+
+```sh
+gh workflow run "Release" --field version_type=patch
+```
+
+`build` → `deploy` → `create-release`, in that order. `create-release` derives the next
+version from the highest `vX.Y.Z` tag, creates a **GPG-signed** tag, publishes the release
+with `--generate-notes`, and attaches `minesweeper.zip`. Tagging after `deploy` is
+deliberate: a tag never points at code that failed to reach production. If `create-release`
+dies after pushing the tag, delete it (`git push --delete origin vX.Y.Z`) before re-running,
+or `gh release create` will collide.
+
+It needs three secrets: `GPG_PRIVATE_KEY` (base64 of an ASCII-armored, **passphrase-less**
+private key — `git tag -s` would otherwise hang on pinentry), `GPG_KEY_ID`, and
+`RELEASE_TOKEN`. That last one is a PAT with `contents: write` and it is **not**
+interchangeable with `GITHUB_TOKEN`: releases created with `GITHUB_TOKEN` don't emit a
+`release: published` event, which would silently stop `commentReleasedPRs.yml` from ever
+running. That workflow still triggers on the event and reads `github.event.release` from
+the payload, so it can't be folded into `release.yml` as a job.
 
 ## Architecture
 

@@ -1,9 +1,17 @@
 name: Release
 
 on:
-  release:
-    types:
-      - published
+  workflow_dispatch:
+    inputs:
+      version_type:
+        description: "Version type to increment"
+        required: true
+        default: minor
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
 
 env:
   ARTIFACT_NAME: minesweeper-compiled
@@ -17,10 +25,9 @@ jobs:
     name: Build
     runs-on: ubuntu-24.04
     permissions:
-      contents: write        # needed to upload the release asset via the gh CLI
+      contents: read
     env:
       ARTIFACT_PATH: artifact
-      ASSET_NAME: minesweeper.zip
     steps:
       - name: Check out the code
         uses: actions/checkout@v7
@@ -53,19 +60,11 @@ jobs:
             --exclude="/${ARTIFACT_PATH}" \
             ./ "${ARTIFACT_PATH}/"
 
-      - name: Prepare release asset
-        run: zip -r "$ASSET_NAME" "$ARTIFACT_PATH"
-
       - name: Upload artifact
         uses: actions/upload-artifact@v7
         with:
           name: ${{ env.ARTIFACT_NAME }}
           path: ./${{ env.ARTIFACT_PATH }}
-
-      - name: Upload release asset
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh release upload "${{ github.event.release.tag_name }}" "$ASSET_NAME" --repo "$GITHUB_REPOSITORY"
 
   deploy:
     name: Deploy
@@ -135,3 +134,106 @@ jobs:
           aws cloudfront create-invalidation \
             --distribution-id "$CLOUDFRONT_DISTRIBUTION_ID" \
             --paths "/*"
+
+  create-release:
+    name: Create release
+    needs: deploy               # tag and publish only what actually reached production
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write           # needed to push the tag
+    env:
+      ARTIFACT_PATH: artifact
+      ASSET_NAME: minesweeper.zip
+    steps:
+      - name: Check out the code
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0        # the version is derived from the tag list
+
+      - name: Set up Git and GPG
+        run: |
+          set -euo pipefail
+
+          git config --local user.email "r.stoyanov@outlook.com"
+          git config --local user.name "Radoslav Stoyanov"
+
+          echo -n "${{ secrets.GPG_PRIVATE_KEY }}" | base64 --decode | gpg --import
+          gpg -k
+
+          git config --local tag.gpgsign true
+          git config --local user.signingkey "${{ secrets.GPG_KEY_ID }}"
+
+      - name: Get current version
+        id: current_version
+        run: |
+          # No pipefail here: grep exits 1 when there are no tags yet, which is fine.
+          latest_tag=$(git tag | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | sort -V | tail -n1)
+          latest_tag="${latest_tag:-v0.0.0}"
+          echo "latest_tag=$latest_tag" >> "$GITHUB_OUTPUT"
+          echo "Found latest tag: $latest_tag"
+
+      - name: Calculate new version
+        id: new_version
+        env:
+          LATEST_TAG: ${{ steps.current_version.outputs.latest_tag }}
+          VERSION_TYPE: ${{ inputs.version_type }}
+        run: |
+          set -euo pipefail
+
+          IFS='.' read -r major minor patch <<< "${LATEST_TAG#v}"
+
+          case "$VERSION_TYPE" in
+            major)
+              major=$((major + 1)); minor=0; patch=0
+              ;;
+            minor)
+              minor=$((minor + 1)); patch=0
+              ;;
+            patch)
+              patch=$((patch + 1))
+              ;;
+          esac
+
+          new_version="v${major}.${minor}.${patch}"
+          echo "new_version=$new_version" >> "$GITHUB_OUTPUT"
+          echo "Calculated new version: $new_version"
+
+      - name: Print release info
+        run: |
+          {
+            echo "## Release information"
+            echo ""
+            echo "- **Previous version**: ${{ steps.current_version.outputs.latest_tag }}"
+            echo "- **New version**: ${{ steps.new_version.outputs.new_version }} (${{ inputs.version_type }})"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Create and push signed tag
+        env:
+          NEW_VERSION: ${{ steps.new_version.outputs.new_version }}
+        run: |
+          set -euo pipefail
+
+          git tag -s "$NEW_VERSION" -m "Release $NEW_VERSION"
+          git push origin "$NEW_VERSION"
+
+      - name: Download artifact
+        uses: actions/download-artifact@v8
+        with:
+          name: ${{ env.ARTIFACT_NAME }}
+          path: ./${{ env.ARTIFACT_PATH }}
+
+      - name: Prepare release asset
+        run: zip -r "$ASSET_NAME" "$ARTIFACT_PATH"
+
+      - name: Create GitHub release
+        env:
+          # A PAT, not GITHUB_TOKEN: releases created with GITHUB_TOKEN don't emit a
+          # `release: published` event, which would leave commentReleasedPRs.yml dead.
+          GH_TOKEN: ${{ secrets.RELEASE_TOKEN }}
+          NEW_VERSION: ${{ steps.new_version.outputs.new_version }}
+        run: |
+          gh release create "$NEW_VERSION" "$ASSET_NAME" \
+            --repo "$GITHUB_REPOSITORY" \
+            --title "$NEW_VERSION" \
+            --generate-notes
