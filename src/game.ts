@@ -119,6 +119,7 @@ export class Game {
         if (this.settingsOpened) {
             this.closeSettings();
         }
+        this.pulseButton(this.resetBtn);
         this.updateUrlHash(true);
         this.initialize(true, false);
     }
@@ -129,7 +130,21 @@ export class Game {
         if (this.settingsOpened) {
             this.closeSettings();
         }
+        this.pulseButton(this.replayBtn);
         this.initialize(false, true);
+    }
+
+    /** Acknowledges the press on the button itself. Touch only — desktop already answers
+     * with the hover background and icon rotation, and with no animation to end there the
+     * listener below would never fire and would pile up a click at a time.
+     * The class comes off on animationend: left on, it would override that hover transform. */
+    private pulseButton(btn: HTMLElement): void {
+        if (!isTouchDevice()) {
+            return;
+        }
+
+        this.restartAnimation(btn, "pressed");
+        btn.addEventListener("animationend", () => btn.classList.remove("pressed"), { once: true });
     }
 
     private showHint(): void {
@@ -306,6 +321,7 @@ export class Game {
         this.timer.stop();
         this.timer.reset();
         this.boardEl.classList.remove("won");
+        this.clearBoardEffect();
         this.winMessageEl.classList.remove("show");
         if (this.winMessageTimeout !== undefined) {
             clearTimeout(this.winMessageTimeout);
@@ -321,6 +337,20 @@ export class Game {
         this.board.draw();
 
         this.setFlags(0);
+
+        this.playBoardChangeEffect();
+    }
+
+    /** A rebuilt board is indistinguishable from the one it replaced — every cell is
+     * unrevealed either way — so New game and Replay have to announce themselves. Only
+     * those two: a hash or settings change is already visible on its own. */
+    private playBoardChangeEffect(): void {
+        if (!this.isReset && !this.isReplay) {
+            return;
+        }
+
+        this.boardEl.addEventListener("animationend", this.clearBoardEffect);
+        this.restartAnimation(this.boardEl, this.isReset ? "new-game" : "replayed");
     }
 
     private generateBoard(): void {
@@ -444,6 +474,14 @@ export class Game {
             this.winMessageEl.classList.remove("show");
         }, 4000);
     }
+
+    /** Retires a finished board effect. Leaving the class on would replay it: showing the
+     * board again — `closeSettings` flipping it back to `display: grid` — restarts every
+     * animation still attached to it. Kept as one instance so re-adding it is a no-op. */
+    private clearBoardEffect = (): void => {
+        this.boardEl.classList.remove("new-game", "replayed");
+        this.boardEl.removeEventListener("animationend", this.clearBoardEffect);
+    };
 
     // Re-adds a class so its CSS animation replays even if it was already applied.
     private restartAnimation(el: HTMLElement, className: string): void {

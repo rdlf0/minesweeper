@@ -128,6 +128,23 @@ main {
     
 }
 
+/* Touch only — applied by Game.pulseButton, which has no hover state to rely on. */
+#controls .buttons-wrapper .control#reset.pressed .icon {
+    animation: icon-spin-cw 400ms ease-out;
+}
+
+#controls .buttons-wrapper .control#replay.pressed .icon {
+    animation: icon-spin-ccw 400ms ease-out;
+}
+
+@keyframes icon-spin-cw {
+    to { transform: rotate(360deg); }
+}
+
+@keyframes icon-spin-ccw {
+    to { transform: rotate(-360deg); }
+}
+
 #controls #mines-counter, #controls #timer {
     background-color: #000000;
     color: #ff0000;
@@ -155,6 +172,8 @@ main {
     position: relative;
     display: grid;
     grid-template-columns: repeat(var(--cols), 1fr);
+    /* Clips the new-game sweep, which travels past both edges. */
+    overflow: hidden;
 }
 
 #board, #settings {
@@ -544,6 +563,51 @@ main {
     }
 }
 
+/* New game / replay feedback. On ::before — the win glow below owns ::after. */
+#board::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 5;
+    opacity: 0;
+}
+
+#board.new-game::before {
+    background: linear-gradient(115deg,
+        transparent 42%, rgba(255, 255, 255, 0.85) 50%, transparent 58%);
+    animation: board-new-game 550ms ease-out;
+}
+
+@keyframes board-new-game {
+    0%   { opacity: 0; transform: translateX(-120%); }
+    15%  { opacity: 1; }
+    85%  { opacity: 1; }
+    100% { opacity: 0; transform: translateX(120%); }
+}
+
+#board.replayed {
+    animation: board-replay 420ms ease-out;
+}
+
+@keyframes board-replay {
+    0%   { transform: scale(1); }
+    35%  { transform: scale(0.94); }
+    70%  { transform: scale(1.02); }
+    100% { transform: scale(1); }
+}
+
+#board.replayed::before {
+    background-color: rgba(255, 255, 255, 0.9);
+    animation: board-replay-flash 420ms ease-out;
+}
+
+@keyframes board-replay-flash {
+    0%   { opacity: 0; }
+    35%  { opacity: 0.35; }
+    100% { opacity: 0; }
+}
+
 #board.won::after {
     content: "";
     position: absolute;
@@ -592,6 +656,17 @@ main {
 
 @media (prefers-reduced-motion: reduce) {
     #board.won::after {
+        animation: none;
+    }
+
+    #board.new-game::before,
+    #board.replayed::before,
+    #board.replayed {
+        animation: none;
+    }
+
+    #controls .buttons-wrapper .control#reset.pressed .icon,
+    #controls .buttons-wrapper .control#replay.pressed .icon {
         animation: none;
     }
 
