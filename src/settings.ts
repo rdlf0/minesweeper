@@ -11,14 +11,26 @@ import {
 import { EVENT_HINT_MODE_CHANGED, EVENT_MODE_CHANGED, EVENT_SETTINGS_CHANGED, PubSub } from "./util/pub-sub.js";
 import { isTouchDevice, getDeviceBoardArea, computeDeviceMode } from "./util/device.js";
 
-enum AVAILABLE_SETTINGS {
-    mode = "Mode",
-    mineDensity = "Mine density",
-    firstClick = "First click",
-    hintMode = "Hint shows",
-    darkMode = "Dark mode",
-    about = "About",
+interface SettingDefinition {
+    legend: string;
+    /** Omitted when the setting applies to every device. */
+    show?: () => boolean;
 }
+
+const AVAILABLE_SETTINGS = {
+    // Dimensions come from the screen on touch, so the presets can't change anything.
+    mode: { legend: "Mode", show: () => !isTouchDevice() },
+    // Density only shapes device-derived boards, which desktop never builds.
+    mineDensity: { legend: "Mine density", show: isTouchDevice },
+    firstClick: { legend: "First click" },
+    hintMode: { legend: "Hint shows" },
+    // `body.dark` only repaints the page behind `main`, and a touch board covers the
+    // viewport edge to edge — the toggle has nothing visible to change.
+    darkMode: { legend: "Dark mode", show: () => !isTouchDevice() },
+    about: { legend: "About" },
+    // `satisfies`, not an annotation: the literal keys have to survive for
+    // `keyof typeof` to keep `drawFieldset`'s switch exhaustive.
+} satisfies Record<string, SettingDefinition>;
 
 /** The slider works in whole percent so dragging can't accumulate float drift. */
 function toPercent(ratio: number): number {
@@ -40,15 +52,11 @@ export class Settings {
     private draw() {
         Object.keys(AVAILABLE_SETTINGS).forEach(settingKey => {
             const key = settingKey as keyof typeof AVAILABLE_SETTINGS;
+            // Widening to the interface is what makes the optional `show` readable
+            // here — indexing the table alone yields a union that lacks it.
+            const setting: SettingDefinition = AVAILABLE_SETTINGS[key];
 
-            // On touch devices the board is derived from the screen and its mine
-            // density comes from config, so the preset picker can't change anything.
-            if (key === "mode" && isTouchDevice()) {
-                return;
-            }
-
-            // Density only shapes device-derived boards, which desktop never builds.
-            if (key === "mineDensity" && !isTouchDevice()) {
+            if (setting.show != null && !setting.show()) {
                 return;
             }
 
@@ -56,7 +64,7 @@ export class Settings {
             this.el.appendChild(fieldset)
 
             const legend = document.createElement("legend");
-            legend.textContent = AVAILABLE_SETTINGS[key];
+            legend.textContent = setting.legend;
             fieldset.appendChild(legend);
             this.drawFieldset(key, fieldset);
         })

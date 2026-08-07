@@ -204,7 +204,9 @@ is made; change it there and everything follows.
   in whole percent so dragging can't accumulate float drift, and only commits on `change`,
   not `input` — committing per input event would rebuild the board dozens of times in one
   drag. Its readout shows the resulting mine count for this screen, computed with the same
-  `computeDeviceMode` the board uses, so the two can't disagree.
+  `computeDeviceMode` the board uses, so the two can't disagree. `Dark mode` is hidden on
+  touch too: `body.dark` only repaints the page behind `main`, and the touch layout gives
+  `main` the whole viewport, so the toggle has nothing a player could see it change.
 
 ## Conventions
 
