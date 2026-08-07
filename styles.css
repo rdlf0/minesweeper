@@ -704,9 +704,15 @@ main {
            drag is what an installed PWA's pull-to-refresh rides on, and with no
            browser chrome that is the player's only way to reload. */
         touch-action: pan-y;
-        width: 100vw;
-        height: 100vh;
-        height: 100dvh; /* accounts for the collapsing browser UI; ignored if unsupported */
+        /* Pinned to the initial containing block rather than sized in viewport units.
+           `100dvh` is a *dynamic* measure and in a standalone PWA it can come back
+           larger than the area actually on screen after a reload — `main` then
+           outgrew the viewport, the document scrolled, and the controls bar sat above
+           the top edge. `inset: 0` resolves against the same box
+           `documentElement.clientHeight` reports, so the layout and the derived board
+           mode cannot disagree. */
+        position: fixed;
+        inset: 0;
         margin: 0;
         border: none;
         display: flex;

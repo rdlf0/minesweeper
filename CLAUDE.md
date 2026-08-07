@@ -172,7 +172,16 @@ is made; change it there and everything follows.
 - **Layout.** One `@media (pointer: coarse)` block at the end of `styles.css` drops the
   desktop `calc()` sizing and fixed margins/borders; `#board` becomes a `1fr` grid inside
   a full-viewport flex column, so it fills the screen exactly. `#controls`' `56rem`
-  height must stay in step with `MOBILE_CONTROLS_HEIGHT`.
+  height must stay in step with `MOBILE_CONTROLS_HEIGHT`. Touch `main` is
+  `position: fixed; inset: 0` — **not** `100dvh`, and not by accident. There are two
+  viewports on a phone: the initial containing block (`documentElement.clientHeight`,
+  what `inset: 0` resolves against) and the dynamic one (`window.innerHeight`, `dvh`).
+  A standalone PWA can report the dynamic one larger than the screen after a reload,
+  which used to produce a board one row too tall over a document that scrolled far
+  enough to push the controls bar off the top edge. Sizing the box and deriving the mode
+  from the *same* viewport is what stops the two disagreeing, so `getDeviceBoardArea`
+  must keep measuring `documentElement` — swapping either side back to `innerHeight` or
+  `dvh` reintroduces the bug.
 - **Input.** `Cell` registers `contextmenu` only on non-touch; on touch it registers the
   `TOUCH_EVENTS` set instead. One gesture scheme, not configurable: **a tap reveals, a
   press-and-hold of `LONG_PRESS_MS` marks** (flag → question → default). The hold sets

@@ -64,10 +64,18 @@ export function preventPinchZoom(): void {
  *
  * Orientation-independent on purpose: the game is portrait-only, so the short
  * viewport side is always the board width. That keeps the derived mode stable when
- * the device is rotated. */
+ * the device is rotated.
+ *
+ * Measured off `documentElement`, not `window.innerWidth/innerHeight`. The two are
+ * different viewports: the root's client box is the initial containing block, which is
+ * what the `position: fixed; inset: 0` on touch `main` resolves against, while
+ * `innerHeight` follows the dynamic viewport. In a standalone PWA those diverge after a
+ * reload — `innerHeight` over-reported, so this subtracted the controls bar from a
+ * height that had never allowed for it and returned a board area a full row too tall. */
 export function getDeviceBoardArea(): { width: number; height: number } {
-    const shortSide = Math.min(window.innerWidth, window.innerHeight);
-    const longSide = Math.max(window.innerWidth, window.innerHeight);
+    const root = document.documentElement;
+    const shortSide = Math.min(root.clientWidth, root.clientHeight);
+    const longSide = Math.max(root.clientWidth, root.clientHeight);
 
     return {
         width: shortSide,
