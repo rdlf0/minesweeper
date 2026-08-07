@@ -236,6 +236,37 @@ is made; change it there and everything follows.
   touch too: `body.dark` only repaints the page behind `main`, and the touch layout gives
   `main` the whole viewport, so the toggle has nothing a player could see it change.
 
+### Service worker (`sw.js`)
+
+Hand-written, with **no Workbox and no `importScripts` from a CDN** — it used to pull
+Workbox 6.5.2 from `storage.googleapis.com`, which broke the no-third-party-dependencies
+rule and made worker start-up depend on an external host. Two strategies cover
+everything: network-first (3s timeout, then cache) for the document and `config.json`,
+stale-while-revalidate for scripts, styles, images, the manifest and the GitHub releases
+lookup. Non-GET requests are left alone so the win-score POST reaches the network.
+
+Three things are easy to get wrong here:
+
+- **`config.json` has to be matched by path, not by `destination`.** `main.ts` fetches it
+  with a bare `fetch()`, whose `request.destination` is the empty string, so every
+  destination-based route misses it. While it was unrouted it went straight to the
+  network, and the app was dead offline — `new Game()` never ran — even with the HTML,
+  CSS and every module sitting in the cache.
+- **`skipWaiting()` on install plus `clients.claim()` on activate are load-bearing.** A
+  waiting worker only activates once every client closes, and *a reload does not close a
+  client* — so in an installed PWA, where the app is rarely swiped away, a deploy could
+  go unnoticed indefinitely. Pull-to-refresh is the only reload a standalone PWA has, and
+  without these it cannot deliver a new version.
+- **Stale-while-revalidate is one load behind by design.** A deploy lands in the cache on
+  the load that discovers it, so the *next* load runs it. Two pull-to-refreshes, not one.
+
+There is deliberately no per-entry expiration. Filenames are stable (no content hashing),
+so a cache holds one entry per URL and is naturally bounded — the previous `maxEntries:
+15` on the script cache was actively harmful, because the app requests 23 scripts and the
+plugin therefore evicted on every single load. `activate` deletes any cache whose name
+isn't in `KNOWN_CACHES`, which cleans up after a rename; entries for files deleted
+outright do linger, which is a few KB and considered acceptable.
+
 ## Conventions
 
 - Keep it dependency-free and simple (the explicit contributing rule).
