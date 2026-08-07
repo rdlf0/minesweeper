@@ -700,6 +700,10 @@ main {
    --------------------------------------------------------------------------- */
 @media (pointer: coarse) {
     main {
+        /* `pan-y`, not `none`: pinch-zoom needs blocking, but a one-finger vertical
+           drag is what an installed PWA's pull-to-refresh rides on, and with no
+           browser chrome that is the player's only way to reload. */
+        touch-action: pan-y;
         width: 100vw;
         height: 100vh;
         height: 100dvh; /* accounts for the collapsing browser UI; ignored if unsupported */
@@ -748,10 +752,17 @@ main {
     .cell {
         width: auto;
         height: auto;
+        /* Not the desktop `manipulation`, which permits pinch-zoom by definition.
+           Matching `main` keeps pull-to-refresh reachable from the board itself;
+           a drag that the browser claims cancels the hold via `pointercancel`. */
+        touch-action: pan-y;
     }
 
     #settings {
         overflow-y: auto;
+        /* Same `pan-y` as the rest, and load-bearing here for a second reason: this
+           panel actually scrolls. */
+        touch-action: pan-y;
     }
 
     /* Flipped above the board when the hint being explained sits in its lower half.

@@ -32,6 +32,34 @@ export function isTouchDevice(): boolean {
     return window.matchMedia("(pointer: coarse)").matches;
 }
 
+/** Blocks pinch-to-zoom on touch devices.
+ *
+ * Three layers, because no single one holds everywhere. The viewport meta in
+ * `index.html` and the `touch-action` rules in `styles.css` cover Android; iOS Safari
+ * ignores `user-scalable=no` outright and runs page zoom above the element's
+ * `touch-action`, so its WebKit-only `gesture*` events are the hook that actually
+ * works there. The `touchmove` guard is the fallback for older WebKit that fires
+ * neither — it only bites once a second finger is down, which is what keeps one-finger
+ * gestures (settings scrolling, and the pull-to-refresh an installed PWA depends on for
+ * reloading) working.
+ *
+ * All four listeners must be non-passive; a passive listener cannot preventDefault. */
+export function preventPinchZoom(): void {
+    if (!isTouchDevice()) {
+        return;
+    }
+
+    ["gesturestart", "gesturechange", "gestureend"].forEach(type => {
+        document.addEventListener(type, e => e.preventDefault(), { passive: false });
+    });
+
+    document.addEventListener("touchmove", e => {
+        if (e.touches.length > 1) {
+            e.preventDefault();
+        }
+    }, { passive: false });
+}
+
 /** The area the board gets on a touch device, in CSS pixels.
  *
  * Orientation-independent on purpose: the game is portrait-only, so the short

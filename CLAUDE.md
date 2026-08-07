@@ -179,8 +179,27 @@ is made; change it there and everything follows.
   `suppressClick` so the release can't reveal a cell the hold just cycled back to default
   — that guard is load-bearing, not defensive. A drag past `LONG_PRESS_MOVE_TOLERANCE`
   cancels the hold so swiping doesn't scatter flags. Reveal no-ops on a marked cell,
-  matching a desktop left click. `.cell` needs `touch-action: manipulation` (kills the tap
-  delay) and `-webkit-touch-callout: none` (stops iOS's callout on a hold).
+  matching a desktop left click. `.cell` needs `touch-action` set (kills the tap delay) and
+  `-webkit-touch-callout: none` (stops iOS's callout on a hold). The base rule is
+  `manipulation`; the `(pointer: coarse)` block tightens it to `none` — see "No zooming".
+- **No zooming.** Pinch-zoom is blocked in three layers, and all three are needed: the
+  `maximum-scale=1, user-scalable=no` viewport meta in `index.html` (Android only — iOS
+  Safari has ignored `user-scalable=no` since iOS 10), `touch-action: none` on `main` and
+  `.cell` in the `(pointer: coarse)` block, and `preventPinchZoom()` in `util/device.ts`
+  for iOS, which runs page zoom above `touch-action` and only yields to preventDefault on
+  its WebKit-only `gesture*` events. Note `touch-action: manipulation` **permits**
+  pinch-zoom — it only suppresses double-tap zoom — so the desktop value can't be reused
+  on touch. Every listener in `preventPinchZoom` is `{ passive: false }` or it couldn't
+  preventDefault at all.
+- **Pull-to-refresh must survive that.** An installed PWA has no browser chrome, so the
+  overscroll gesture is the player's only way to reload — which is why the touch
+  `touch-action` is `pan-y` and **not** `none`. `none` blocks pinch and pull-to-refresh
+  alike; `pan-y` still refuses pinch (zoom isn't in its allowed set) while leaving the
+  one-finger vertical drag the gesture rides on. The `touchmove` fallback in
+  `preventPinchZoom` fires only once a second finger is down for the same reason. The
+  cost is that a firm downward drag on the board can reload mid-game; `Cell`'s
+  `pointercancel` handling means the hold is cancelled rather than left armed, so the
+  reload is the whole of the damage.
 - **Haptics.** `vibrate()` in `util/device.ts` is called from exactly one place: a mine
   going off. There is deliberately **no** buzz when flagging — Android fires its own
   haptic on a press-and-hold, and adding ours produced a double buzz on real hardware

@@ -17,7 +17,7 @@ import {
 } from "./util/pub-sub.js";
 import { Session } from "./util/session.js";
 import { Settings } from "./settings.js";
-import { isTouchDevice, getDeviceBoardArea, computeDeviceMode } from "./util/device.js";
+import { isTouchDevice, getDeviceBoardArea, computeDeviceMode, preventPinchZoom } from "./util/device.js";
 
 /** Debounce for the resize-driven recomputation of the device mode. */
 const RESIZE_DEBOUNCE_MS = 150;
@@ -94,6 +94,7 @@ export class Game {
         window.addEventListener("resize", this.handleResize.bind(this));
 
         this.lockPortraitOrientation();
+        preventPinchZoom();
 
         this.urlTool = new UrlTool(
             this.config.encoder,
