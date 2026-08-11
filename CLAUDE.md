@@ -172,15 +172,43 @@ is made; change it there and everything follows.
 - **Layout.** One `@media (pointer: coarse)` block at the end of `styles.css` drops the
   desktop `calc()` sizing and fixed margins/borders; `#board` becomes a `1fr` grid inside
   a full-viewport flex column, so it fills the screen exactly. `#controls`' `56rem`
-  height must stay in step with `MOBILE_CONTROLS_HEIGHT`.
+  height must stay in step with `MOBILE_CONTROLS_HEIGHT`. Touch `main` is
+  `position: fixed; inset: 0` — **not** `100dvh`, and not by accident. There are two
+  viewports on a phone: the initial containing block (`documentElement.clientHeight`,
+  what `inset: 0` resolves against) and the dynamic one (`window.innerHeight`, `dvh`).
+  A standalone PWA can report the dynamic one larger than the screen after a reload,
+  which used to produce a board one row too tall over a document that scrolled far
+  enough to push the controls bar off the top edge. Sizing the box and deriving the mode
+  from the *same* viewport is what stops the two disagreeing, so `getDeviceBoardArea`
+  must keep measuring `documentElement` — swapping either side back to `innerHeight` or
+  `dvh` reintroduces the bug.
 - **Input.** `Cell` registers `contextmenu` only on non-touch; on touch it registers the
   `TOUCH_EVENTS` set instead. One gesture scheme, not configurable: **a tap reveals, a
   press-and-hold of `LONG_PRESS_MS` marks** (flag → question → default). The hold sets
   `suppressClick` so the release can't reveal a cell the hold just cycled back to default
   — that guard is load-bearing, not defensive. A drag past `LONG_PRESS_MOVE_TOLERANCE`
   cancels the hold so swiping doesn't scatter flags. Reveal no-ops on a marked cell,
-  matching a desktop left click. `.cell` needs `touch-action: manipulation` (kills the tap
-  delay) and `-webkit-touch-callout: none` (stops iOS's callout on a hold).
+  matching a desktop left click. `.cell` needs `touch-action` set (kills the tap delay) and
+  `-webkit-touch-callout: none` (stops iOS's callout on a hold). The base rule is
+  `manipulation`; the `(pointer: coarse)` block tightens it to `none` — see "No zooming".
+- **No zooming.** Pinch-zoom is blocked in three layers, and all three are needed: the
+  `maximum-scale=1, user-scalable=no` viewport meta in `index.html` (Android only — iOS
+  Safari has ignored `user-scalable=no` since iOS 10), `touch-action: none` on `main` and
+  `.cell` in the `(pointer: coarse)` block, and `preventPinchZoom()` in `util/device.ts`
+  for iOS, which runs page zoom above `touch-action` and only yields to preventDefault on
+  its WebKit-only `gesture*` events. Note `touch-action: manipulation` **permits**
+  pinch-zoom — it only suppresses double-tap zoom — so the desktop value can't be reused
+  on touch. Every listener in `preventPinchZoom` is `{ passive: false }` or it couldn't
+  preventDefault at all.
+- **Pull-to-refresh must survive that.** An installed PWA has no browser chrome, so the
+  overscroll gesture is the player's only way to reload — which is why the touch
+  `touch-action` is `pan-y` and **not** `none`. `none` blocks pinch and pull-to-refresh
+  alike; `pan-y` still refuses pinch (zoom isn't in its allowed set) while leaving the
+  one-finger vertical drag the gesture rides on. The `touchmove` fallback in
+  `preventPinchZoom` fires only once a second finger is down for the same reason. The
+  cost is that a firm downward drag on the board can reload mid-game; `Cell`'s
+  `pointercancel` handling means the hold is cancelled rather than left armed, so the
+  reload is the whole of the damage.
 - **Haptics.** `vibrate()` in `util/device.ts` is called from exactly one place: a mine
   going off. There is deliberately **no** buzz when flagging — Android fires its own
   haptic on a press-and-hold, and adding ours produced a double buzz on real hardware
@@ -204,7 +232,40 @@ is made; change it there and everything follows.
   in whole percent so dragging can't accumulate float drift, and only commits on `change`,
   not `input` — committing per input event would rebuild the board dozens of times in one
   drag. Its readout shows the resulting mine count for this screen, computed with the same
-  `computeDeviceMode` the board uses, so the two can't disagree.
+  `computeDeviceMode` the board uses, so the two can't disagree. `Dark mode` is hidden on
+  touch too: `body.dark` only repaints the page behind `main`, and the touch layout gives
+  `main` the whole viewport, so the toggle has nothing a player could see it change.
+
+### Service worker (`sw.js`)
+
+Hand-written, with **no Workbox and no `importScripts` from a CDN** — it used to pull
+Workbox 6.5.2 from `storage.googleapis.com`, which broke the no-third-party-dependencies
+rule and made worker start-up depend on an external host. Two strategies cover
+everything: network-first (3s timeout, then cache) for the document and `config.json`,
+stale-while-revalidate for scripts, styles, images, the manifest and the GitHub releases
+lookup. Non-GET requests are left alone so the win-score POST reaches the network.
+
+Three things are easy to get wrong here:
+
+- **`config.json` has to be matched by path, not by `destination`.** `main.ts` fetches it
+  with a bare `fetch()`, whose `request.destination` is the empty string, so every
+  destination-based route misses it. While it was unrouted it went straight to the
+  network, and the app was dead offline — `new Game()` never ran — even with the HTML,
+  CSS and every module sitting in the cache.
+- **`skipWaiting()` on install plus `clients.claim()` on activate are load-bearing.** A
+  waiting worker only activates once every client closes, and *a reload does not close a
+  client* — so in an installed PWA, where the app is rarely swiped away, a deploy could
+  go unnoticed indefinitely. Pull-to-refresh is the only reload a standalone PWA has, and
+  without these it cannot deliver a new version.
+- **Stale-while-revalidate is one load behind by design.** A deploy lands in the cache on
+  the load that discovers it, so the *next* load runs it. Two pull-to-refreshes, not one.
+
+There is deliberately no per-entry expiration. Filenames are stable (no content hashing),
+so a cache holds one entry per URL and is naturally bounded — the previous `maxEntries:
+15` on the script cache was actively harmful, because the app requests 23 scripts and the
+plugin therefore evicted on every single load. `activate` deletes any cache whose name
+isn't in `KNOWN_CACHES`, which cleans up after a rename; entries for files deleted
+outright do linger, which is a few KB and considered acceptable.
 
 ## Conventions
 

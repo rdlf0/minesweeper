@@ -9,6 +9,10 @@ export class Timer {
         return this.intervaID !== undefined;
     }
 
+    public getValue(): number {
+        return this.value;
+    }
+
     public start(): void {
         this.intervaID = window.setInterval(() => {
             this.value++;

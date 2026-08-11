@@ -16,29 +16,49 @@
     ],
     "screenshots": [
         {
-            "src": "/assets/screenshots/minesweeper_expert.png",
-            "type": "image/png"
+            "src": "/assets/screenshots/minesweeper_wide_expert.png",
+            "type": "image/png",
+            "sizes": "1818x1133",
+            "form_factor": "wide",
+            "label": "Expert mode: 30x16 with 99 mines"
         },
         {
-            "src": "/assets/screenshots/minesweeper_intermediate.png",
-            "type": "image/png"
+            "src": "/assets/screenshots/minesweeper_wide_hints.png",
+            "type": "image/png",
+            "sizes": "1818x1133",
+            "form_factor": "wide",
+            "label": "Hints mark every mine the solver can prove"
         },
         {
-            "src": "/assets/screenshots/minesweeper_beginner.png",
-            "type": "image/png"
+            "src": "/assets/screenshots/minesweeper_wide_settings.png",
+            "type": "image/png",
+            "sizes": "1818x1133",
+            "form_factor": "wide",
+            "label": "Settings: board size, first-click rule and hints"
         },
         {
-            "src": "/assets/screenshots/minesweeper_settings.png",
-            "type": "image/png"
+            "src": "/assets/screenshots/minesweeper_narrow.png",
+            "type": "image/png",
+            "sizes": "1082x2402",
+            "form_factor": "narrow",
+            "label": "A board sized to fit your screen"
+        },
+        {
+            "src": "/assets/screenshots/minesweeper_narrow_hints.png",
+            "type": "image/png",
+            "sizes": "1082x2402",
+            "form_factor": "narrow",
+            "label": "Every hint explains the deduction behind it"
+        },
+        {
+            "src": "/assets/screenshots/minesweeper_narrow_settings.png",
+            "type": "image/png",
+            "sizes": "1082x2402",
+            "form_factor": "narrow",
+            "label": "Settings: mine density, first-click rule and hints"
         }
     ],
     "icons": [
-        {
-            "src": "/assets/icons/favicon_144.svg",
-            "type": "image/svg",
-            "sizes": "144x144",
-            "purpose": "any"
-        },
         {
             "src": "/assets/icons/favicon_192_maskable.png",
             "sizes": "192x192",
@@ -64,9 +84,9 @@
             "url": "/#ALBo",
             "icons": [
                 {
-                    "src": "/assets/icons/favicon_96.svg",
-                    "sizes": "96x96",
-                    "type": "image/svg"
+                    "src": "/assets/icons/favicon_512.png",
+                    "sizes": "512x512",
+                    "type": "image/png"
                 }
             ]
         },
@@ -76,9 +96,9 @@
             "url": "/#Apts",
             "icons": [
                 {
-                    "src": "/assets/icons/favicon_96.svg",
-                    "sizes": "96x96",
-                    "type": "image/svg"
+                    "src": "/assets/icons/favicon_512.png",
+                    "sizes": "512x512",
+                    "type": "image/png"
                 }
             ]
         },
@@ -88,9 +108,9 @@
             "url": "/#Cy5S",
             "icons": [
                 {
-                    "src": "/assets/icons/favicon_96.svg",
-                    "sizes": "96x96",
-                    "type": "image/svg"
+                    "src": "/assets/icons/favicon_512.png",
+                    "sizes": "512x512",
+                    "type": "image/png"
                 }
             ]
         }

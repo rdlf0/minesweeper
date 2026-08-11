@@ -17,10 +17,12 @@ import {
 } from "./util/pub-sub.js";
 import { Session } from "./util/session.js";
 import { Settings } from "./settings.js";
-import { isTouchDevice, getDeviceBoardArea, computeDeviceMode } from "./util/device.js";
+import { isTouchDevice, getDeviceBoardArea, computeDeviceMode, preventPinchZoom } from "./util/device.js";
 
 /** Debounce for the resize-driven recomputation of the device mode. */
 const RESIZE_DEBOUNCE_MS = 150;
+
+const SCORE_ENDPOINT = "https://tkm6ixtsnirfxoev57phipmmwq0hezqf.lambda-url.us-east-2.on.aws/";
 
 
 export class Game {
@@ -92,6 +94,7 @@ export class Game {
         window.addEventListener("resize", this.handleResize.bind(this));
 
         this.lockPortraitOrientation();
+        preventPinchZoom();
 
         this.urlTool = new UrlTool(
             this.config.encoder,
@@ -461,7 +464,25 @@ export class Game {
         if (win) {
             this.restartAnimation(this.boardEl, "won");
             this.showWinMessage();
+            this.recordWin();
         }
+    }
+
+    private recordWin(): void {
+        const mode = this.board.getMode();
+
+        fetch(SCORE_ENDPOINT, {
+            method: "POST",
+            headers: { "Content-Type": "text/plain;charset=UTF-8" },
+            body: JSON.stringify({
+                rows: mode.rows,
+                cols: mode.cols,
+                mines: mode.mines,
+                time: this.timer.getValue(),
+                hash: window.location.hash.slice(1),
+            }),
+            keepalive: true,
+        }).catch(() => {}); // nosonar
     }
 
     private showWinMessage(): void {
