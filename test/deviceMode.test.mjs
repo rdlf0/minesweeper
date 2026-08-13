@@ -4,7 +4,6 @@ import assert from "node:assert/strict";
 import {
     computeDeviceGrid,
     computeDeviceMode,
-    computeFittedCellSide,
     fitsDeviceArea,
     TARGET_CELL_SIDE,
 } from "../dist/util/device.js";
@@ -89,9 +88,8 @@ const AREA = { width: 390, height: 788 };
 
 test("a device board always matches the grid, so its own hash needs no fixed cells", () => {
     // The app writes its board's hash, so every reload decodes a board it derived itself.
-    // If those dimensions ever drifted from the grid, `Game.matchesDeviceGrid` would call
-    // the board foreign and render it with square cells — a margin appearing on reload
-    // that wasn't there on first load.
+    // If those dimensions ever drifted from the grid, a reload would decode a board the
+    // fit rule then refuses, and the player would lose their board to a fresh one.
     const viewports = [[320, 480], [360, 784], [390, 788], [412, 859], [768, 1000]];
 
     for (const [width, height] of viewports) {
@@ -123,30 +121,4 @@ test("a shared board is refused rather than shrunk below the device grid", () =>
     // One row over the grid is one row too many.
     assert.equal(fitsDeviceArea({ rows: 21, cols: 10, mines: 37 }, AREA.width, AREA.height), false);
     assert.equal(fitsDeviceArea({ rows: 20, cols: 11, mines: 39 }, AREA.width, AREA.height), false);
-});
-
-test("an accepted board never has cells smaller than the device board's", () => {
-    const grid = computeDeviceGrid(AREA.width, AREA.height);
-    // What a device-derived board's cells measure here. Not TARGET_CELL_SIDE itself: the
-    // grid rounds to the nearest whole track, so it can land just under the target.
-    const deviceSide = computeFittedCellSide(
-        { ...grid, mines: 1 }, AREA.width, AREA.height,
-    );
-    assert.ok(Math.abs(deviceSide - TARGET_CELL_SIDE) <= 1);
-
-    for (let rows = MIN_ROWS; rows <= grid.rows; rows++) {
-        for (let cols = MIN_COLS; cols <= grid.cols; cols++) {
-            const mode = { rows, cols, mines: 1 };
-
-            assert.ok(fitsDeviceArea(mode, AREA.width, AREA.height), `${cols}x${rows} should fit`);
-
-            const side = computeFittedCellSide(mode, AREA.width, AREA.height);
-
-            assert.ok(side >= deviceSide, `${cols}x${rows} cell side ${side}`);
-            // Square cells, and the grid they make stays inside the area it was measured
-            // against — a rounded-up side would overflow the board and clip a row.
-            assert.ok(side * cols <= AREA.width, `${cols}x${rows} width`);
-            assert.ok(side * rows <= AREA.height, `${cols}x${rows} height`);
-        }
-    }
 });

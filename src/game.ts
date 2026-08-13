@@ -20,9 +20,7 @@ import { Settings } from "./settings.js";
 import {
     isTouchDevice,
     getDeviceBoardArea,
-    computeDeviceGrid,
     computeDeviceMode,
-    computeFittedCellSide,
     fitsDeviceArea,
     preventPinchZoom,
 } from "./util/device.js";
@@ -646,51 +644,9 @@ export class Game {
     private resizeBoard(): void {
         this.boardEl.style.setProperty("--rows", this.board.getMode().rows.toString());
         this.boardEl.style.setProperty("--cols", this.board.getMode().cols.toString());
-        this.sizeCellsForHashBoard();
 
         this.settingsEl.style.setProperty("--rows", this.board.getMode().rows.toString());
         this.settingsEl.style.setProperty("--cols", this.board.getMode().cols.toString());
-    }
-
-    /** A board from a hash has its own shape, so on touch it can't use the `1fr` tracks
-     * that stretch a device board over the whole screen — it gets square cells sized to
-     * whichever of the two axes runs out first, and the leftover space as margin.
-     *
-     * Unless its shape *is* the screen's, which is the common case: the app writes its
-     * own board's hash, so every reload comes back through the hash branch. Square cells
-     * would then leave a margin all round that the same board didn't have when it was
-     * first derived — the `1fr` tracks are what makes it fill the area exactly. */
-    private sizeCellsForHashBoard(): void {
-        const fixed = this.boardFromHash
-            && isTouchDevice()
-            && !this.matchesDeviceGrid(this.board.getMode());
-
-        this.boardEl.classList.toggle("fixed-cells", fixed);
-
-        if (!fixed) {
-            // Desktop sizes the board off `--cell-side`, so a value left over from a
-            // touch board would follow the page across a viewport change.
-            this.boardEl.style.removeProperty("--cell-side");
-            return;
-        }
-
-        const side = computeFittedCellSide(
-            this.board.getMode(),
-            this.deviceArea.width,
-            this.deviceArea.height,
-        );
-
-        // `html` is `font-size: 1px`, so the `rem` the stylesheet is written in and the
-        // CSS pixels measured here are the same unit.
-        this.boardEl.style.setProperty("--cell-side", `${side}rem`);
-    }
-
-    /** Whether a board has exactly the dimensions this screen would have derived on its
-     * own — in which case nothing about it needs to be treated as foreign. */
-    private matchesDeviceGrid(mode: Mode): boolean {
-        const grid = computeDeviceGrid(this.deviceArea.width, this.deviceArea.height);
-
-        return mode.rows === grid.rows && mode.cols === grid.cols;
     }
 
     private logDebugMessage(...message: any[]): void {
