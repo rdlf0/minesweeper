@@ -17,10 +17,20 @@ import {
 } from "./util/pub-sub.js";
 import { Session } from "./util/session.js";
 import { Settings } from "./settings.js";
-import { isTouchDevice, getDeviceBoardArea, computeDeviceMode, preventPinchZoom } from "./util/device.js";
+import {
+    isTouchDevice,
+    getDeviceBoardArea,
+    computeDeviceMode,
+    computeFittedCellSide,
+    fitsDeviceArea,
+    preventPinchZoom,
+} from "./util/device.js";
 
 /** Debounce for the resize-driven recomputation of the device mode. */
 const RESIZE_DEBOUNCE_MS = 150;
+
+/** How long a message that isn't a hint explanation stays up. */
+const MESSAGE_TIMEOUT_MS = 5000;
 
 const SCORE_ENDPOINT = "https://tkm6ixtsnirfxoev57phipmmwq0hezqf.lambda-url.us-east-2.on.aws/";
 
@@ -37,8 +47,12 @@ export class Game {
     private board: Board;
     private boardEl: HTMLElement;
     private settingsEl: HTMLElement;
-    private hintMessageEl: HTMLElement;
-    private hintMessageTextEl: HTMLElement;
+    private messageEl: HTMLElement;
+    private messageTextEl: HTMLElement;
+    private messageTimeout: number | undefined;
+    /** Set while generating a board, shown once the board is up — `initialize` clears
+     * the toast before `generateBoard` runs, so it can't show its own message. */
+    private pendingMessage: string | undefined;
     private winMessageEl: HTMLElement;
     private winMessageTimeout: number | undefined;
     // Blocks re-invoking the hint until the player makes a move.
@@ -52,6 +66,9 @@ export class Game {
     private isOver: boolean;
     private isReset: boolean;
     private isReplay: boolean;
+    /** Whether the board on screen came from the URL hash rather than being derived
+     * from the device or the configured mode. */
+    private boardFromHash: boolean = false;
     private urlTool: UrlTool;
     private settingsOpened: boolean = false;
     private resizeTimeout: number | undefined;
@@ -83,11 +100,11 @@ export class Game {
 
         this.boardEl = document.getElementById("board")!;
         this.settingsEl = document.getElementById("settings")!;
-        this.hintMessageEl = document.getElementById("hint-message")!;
-        this.hintMessageTextEl = document.getElementById("hint-message-text")!;
+        this.messageEl = document.getElementById("message")!;
+        this.messageTextEl = document.getElementById("message-text")!;
         // On the whole toast, not just the ×: it blocks input anyway, so a tap anywhere
         // on it should dismiss rather than do nothing. The × clicks bubble up here too.
-        this.hintMessageEl.addEventListener("click", this.hideHintMessage.bind(this));
+        this.messageEl.addEventListener("click", this.hideMessage.bind(this));
         this.winMessageEl = document.getElementById("win-message")!;
         window.addEventListener("hashchange", this.handleHashChange.bind(this));
         // orientationchange fires a resize too, so this covers rotation as well.
@@ -156,7 +173,7 @@ export class Game {
         }
 
         if (!this.isStarted()) {
-            this.flashHintMessage("Click any cell — your first move is always safe.");
+            this.showMessage("Click any cell — your first move is always safe.");
             return;
         }
 
@@ -167,7 +184,7 @@ export class Game {
                 this.hintIndex++;
                 this.explainFocusedHint();
             } else if (this.lastHintMessage !== undefined) {
-                this.flashHintMessage(this.lastHintMessage);
+                this.showMessage(this.lastHintMessage);
             }
             return;
         }
@@ -183,7 +200,7 @@ export class Game {
             this.lastHintMessage = this.config.hintMode === HINT_MODE.Mines
                 ? "No mine can be logically pinned down yet."
                 : "No logical move — you'll have to take a guess.";
-            this.flashHintMessage(this.lastHintMessage);
+            this.showMessage(this.lastHintMessage);
         } else {
             this.lastHintMessage = undefined;
             this.explainFocusedHint();
@@ -210,12 +227,12 @@ export class Game {
         // On mobile the board fills the screen, so a fixed message always covers cells.
         // Put it in the half the hinted cell isn't in, or it hides what it's describing.
         const inTopHalf = focus.row < this.board.getMode().rows / 2;
-        this.hintMessageEl.classList.toggle("at-top", !inTopHalf);
+        this.messageEl.classList.toggle("at-top", !inTopHalf);
 
         // Without the counter there's nothing telling the player more hints are waiting.
         const position = count > 1 ? `(${(this.hintIndex % count) + 1}/${count}) ` : "";
-        this.flashHintMessage(position + focus.reason);
-        this.hintMessageEl.classList.toggle("at-top", !inTopHalf);
+        this.showMessage(position + focus.reason);
+        this.messageEl.classList.toggle("at-top", !inTopHalf);
     }
 
     private allowHint(): void {
@@ -223,21 +240,36 @@ export class Game {
         this.lastHintMessage = undefined;
         this.hintIndex = 0;
         // The board moved on, so whatever the message was explaining is stale.
-        this.hideHintMessage();
+        this.hideMessage();
     }
 
-    /** Shows a message and leaves it up. A solver explanation is something to read, and no
-     * timeout suits every reader — it clears when the player dismisses it, steps to
-     * another hint, or changes the board. */
-    private flashHintMessage(message: string): void {
+    /** Shows a message, by default leaving it up. A solver explanation is something to
+     * read, and no timeout suits every reader — it clears when the player dismisses it,
+     * steps to another hint, or changes the board. Messages that merely report something
+     * (`timeoutMs`) retire themselves instead, so they can't sit over the board. */
+    private showMessage(message: string, timeoutMs?: number): void {
+        this.clearMessageTimeout();
+
         // Callers that have a cell to avoid re-anchor after this; the rest sit at the bottom.
-        this.hintMessageEl.classList.remove("at-top");
-        this.hintMessageTextEl.textContent = message;
-        this.hintMessageEl.classList.add("show");
+        this.messageEl.classList.remove("at-top");
+        this.messageTextEl.textContent = message;
+        this.messageEl.classList.add("show");
+
+        if (timeoutMs !== undefined) {
+            this.messageTimeout = window.setTimeout(() => this.hideMessage(), timeoutMs);
+        }
     }
 
-    private hideHintMessage(): void {
-        this.hintMessageEl.classList.remove("show");
+    private hideMessage(): void {
+        this.clearMessageTimeout();
+        this.messageEl.classList.remove("show");
+    }
+
+    private clearMessageTimeout(): void {
+        if (this.messageTimeout !== undefined) {
+            clearTimeout(this.messageTimeout);
+            this.messageTimeout = undefined;
+        }
     }
 
     private handleHashChange(): void {
@@ -271,7 +303,9 @@ export class Game {
      * the viewport changes — but never mid-game, or an in-progress board would be
      * thrown away. */
     private handleResize(): void {
-        if (!isTouchDevice() || Session.get("gameStarted") === true) {
+        // A board from a hash keeps the dimensions it was shared with, so there is no
+        // device mode for it to fall out of step with.
+        if (!isTouchDevice() || this.boardFromHash || Session.get("gameStarted") === true) {
             return;
         }
 
@@ -302,6 +336,22 @@ export class Game {
         return computeDeviceMode(area.width, area.height, this.config.mobileMineDensity);
     }
 
+    private fitsDevice(mode: Mode): boolean {
+        const area = getDeviceBoardArea();
+
+        return fitsDeviceArea(mode, area.width, area.height);
+    }
+
+    /** The board to fall back to when the hash can't be played: whatever this device
+     * would have produced on its own. */
+    private getFallbackMode(): Mode {
+        if (isTouchDevice()) {
+            return this.getDeviceMode();
+        }
+
+        return this.board?.getMode() ?? BOARD_CONFIG[this.config.mode]!;
+    }
+
     private handleSettingsChange() {
         this.logDebugMessage('======= SETTINGS CHANGED =======');
 
@@ -320,7 +370,7 @@ export class Game {
         this.hintUsed = false;
         this.lastHintMessage = undefined;
         this.hintIndex = 0;
-        this.hideHintMessage();
+        this.hideMessage();
         this.timer.stop();
         this.timer.reset();
         this.boardEl.classList.remove("won");
@@ -341,6 +391,11 @@ export class Game {
 
         this.setFlags(0);
 
+        if (this.pendingMessage !== undefined) {
+            this.showMessage(this.pendingMessage, MESSAGE_TIMEOUT_MS);
+            this.pendingMessage = undefined;
+        }
+
         this.playBoardChangeEffect();
     }
 
@@ -360,6 +415,8 @@ export class Game {
         let mode: Mode;
         let state: State | null;
 
+        // Not reset here: reset and replay keep the mode they were given, so a board that
+        // came from a hash is still one after either of them.
         if (this.isReset) {
             mode = this.board.getMode();
             state = null;
@@ -368,26 +425,48 @@ export class Game {
             // Same as if started by a URL with a hash, but here we avoid decoding and unpairing
             mode = this.board.getMode();
             state = this.board.getState();
-        } else if (!isTouchDevice() && this.urlTool.isHashSet()) {
-            // Touch devices skip this branch: a shared board carries fixed dimensions
-            // that would not fit the screen, so they always play a device-derived one.
+        } else if (this.urlTool.isHashSet()) {
             const decodedMode = this.urlTool.extractMode();
-            mode = decodedMode ?? this.board?.getMode() ?? BOARD_CONFIG[this.config.mode];
-            this.config.mode = this.getModeNameFromMode(mode);
+            // Touch only: a shared board carries fixed dimensions, and one bigger than the
+            // grid this screen yields could only be shown with cells too small to hit.
+            const tooBig = decodedMode != null
+                && isTouchDevice()
+                && !this.fitsDevice(decodedMode);
 
             if (decodedMode == null) {
                 // Nothing usable in the hash at all — extractMode has already said why.
                 console.warn("Could not read a board from the hash. Falling back to defaults.");
+            }
+
+            if (decodedMode == null || tooBig) {
+                mode = this.getFallbackMode();
                 state = null;
+                Session.set("applyFirstClickRule", true);
+
+                // Only worth saying when a board was actually shared. A mode-only hash —
+                // the PWA shortcuts in manifest.webmanifest — asks for a size, not a
+                // specific board, and gets a device-sized one without any explaining.
+                if (tooBig && this.urlTool.hasLayout()) {
+                    this.pendingMessage = "That board is too big for this screen — here's a new one.";
+                }
+
+                this.boardFromHash = false;
             } else {
+                mode = decodedMode;
                 // Only worth reading a layout once we know which board it belongs to.
                 // extractState reports a missing layout itself, at the right severity.
                 state = this.urlTool.extractState(mode);
+                // True even when the hash carried no layout: the *dimensions* came from
+                // the hash either way, so they are not the device's to stretch or resize.
+                this.boardFromHash = true;
             }
+
+            this.config.mode = this.getModeNameFromMode(mode);
         } else {
             mode = isTouchDevice() ? this.getDeviceMode() : BOARD_CONFIG[this.config.mode]!;
             state = null;
             Session.set("applyFirstClickRule", true);
+            this.boardFromHash = false;
         }
 
         this.logDebugMessage(mode);
@@ -457,7 +536,7 @@ export class Game {
         // Hitting a mine never publishes EVENT_CELL_REVEALED, so allowHint doesn't run
         // here — the hint and its explanation have to be retired explicitly.
         this.board.clearHints();
-        this.hideHintMessage();
+        this.hideMessage();
 
         this.board.revealMines(win);
 
@@ -544,9 +623,33 @@ export class Game {
     private resizeBoard(): void {
         this.boardEl.style.setProperty("--rows", this.board.getMode().rows.toString());
         this.boardEl.style.setProperty("--cols", this.board.getMode().cols.toString());
+        this.sizeCellsForHashBoard();
 
         this.settingsEl.style.setProperty("--rows", this.board.getMode().rows.toString());
         this.settingsEl.style.setProperty("--cols", this.board.getMode().cols.toString());
+    }
+
+    /** A board from a hash has its own shape, so on touch it can't use the `1fr` tracks
+     * that stretch a device board over the whole screen — it gets square cells sized to
+     * whichever of the two axes runs out first, and the leftover space as margin. */
+    private sizeCellsForHashBoard(): void {
+        const fixed = this.boardFromHash && isTouchDevice();
+
+        this.boardEl.classList.toggle("fixed-cells", fixed);
+
+        if (!fixed) {
+            // Desktop sizes the board off `--cell-side`, so a value left over from a
+            // touch board would follow the page across a viewport change.
+            this.boardEl.style.removeProperty("--cell-side");
+            return;
+        }
+
+        const area = getDeviceBoardArea();
+        const side = computeFittedCellSide(this.board.getMode(), area.width, area.height);
+
+        // `html` is `font-size: 1px`, so the `rem` the stylesheet is written in and the
+        // CSS pixels measured here are the same unit.
+        this.boardEl.style.setProperty("--cell-side", `${side}rem`);
     }
 
     private logDebugMessage(...message: any[]): void {

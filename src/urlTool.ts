@@ -61,6 +61,16 @@ export class UrlTool {
         }
     }
 
+    /** Whether the hash carries mine layout bits at all, on top of the 24-bit mode.
+     *
+     * Only meaningful after `extractMode` has run — that is what fills `decodedHash`.
+     * A mode-only hash (the PWA shortcuts in `manifest.webmanifest`) asks for a board
+     * of a size, not a specific board, so callers can treat it differently from a
+     * shared layout they had to refuse. */
+    public hasLayout(): boolean {
+        return this.decodedHash.length > MODE_SIZE;
+    }
+
     public extractState(mode: Mode): State | null {
         const expectedLength = mode.rows * mode.cols;
         const stateString = this.decodedHash.slice(MODE_SIZE, expectedLength + MODE_SIZE);

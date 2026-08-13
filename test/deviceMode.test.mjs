@@ -1,12 +1,19 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 
-import { computeDeviceMode, TARGET_CELL_SIDE } from "../dist/util/device.js";
+import {
+    computeDeviceGrid,
+    computeDeviceMode,
+    computeFittedCellSide,
+    fitsDeviceArea,
+    TARGET_CELL_SIDE,
+} from "../dist/util/device.js";
 import {
     MIN_ROWS,
     MIN_COLS,
     MIN_MINES_TO_CELLS_RATIO,
     MAX_MINES_TO_CELLS_RATIO,
+    BOARD_CONFIG,
 } from "../dist/config.js";
 import { CantorPairer } from "../dist/pairer/cantorPairer.js";
 
@@ -73,6 +80,62 @@ test("derived boards always pass the hash validation in urlTool", () => {
                 pairMode(mode) <= MODE_MAX,
                 `mode pairs within 24 bits for ${width}x${height} @ ${density}`,
             );
+        }
+    }
+});
+
+// iPhone 14 portrait minus the controls bar — the grid it yields is 10x20.
+const AREA = { width: 390, height: 788 };
+
+test("the derived mode is built on the grid the fit check measures against", () => {
+    const grid = computeDeviceGrid(AREA.width, AREA.height);
+    const mode = computeDeviceMode(AREA.width, AREA.height, 0.18);
+
+    assert.equal(grid.cols, mode.cols);
+    assert.equal(grid.rows, mode.rows);
+});
+
+test("a shared board is refused rather than shrunk below the device grid", () => {
+    // Every desktop preset is wider than a phone: none of them can be played as shared.
+    for (const [name, mode] of Object.entries(BOARD_CONFIG)) {
+        assert.equal(
+            fitsDeviceArea(mode, AREA.width, AREA.height),
+            false,
+            `${name} should not fit a phone`,
+        );
+    }
+
+    // A board shared from another phone of the same size is exactly the grid, so it fits.
+    assert.equal(fitsDeviceArea({ rows: 20, cols: 10, mines: 36 }, AREA.width, AREA.height), true);
+    // As does anything smaller, on either axis.
+    assert.equal(fitsDeviceArea({ rows: 18, cols: 9, mines: 29 }, AREA.width, AREA.height), true);
+    // One row over the grid is one row too many.
+    assert.equal(fitsDeviceArea({ rows: 21, cols: 10, mines: 37 }, AREA.width, AREA.height), false);
+    assert.equal(fitsDeviceArea({ rows: 20, cols: 11, mines: 39 }, AREA.width, AREA.height), false);
+});
+
+test("an accepted board never has cells smaller than the device board's", () => {
+    const grid = computeDeviceGrid(AREA.width, AREA.height);
+    // What a device-derived board's cells measure here. Not TARGET_CELL_SIDE itself: the
+    // grid rounds to the nearest whole track, so it can land just under the target.
+    const deviceSide = computeFittedCellSide(
+        { ...grid, mines: 1 }, AREA.width, AREA.height,
+    );
+    assert.ok(Math.abs(deviceSide - TARGET_CELL_SIDE) <= 1);
+
+    for (let rows = MIN_ROWS; rows <= grid.rows; rows++) {
+        for (let cols = MIN_COLS; cols <= grid.cols; cols++) {
+            const mode = { rows, cols, mines: 1 };
+
+            assert.ok(fitsDeviceArea(mode, AREA.width, AREA.height), `${cols}x${rows} should fit`);
+
+            const side = computeFittedCellSide(mode, AREA.width, AREA.height);
+
+            assert.ok(side >= deviceSide, `${cols}x${rows} cell side ${side}`);
+            // Square cells, and the grid they make stays inside the area it was measured
+            // against — a rounded-up side would overflow the board and clip a row.
+            assert.ok(side * cols <= AREA.width, `${cols}x${rows} width`);
+            assert.ok(side * rows <= AREA.height, `${cols}x${rows} height`);
         }
     }
 });

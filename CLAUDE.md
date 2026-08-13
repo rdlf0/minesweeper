@@ -139,19 +139,22 @@ hover-only and unusable on touch:
   reference highlighting. `explainFocusedHint` returns early here — a toast big enough for
   a solver sentence lands on the controls, and hover already works. Repeat presses of the
   hint button therefore do nothing, as before the stepping existed.
-- **Touch** gets the `#hint-message` toast, prefixed `(n/total)` — without that counter
+- **Touch** gets the `#message` toast, prefixed `(n/total)` — without that counter
   nothing tells the player more hints are waiting — and a `hint-focus` ring so it's clear
   which cell the text describes. `focusHint` returns the hinted cell's row so `Game` can
   flip the toast to whichever half the cell **isn't** in (`.at-top`, a touch-only class);
   the board fills the screen here, so a fixed anchor would cover the cell being explained.
 
-The toast has **no timeout** — an explanation is read at the player's pace. It clears on
+The toast is shared with any other message the game needs to put in front of a player
+without a mouse (`Game.showMessage`), and a hint explanation is the case that has **no
+timeout** — it is read at the player's pace, where a message that merely reports something
+passes `MESSAGE_TIMEOUT_MS` and retires itself. It clears on
 dismiss, on stepping to another hint, on any board change, and on game over. That last one
 is easy to miss: detonating a mine returns early in `Cell.reveal` and never publishes
 `EVENT_CELL_REVEALED`, so `allowHint` never runs and `gameOver` has to retire the hint
 itself. It takes `pointer-events` only while `.show` is set — opaque to input on purpose,
 since letting taps through would fire whichever cell sits under the text, unseen — and a
-click anywhere on it dismisses, with `#hint-message-close` as the visible affordance.
+click anywhere on it dismisses, with `#message-close` as the visible affordance.
 
 ### Mobile / touch (`util/device.ts`)
 
@@ -216,10 +219,27 @@ is made; change it there and everything follows.
   in-game haptics setting either; the phone's own silent mode and system touch-feedback
   toggle already gate it, and `navigator.vibrate()` returns `true` even when the device
   silently drops the buzz, so its return value can't be used to detect that.
-- **URL hash is ignored on touch.** A shared board carries fixed dimensions that wouldn't
-  fit, so `generateBoard` skips the hash branch and plays a device board — whose own hash
-  is then written, keeping mobile boards shareable outward. Replay is unaffected (it
-  reads `board.getState()` from memory).
+- **A shared board is played on touch only if it fits, and is never shrunk to make it.**
+  `fitsDeviceArea` (in `util/device.ts`) accepts a decoded mode when `cols <= deviceCols &&
+  rows <= deviceRows` — measured with `computeDeviceGrid`, the same function
+  `computeDeviceMode` builds on, so the fit test and the board can't disagree. In practice
+  that means boards shared from another phone load and every desktop preset doesn't:
+  fitting a 30-column expert board on a phone would need cells a finger can't hit. A
+  refused board falls back to a device board, and `Game` puts up a toast saying so — but
+  only when the hash actually carried a layout (`UrlTool.hasLayout()`). A mode-only hash,
+  which is what the `manifest.webmanifest` shortcuts are, asked for a size rather than a
+  specific board, so it is refused silently. The device board's own hash is then written
+  over the link, keeping mobile boards shareable outward and stopping a pull-to-refresh
+  from replaying the message. Replay is unaffected (it reads `board.getState()` from
+  memory).
+- **A board from a hash keeps its own shape.** `boardFromHash` tracks it, and it survives
+  reset and replay — both keep the mode they were handed. Two things follow from it:
+  `handleResize` stops recomputing the device mode (there is nothing for the board to fall
+  out of step with), and `resizeBoard` swaps the `1fr` tracks for square `--cell-side`
+  ones via the `fixed-cells` class, centering the grid in the board area. Stretching a
+  hash board across a screen it wasn't shaped for is what those tracks would otherwise do.
+  Changing `Mine density` in settings empties the hash, which is how a player gets back to
+  a device board.
 - **Portrait only.** A `(pointer: coarse) and (orientation: landscape)` rule hides `main`
   and shows `#rotate-message`. `Game.lockPortraitOrientation()` additionally attempts
   `screen.orientation.lock("portrait")`, which only succeeds in an installed mobile PWA
@@ -235,6 +255,25 @@ is made; change it there and everything follows.
   `computeDeviceMode` the board uses, so the two can't disagree. `Dark mode` is hidden on
   touch too: `body.dark` only repaints the page behind `main`, and the touch layout gives
   `main` the whole viewport, so the toggle has nothing a player could see it change.
+
+### Link handling (`manifest.webmanifest`)
+
+`handle_links: "preferred"` plus `scope: "/"` is what asks the OS to route
+`theminesweeper.com` links into the installed app instead of a browser tab. On Android
+this is all that's needed — a Chrome-installed WebAPK is verified by Chrome's own
+signing, so there is **no** `/.well-known/assetlinks.json` here; that file is only for a
+TWA shipped through Play. The same fields cover the Windows desktop PWA (Edge honours
+`handle_links`, and Windows auto-routes in-scope links for an Edge-installed PWA when
+Edge is the default browser, with a per-app opt-out at `edge://apps`). Brave's PWA
+support has diverged from Chromium's — don't rely on it there.
+
+`launch_handler: { "client_mode": "navigate-existing" }` is the load-bearing half: a link
+arriving while the app is already open navigates that window, which fires `hashchange` →
+`Game.handleHashChange` → `initialize()`. Without it the player taps a shared board and
+keeps looking at their old one.
+
+An installed WebAPK re-reads the manifest lazily — typically within a day — so a manifest
+change is not testable on a phone right after deploying. Reinstall the PWA to force it.
 
 ### Service worker (`sw.js`)
 

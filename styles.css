@@ -498,7 +498,7 @@ main {
 }
 
 
-#hint-message {
+#message {
     position: absolute;
     left: 50%;
     bottom: 30rem;
@@ -526,18 +526,18 @@ main {
 
 /* Deliberately opaque to input. Letting taps through would fire whichever cell happens
    to sit under the text, which the player can't see — a blind reveal loses the game. */
-#hint-message.show {
+#message.show {
     opacity: 0.95;
     pointer-events: auto;
     cursor: pointer;
 }
 
-#hint-message #hint-message-text {
+#message #message-text {
     flex: 1 1 auto;
 }
 
 /* Purely the affordance — the click handler sits on the toast, so anywhere dismisses. */
-#hint-message #hint-message-close {
+#message #message-close {
     flex: 0 0 auto;
     appearance: none;
     -webkit-appearance: none;
@@ -558,7 +558,7 @@ main {
 }
 
 @media (hover: hover) {
-    #hint-message #hint-message-close:hover {
+    #message #message-close:hover {
         color: #ff8c00;
     }
 }
@@ -754,7 +754,18 @@ main {
         grid-template-rows: repeat(var(--rows), 1fr);
     }
 
-    /* 1fr tracks size the cells, so the grid fills the area exactly. */
+    /* A board decoded from a shared link keeps the shape it was shared with, which is
+       almost never the screen's — so it can't use the `1fr` tracks above without the
+       cells coming out visibly rectangular. Fixed square cells (`--cell-side` is set
+       inline by `Game.sizeCellsForHashBoard`), centered in the board area. */
+    #board.fixed-cells {
+        grid-template-columns: repeat(var(--cols), var(--cell-side));
+        grid-template-rows: repeat(var(--rows), var(--cell-side));
+        justify-content: center;
+        align-content: center;
+    }
+
+    /* The tracks size the cells, so the grid fills its area exactly. */
     .cell {
         width: auto;
         height: auto;
@@ -771,16 +782,16 @@ main {
         touch-action: pan-y;
     }
 
-    /* Flipped above the board when the hint being explained sits in its lower half.
+    /* Flipped above the board when the cell being explained sits in its lower half.
        Touch only — `.at-top` is never set on desktop, where a toast up here would land
        on the controls. Must clear the controls bar. */
-    #hint-message.at-top {
+    #message.at-top {
         top: calc(56rem + 12rem);
         bottom: auto;
     }
 
     /* Wider and tighter than on desktop: fewer wrapped lines means fewer covered cells. */
-    #hint-message {
+    #message {
         max-width: calc(100% - 16rem);
         font-size: 15rem;
         line-height: 20rem;
