@@ -83,13 +83,45 @@ export function getDeviceBoardArea(): { width: number; height: number } {
     };
 }
 
-/** Derives a board that fills the given area with cells close to TARGET_CELL_SIDE.
+/** The grid a given area yields: cells as close to TARGET_CELL_SIDE as whole rows and
+ * columns allow.
  *
  * Rounding (rather than flooring) picks the cell count closest to the target; the
- * mobile grid uses `1fr` tracks, so the board then fills the area exactly. */
+ * mobile grid uses `1fr` tracks, so the board then fills the area exactly.
+ *
+ * Split out of `computeDeviceMode` so `fitsDeviceArea` can measure a shared board
+ * against the very same grid the device board is built from — the two deciding
+ * differently is the one bug worth designing out here. */
+export function computeDeviceGrid(width: number, height: number): { rows: number; cols: number } {
+    return {
+        cols: Math.max(MIN_COLS, Math.round(width / TARGET_CELL_SIDE)),
+        rows: Math.max(MIN_ROWS, Math.round(height / TARGET_CELL_SIDE)),
+    };
+}
+
+/** Whether a board decoded from a shared hash can be played on this screen as-is.
+ *
+ * The rule is that its cells are never smaller than a device-derived board's, so
+ * anything wider or taller than the grid the area yields is refused rather than
+ * shrunk — a board is not worth playing if a finger can't hit a cell. */
+export function fitsDeviceArea(mode: Mode, width: number, height: number): boolean {
+    const grid = computeDeviceGrid(width, height);
+
+    return mode.cols <= grid.cols && mode.rows <= grid.rows;
+}
+
+/** Side, in CSS pixels, of the largest square cell that fits `mode` into the area.
+ *
+ * A shared board keeps its own shape, so it can't use the `1fr` tracks that stretch a
+ * device board across the screen; it gets square cells and the leftover space as margin.
+ * Floored so rounding can never push the grid past the area it was measured against. */
+export function computeFittedCellSide(mode: Mode, width: number, height: number): number {
+    return Math.floor(Math.min(width / mode.cols, height / mode.rows));
+}
+
+/** Derives a board that fills the given area with cells close to TARGET_CELL_SIDE. */
 export function computeDeviceMode(width: number, height: number, density: number): Mode {
-    const cols = Math.max(MIN_COLS, Math.round(width / TARGET_CELL_SIDE));
-    const rows = Math.max(MIN_ROWS, Math.round(height / TARGET_CELL_SIDE));
+    const { rows, cols } = computeDeviceGrid(width, height);
 
     const cells = rows * cols;
     const clampedDensity = Math.min(
