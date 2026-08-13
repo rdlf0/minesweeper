@@ -163,6 +163,17 @@ Touch devices take a different path throughout. The single detector is
 desktops and touchscreen laptops don't. It's deliberately the only place that decision
 is made; change it there and everything follows.
 
+- **Measuring the viewport is not free.** `getDeviceBoardArea` reads `clientWidth` /
+  `clientHeight`, which forces the browser to lay out the document before it can answer.
+  `Game` therefore calls it through `measureDeviceArea()` exactly once per board — at the
+  very top of `initialize`, ahead of every class and custom-property write that follows,
+  so the read comes off an already-clean layout. The derived mode, the shared-board fit
+  test and the `fixed-cells` cell size all work from that one measurement. Re-reading it
+  between those writes is what makes a rebuild visibly slow on a phone, because each read
+  flushes a fresh layout of a board several hundred cells wide. The debounced
+  `handleResize` re-measures, since there the viewport is the thing that changed.
+  `isTouchDevice()` has the same shape of problem — `Cell` asks once per cell — so its
+  `MediaQueryList` is built once and only `.matches` is read after that.
 - **Board size.** Instead of a `BOARD_CONFIG` preset, `Game.generateBoard` derives a
   `Mode` from the screen via `computeDeviceMode(width, height, density)` — rows and cols
   chosen so each cell lands near `TARGET_CELL_SIDE` (40px), and mines from
@@ -233,13 +244,19 @@ is made; change it there and everything follows.
   from replaying the message. Replay is unaffected (it reads `board.getState()` from
   memory).
 - **A board from a hash keeps its own shape.** `boardFromHash` tracks it, and it survives
-  reset and replay — both keep the mode they were handed. Two things follow from it:
-  `handleResize` stops recomputing the device mode (there is nothing for the board to fall
-  out of step with), and `resizeBoard` swaps the `1fr` tracks for square `--cell-side`
-  ones via the `fixed-cells` class, centering the grid in the board area. Stretching a
-  hash board across a screen it wasn't shaped for is what those tracks would otherwise do.
-  Changing `Mine density` in settings empties the hash, which is how a player gets back to
-  a device board.
+  reset and replay — both keep the mode they were handed. `handleResize` then stops
+  recomputing the device mode, since the hash fixed the dimensions and there is nothing
+  for them to fall out of step with. Changing `Mine density` in settings empties the hash,
+  which is how a player gets back to a device board.
+- **Only a board shaped unlike the screen gets `fixed-cells`.** `resizeBoard` swaps the
+  `1fr` tracks for square `--cell-side` ones and centers the grid — but only when the
+  decoded dimensions differ from what `computeDeviceGrid` would have derived
+  (`Game.matchesDeviceGrid`). `boardFromHash` alone is not the test, and using it as one
+  was a bug: the app writes its own board's hash, so **every reload comes back through the
+  hash branch**, and square cells left a few pixels of margin all round that the same
+  board hadn't had when it was first derived. A player sees that as a border appearing on
+  refresh. The `1fr` tracks are what make a device-shaped board fill the area exactly, so
+  a board that *is* device-shaped has to keep them however it arrived.
 - **Portrait only.** A `(pointer: coarse) and (orientation: landscape)` rule hides `main`
   and shows `#rotate-message`. `Game.lockPortraitOrientation()` additionally attempts
   `screen.orientation.lock("portrait")`, which only succeeds in an installed mobile PWA
@@ -259,13 +276,23 @@ is made; change it there and everything follows.
 ### Link handling (`manifest.webmanifest`)
 
 `handle_links: "preferred"` plus `scope: "/"` is what asks the OS to route
-`theminesweeper.com` links into the installed app instead of a browser tab. On Android
-this is all that's needed — a Chrome-installed WebAPK is verified by Chrome's own
-signing, so there is **no** `/.well-known/assetlinks.json` here; that file is only for a
-TWA shipped through Play. The same fields cover the Windows desktop PWA (Edge honours
-`handle_links`, and Windows auto-routes in-scope links for an Edge-installed PWA when
-Edge is the default browser, with a per-app opt-out at `edge://apps`). Brave's PWA
-support has diverged from Chromium's — don't rely on it there.
+`theminesweeper.com` links into the installed app instead of a browser tab.
+
+**Which browser installed the PWA decides whether any of it works, and the manifest
+can't influence that.** On Android only a **WebAPK** carries the intent filters that
+capture links, and only Chrome (on devices with Google Mobile Services) and Samsung
+Internet (on Samsung hardware) have access to a WebAPK minting server. Edge, Brave,
+Firefox and Opera on Android install a plain home-screen shortcut instead — it launches
+the app but can never claim a URL. So "links don't open the app" on Android Edge or
+Android Brave is expected and not a bug to chase: reinstall from Chrome. A
+Chrome-minted WebAPK is verified by Chrome's own signing, so there is **no**
+`/.well-known/assetlinks.json` here; that file is only for a TWA shipped through Play.
+
+On desktop, Edge on Windows is the reliable one — it honours `handle_links`, and Windows
+auto-routes in-scope links for an Edge-installed PWA when Edge is the default browser,
+with a per-app opt-out at `edge://apps`. Chrome 139+ captures in-scope links on
+Windows/Mac/Linux. Brave's web-app support has diverged from Chromium's and does not
+capture links on either platform.
 
 `launch_handler: { "client_mode": "navigate-existing" }` is the load-bearing half: a link
 arriving while the app is already open navigates that window, which fires `hashchange` →
