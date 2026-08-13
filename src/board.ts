@@ -173,9 +173,15 @@ export class Board {
         // Remove existing cells (on reset/replay)
         this.el.textContent = "";
 
+        // Filled off-document and inserted once. Appending each cell to `this.el`
+        // directly puts several hundred insertions into a live grid, and the grid has to
+        // be re-resolved after every one of them.
+        const fragment = document.createDocumentFragment();
         this.grid.forEach(row => {
-            row.forEach(cell => this.el.append(cell.getElement()))
+            row.forEach(cell => fragment.append(cell.getElement()))
         });
+
+        this.el.append(fragment);
     }
 
     private secureSafeArea(cell: Cell): void {

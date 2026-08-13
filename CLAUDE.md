@@ -163,6 +163,17 @@ Touch devices take a different path throughout. The single detector is
 desktops and touchscreen laptops don't. It's deliberately the only place that decision
 is made; change it there and everything follows.
 
+- **Measuring the viewport is not free.** `getDeviceBoardArea` reads `clientWidth` /
+  `clientHeight`, which forces the browser to lay out the document before it can answer.
+  `Game` therefore calls it through `measureDeviceArea()` exactly once per board — at the
+  very top of `initialize`, ahead of every class and custom-property write that follows,
+  so the read comes off an already-clean layout. The derived mode, the shared-board fit
+  test and the `fixed-cells` cell size all work from that one measurement. Re-reading it
+  between those writes is what makes a rebuild visibly slow on a phone, because each read
+  flushes a fresh layout of a board several hundred cells wide. The debounced
+  `handleResize` re-measures, since there the viewport is the thing that changed.
+  `isTouchDevice()` has the same shape of problem — `Cell` asks once per cell — so its
+  `MediaQueryList` is built once and only `.matches` is read after that.
 - **Board size.** Instead of a `BOARD_CONFIG` preset, `Game.generateBoard` derives a
   `Mode` from the screen via `computeDeviceMode(width, height, density)` — rows and cols
   chosen so each cell lands near `TARGET_CELL_SIDE` (40px), and mines from
@@ -259,13 +270,23 @@ is made; change it there and everything follows.
 ### Link handling (`manifest.webmanifest`)
 
 `handle_links: "preferred"` plus `scope: "/"` is what asks the OS to route
-`theminesweeper.com` links into the installed app instead of a browser tab. On Android
-this is all that's needed — a Chrome-installed WebAPK is verified by Chrome's own
-signing, so there is **no** `/.well-known/assetlinks.json` here; that file is only for a
-TWA shipped through Play. The same fields cover the Windows desktop PWA (Edge honours
-`handle_links`, and Windows auto-routes in-scope links for an Edge-installed PWA when
-Edge is the default browser, with a per-app opt-out at `edge://apps`). Brave's PWA
-support has diverged from Chromium's — don't rely on it there.
+`theminesweeper.com` links into the installed app instead of a browser tab.
+
+**Which browser installed the PWA decides whether any of it works, and the manifest
+can't influence that.** On Android only a **WebAPK** carries the intent filters that
+capture links, and only Chrome (on devices with Google Mobile Services) and Samsung
+Internet (on Samsung hardware) have access to a WebAPK minting server. Edge, Brave,
+Firefox and Opera on Android install a plain home-screen shortcut instead — it launches
+the app but can never claim a URL. So "links don't open the app" on Android Edge or
+Android Brave is expected and not a bug to chase: reinstall from Chrome. A
+Chrome-minted WebAPK is verified by Chrome's own signing, so there is **no**
+`/.well-known/assetlinks.json` here; that file is only for a TWA shipped through Play.
+
+On desktop, Edge on Windows is the reliable one — it honours `handle_links`, and Windows
+auto-routes in-scope links for an Edge-installed PWA when Edge is the default browser,
+with a per-app opt-out at `edge://apps`. Chrome 139+ captures in-scope links on
+Windows/Mac/Linux. Brave's web-app support has diverged from Chromium's and does not
+capture links on either platform.
 
 `launch_handler: { "client_mode": "navigate-existing" }` is the load-bearing half: a link
 arriving while the app is already open navigates that window, which fires `hashchange` →

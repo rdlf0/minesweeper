@@ -72,6 +72,9 @@ export class Game {
     private urlTool: UrlTool;
     private settingsOpened: boolean = false;
     private resizeTimeout: number | undefined;
+    /** The board area as of the last `measureDeviceArea()`. Held rather than re-read
+     * because reading it forces a synchronous layout — see that method. */
+    private deviceArea: { width: number; height: number };
 
     constructor(private config: Config) {
         document.body.classList.toggle("dark", this.config.darkModeOn);
@@ -316,6 +319,9 @@ export class Game {
         this.resizeTimeout = window.setTimeout(() => {
             this.resizeTimeout = undefined;
 
+            // The viewport is what changed, so this one has to re-measure.
+            this.measureDeviceArea();
+
             const mode = this.getDeviceMode();
             const current = this.board.getMode();
 
@@ -330,16 +336,29 @@ export class Game {
         }, RESIZE_DEBOUNCE_MS);
     }
 
-    private getDeviceMode(): Mode {
-        const area = getDeviceBoardArea();
+    /** Takes the viewport measurement the derived mode, the fit test and the cell sizing
+     * all work from.
+     *
+     * Deliberately one call per board: `getDeviceBoardArea` reads `clientWidth` /
+     * `clientHeight`, which forces the browser to lay out the document before it can
+     * answer. Called at the top of `initialize`, before anything writes a style, that
+     * costs nothing — the layout is already clean. Interleaved with the class and custom
+     * property writes that follow, each read would instead flush a fresh layout of a
+     * board several hundred cells wide. */
+    private measureDeviceArea(): void {
+        this.deviceArea = getDeviceBoardArea();
+    }
 
-        return computeDeviceMode(area.width, area.height, this.config.mobileMineDensity);
+    private getDeviceMode(): Mode {
+        return computeDeviceMode(
+            this.deviceArea.width,
+            this.deviceArea.height,
+            this.config.mobileMineDensity,
+        );
     }
 
     private fitsDevice(mode: Mode): boolean {
-        const area = getDeviceBoardArea();
-
-        return fitsDeviceArea(mode, area.width, area.height);
+        return fitsDeviceArea(mode, this.deviceArea.width, this.deviceArea.height);
     }
 
     /** The board to fall back to when the hash can't be played: whatever this device
@@ -360,6 +379,9 @@ export class Game {
     }
 
     private initialize(isReset: boolean, isReplay: boolean): void {
+        // Before the style writes below, so the read comes off a clean layout.
+        this.measureDeviceArea();
+
         Session.clear();
         Session.set("debug", this.config.debug);
         Session.set("firstClick", Number(this.config.firstClick));
@@ -644,8 +666,11 @@ export class Game {
             return;
         }
 
-        const area = getDeviceBoardArea();
-        const side = computeFittedCellSide(this.board.getMode(), area.width, area.height);
+        const side = computeFittedCellSide(
+            this.board.getMode(),
+            this.deviceArea.width,
+            this.deviceArea.height,
+        );
 
         // `html` is `font-size: 1px`, so the `rem` the stylesheet is written in and the
         // CSS pixels measured here are the same unit.

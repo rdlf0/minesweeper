@@ -26,10 +26,19 @@ export function vibrate(pattern: number | number[]): void {
     navigator.vibrate?.(pattern);
 }
 
+/** The one `matchMedia` call behind `isTouchDevice`. Building a MediaQueryList means
+ * parsing the query and registering a live listener with the browser, and `Cell` asks
+ * once per cell — several hundred times for a single board — so the list is built once
+ * and only `.matches` is read after that. Still live, so a DevTools device-mode toggle
+ * is picked up without a reload. */
+let coarsePointer: MediaQueryList | undefined;
+
 /** Touch-primary devices — phones and tablets. Desktops and touchscreen laptops
  * report a fine primary pointer and are treated as regular desktops. */
 export function isTouchDevice(): boolean {
-    return window.matchMedia("(pointer: coarse)").matches;
+    coarsePointer ??= window.matchMedia("(pointer: coarse)");
+
+    return coarsePointer.matches;
 }
 
 /** Blocks pinch-to-zoom on touch devices.
