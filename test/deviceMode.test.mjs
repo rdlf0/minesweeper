@@ -87,12 +87,23 @@ test("derived boards always pass the hash validation in urlTool", () => {
 // iPhone 14 portrait minus the controls bar — the grid it yields is 10x20.
 const AREA = { width: 390, height: 788 };
 
-test("the derived mode is built on the grid the fit check measures against", () => {
-    const grid = computeDeviceGrid(AREA.width, AREA.height);
-    const mode = computeDeviceMode(AREA.width, AREA.height, 0.18);
+test("a device board always matches the grid, so its own hash needs no fixed cells", () => {
+    // The app writes its board's hash, so every reload decodes a board it derived itself.
+    // If those dimensions ever drifted from the grid, `Game.matchesDeviceGrid` would call
+    // the board foreign and render it with square cells — a margin appearing on reload
+    // that wasn't there on first load.
+    const viewports = [[320, 480], [360, 784], [390, 788], [412, 859], [768, 1000]];
 
-    assert.equal(grid.cols, mode.cols);
-    assert.equal(grid.rows, mode.rows);
+    for (const [width, height] of viewports) {
+        const grid = computeDeviceGrid(width, height);
+
+        for (const density of [0, 0.05, 0.18, 0.25, 0.9]) {
+            const mode = computeDeviceMode(width, height, density);
+
+            assert.equal(mode.cols, grid.cols, `cols for ${width}x${height} @ ${density}`);
+            assert.equal(mode.rows, grid.rows, `rows for ${width}x${height} @ ${density}`);
+        }
+    }
 });
 
 test("a shared board is refused rather than shrunk below the device grid", () => {

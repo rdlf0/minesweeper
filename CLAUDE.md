@@ -244,13 +244,19 @@ is made; change it there and everything follows.
   from replaying the message. Replay is unaffected (it reads `board.getState()` from
   memory).
 - **A board from a hash keeps its own shape.** `boardFromHash` tracks it, and it survives
-  reset and replay — both keep the mode they were handed. Two things follow from it:
-  `handleResize` stops recomputing the device mode (there is nothing for the board to fall
-  out of step with), and `resizeBoard` swaps the `1fr` tracks for square `--cell-side`
-  ones via the `fixed-cells` class, centering the grid in the board area. Stretching a
-  hash board across a screen it wasn't shaped for is what those tracks would otherwise do.
-  Changing `Mine density` in settings empties the hash, which is how a player gets back to
-  a device board.
+  reset and replay — both keep the mode they were handed. `handleResize` then stops
+  recomputing the device mode, since the hash fixed the dimensions and there is nothing
+  for them to fall out of step with. Changing `Mine density` in settings empties the hash,
+  which is how a player gets back to a device board.
+- **Only a board shaped unlike the screen gets `fixed-cells`.** `resizeBoard` swaps the
+  `1fr` tracks for square `--cell-side` ones and centers the grid — but only when the
+  decoded dimensions differ from what `computeDeviceGrid` would have derived
+  (`Game.matchesDeviceGrid`). `boardFromHash` alone is not the test, and using it as one
+  was a bug: the app writes its own board's hash, so **every reload comes back through the
+  hash branch**, and square cells left a few pixels of margin all round that the same
+  board hadn't had when it was first derived. A player sees that as a border appearing on
+  refresh. The `1fr` tracks are what make a device-shaped board fill the area exactly, so
+  a board that *is* device-shaped has to keep them however it arrived.
 - **Portrait only.** A `(pointer: coarse) and (orientation: landscape)` rule hides `main`
   and shows `#rotate-message`. `Game.lockPortraitOrientation()` additionally attempts
   `screen.orientation.lock("portrait")`, which only succeeds in an installed mobile PWA
