@@ -119,15 +119,6 @@ export function fitsDeviceArea(mode: Mode, width: number, height: number): boole
     return mode.cols <= grid.cols && mode.rows <= grid.rows;
 }
 
-/** Side, in CSS pixels, of the largest square cell that fits `mode` into the area.
- *
- * A shared board keeps its own shape, so it can't use the `1fr` tracks that stretch a
- * device board across the screen; it gets square cells and the leftover space as margin.
- * Floored so rounding can never push the grid past the area it was measured against. */
-export function computeFittedCellSide(mode: Mode, width: number, height: number): number {
-    return Math.floor(Math.min(width / mode.cols, height / mode.rows));
-}
-
 /** Derives a board that fills the given area with cells close to TARGET_CELL_SIDE. */
 export function computeDeviceMode(width: number, height: number, density: number): Mode {
     const { rows, cols } = computeDeviceGrid(width, height);

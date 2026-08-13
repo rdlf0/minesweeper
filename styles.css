@@ -754,18 +754,7 @@ main {
         grid-template-rows: repeat(var(--rows), 1fr);
     }
 
-    /* A board decoded from a shared link keeps the shape it was shared with, which is
-       almost never the screen's — so it can't use the `1fr` tracks above without the
-       cells coming out visibly rectangular. Fixed square cells (`--cell-side` is set
-       inline by `Game.sizeCellsForHashBoard`), centered in the board area. */
-    #board.fixed-cells {
-        grid-template-columns: repeat(var(--cols), var(--cell-side));
-        grid-template-rows: repeat(var(--rows), var(--cell-side));
-        justify-content: center;
-        align-content: center;
-    }
-
-    /* The tracks size the cells, so the grid fills its area exactly. */
+    /* 1fr tracks size the cells, so the grid fills the area exactly. */
     .cell {
         width: auto;
         height: auto;

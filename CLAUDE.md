@@ -168,7 +168,7 @@ is made; change it there and everything follows.
   `Game` therefore calls it through `measureDeviceArea()` exactly once per board — at the
   very top of `initialize`, ahead of every class and custom-property write that follows,
   so the read comes off an already-clean layout. The derived mode, the shared-board fit
-  test and the `fixed-cells` cell size all work from that one measurement. Re-reading it
+  test and the derived mode all work from that one measurement. Re-reading it
   between those writes is what makes a rebuild visibly slow on a phone, because each read
   flushes a fresh layout of a board several hundred cells wide. The debounced
   `handleResize` re-measures, since there the viewport is the thing that changed.
@@ -243,20 +243,25 @@ is made; change it there and everything follows.
   over the link, keeping mobile boards shareable outward and stopping a pull-to-refresh
   from replaying the message. Replay is unaffected (it reads `board.getState()` from
   memory).
-- **A board from a hash keeps its own shape.** `boardFromHash` tracks it, and it survives
-  reset and replay — both keep the mode they were handed. `handleResize` then stops
-  recomputing the device mode, since the hash fixed the dimensions and there is nothing
-  for them to fall out of step with. Changing `Mine density` in settings empties the hash,
-  which is how a player gets back to a device board.
-- **Only a board shaped unlike the screen gets `fixed-cells`.** `resizeBoard` swaps the
-  `1fr` tracks for square `--cell-side` ones and centers the grid — but only when the
-  decoded dimensions differ from what `computeDeviceGrid` would have derived
-  (`Game.matchesDeviceGrid`). `boardFromHash` alone is not the test, and using it as one
-  was a bug: the app writes its own board's hash, so **every reload comes back through the
-  hash branch**, and square cells left a few pixels of margin all round that the same
-  board hadn't had when it was first derived. A player sees that as a border appearing on
-  refresh. The `1fr` tracks are what make a device-shaped board fill the area exactly, so
-  a board that *is* device-shaped has to keep them however it arrived.
+- **A board from a hash keeps its own shape, and the `1fr` tracks stretch it to fill.**
+  `boardFromHash` records where the mode came from, and it survives reset and replay —
+  both keep the mode they were handed — so `handleResize` stops recomputing the device
+  mode, the hash having fixed the dimensions. Changing `Mine density` in settings empties
+  the hash, which is how a player gets back to a device board.
+
+  There was briefly a `fixed-cells` rendering that gave such a board square cells centred
+  in the board area. It is gone, and **don't reintroduce it**: the app writes its own
+  board's hash, so every reload decodes a board through this path, and the viewport it is
+  re-measured against is not the one that wrote it — a standalone PWA and a browser tab
+  report different heights for the same phone. Any rule of the form "square cells unless
+  the board matches the screen" therefore fires on ordinary reloads and shows the player a
+  border that wasn't there on first load. Filling the area unconditionally is the only
+  behaviour that looks the same however the board arrived. The cost is that an accepted
+  board with a different shape stretches. Measured on an emulated 412x915 phone: a shared
+  9x18 board renders 45.8x47.7 cells, which nobody will notice, but a wide flat 10x5 gets
+  41.2x171.8 — over four times taller than wide. The fit rule is what lets a board that
+  far off the screen's shape through, so tightening `fitsDeviceArea` is where to address
+  it if it ever matters — not in the sizing.
 - **Portrait only.** A `(pointer: coarse) and (orientation: landscape)` rule hides `main`
   and shows `#rotate-message`. `Game.lockPortraitOrientation()` additionally attempts
   `screen.orientation.lock("portrait")`, which only succeeds in an installed mobile PWA
