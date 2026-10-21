@@ -31,7 +31,7 @@ const RESIZE_DEBOUNCE_MS = 150;
 /** How long a message that isn't a hint explanation stays up. */
 const MESSAGE_TIMEOUT_MS = 5000;
 
-const SCORE_ENDPOINT = "https://tkm6ixtsnirfxoev57phipmmwq0hezqf.lambda-url.us-east-2.on.aws/";
+const SCORE_ENDPOINT = "https://theminesweeper.com/scores/";
 
 
 export class Game {
